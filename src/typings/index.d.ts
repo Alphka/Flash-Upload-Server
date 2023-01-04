@@ -1,0 +1,11 @@
+declare global {
+	interface File extends Blob {
+		readonly lastModified: number;
+		/** @deprecated */
+		readonly lastModifiedDate: number;
+		readonly name: string;
+		readonly webkitRelativePath: string;
+	}
+}
+
+export {}

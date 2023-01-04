@@ -1,0 +1,28 @@
+{
+	"compilerOptions": {
+		"module": "CommonJS",
+		"target": "ESNext",
+		"moduleResolution": "Node",
+		"resolveJsonModule": true,
+		"strict": true,
+		"noImplicitAny": false,
+		"esModuleInterop": true,
+		"allowSyntheticDefaultImports": true,
+		"lib": [
+			"ESNext"
+		],
+		"typeRoots": [
+			"typings",
+			"node_modules/@types"
+		],
+		"sourceMap": true,
+		"outDir": "build"
+	},
+	"exclude": [
+		"node_modules",
+		"build"
+	],
+	"typeAcquisition": {
+		"enable": true
+	}
+}

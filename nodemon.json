@@ -1,0 +1,14 @@
+{
+	"watch": [
+		"bin/start.js"
+	],
+	"ignore": [
+		"build.js",
+		"helpers"
+	],
+	"env": {
+		"NODEMON": "true"
+	},
+	"ext": "js",
+	"exec": "node bin/start.js"
+}

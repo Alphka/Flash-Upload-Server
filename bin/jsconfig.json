@@ -1,0 +1,15 @@
+{
+	"extends": "../tsconfig",
+	"compilerOptions": {
+		"module": "NodeNext",
+		"target": "ESNext",
+		"moduleResolution": "NodeNext",
+		"allowJs": true,
+		"checkJs": true,
+		"strict": true,
+		"noImplicitAny": false,
+		"strictNullChecks": false,
+		"esModuleInterop": false,
+		"allowSyntheticDefaultImports": true
+	}
+}

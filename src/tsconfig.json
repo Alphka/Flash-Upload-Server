@@ -1,0 +1,14 @@
+{
+	"extends": "../tsconfig",
+	"compilerOptions": {
+		"module": "ESNext",
+		"lib": [
+			"ESNext",
+			"DOM",
+			"DOM.Iterable"
+		],
+		"typeRoots": [
+			"typings"
+		]
+	}
+}

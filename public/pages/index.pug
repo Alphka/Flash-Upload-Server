@@ -1,0 +1,69 @@
+doctype html
+html(lang="pt-BR")
+	head
+		meta(charset="UTF-8")
+		meta(name="viewport", content="width=device-width, initial-scale=1.0")
+		title Flash &raquo; Página Inicial
+		link(rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png")
+		link(rel="shortcut icon" sizes="32x32" href="images/favicon.ico")
+		link(rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png")
+		link(rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png")
+		link(rel="icon" type="image/svg+xml" sizes="any" href="images/favicon.svg")
+		link(rel="mask-icon" href="images/safari-pinned-tab.svg" color="#121d46")
+		meta(name="apple-mobile-web-app-title" content="Flash")
+		meta(name="theme-color" content="#101728")
+		meta(name="application-name" content="Flash")
+		meta(name="msapplication-TileColor" content="#101728")
+		meta(name="msapplication-config" content="browserconfig.xml")
+		link(rel="manifest" href="site.webmanifest")
+		link(rel="stylesheet" href="styles/index.css")
+		if canonicalURL
+			link(rel="canonical" href=canonicalURL)
+		link(rel="preconnect" href="https://fonts.googleapis.com" crossorigin)
+		link(rel="preconnect" href="https://fonts.gstatic.com" crossorigin)
+		if isWatching
+			script(src="socket.io/socket.io.js")
+			script.
+				const socket = io()
+				socket.on("browserReload", () => document.location.reload())
+				socket.on("disconnect", () => socket.on("connect", () => document.location.reload()))
+		script(src="scripts/index.js" defer)
+	body
+		nav
+			header
+				a(href="/")
+					img(src="images/logo.svg" alt="Logotipo do site")
+					span Flash
+
+			div.icons
+				div#notifications
+					span.icon.material-symbols-outlined(data-id="notifications" class = notifications.unread && "fill")
+						if notifications.unread
+							| notifications_active
+						else
+							| notifications
+
+					div.content.hidden
+						p.title Notificações
+						hr
+
+						//- each notification in notifications.list
+							//- p notification.title
+							//- p notication.body
+							//- if notification.unread
+
+				a(href="/documents")
+					span.icon.material-symbols-outlined(data-id="documents") description
+				a(href="/login")
+					span.icon.material-symbols-outlined(data-id="logout") logout
+
+		main
+			article
+				section Busque com rapidez e facilidade!
+				section
+					form(method="post" action="api/upload" name="upload" enctype="multipart/form-data")
+						label Enviar documento
+							input(type="file" name="file" aria-hidden="true")
+
+			aside
+				img(src="images/documents.png" alt="Ilustração de documentos")
