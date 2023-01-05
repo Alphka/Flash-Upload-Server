@@ -1,3 +1,4 @@
+import type { FileInfo } from "../typings"
 import CreateElement from "../helpers/CreateElement"
 
 new class Index {
@@ -32,13 +33,6 @@ new class Index {
 
 		function DisplayError(error: string){
 			console.error(error)
-		}
-
-		interface FileInfo {
-			name: string
-			type: string
-			size: number
-			date: number
 		}
 
 		function CreateInfoMenu(info: FileInfo){
@@ -101,7 +95,6 @@ new class Index {
 				// TODO: Verify data (size and type)
 				// TODO*: Display error if file size is too large
 
-				// TODO!: Upload file to server
 				form.appendChild(CreateElement("input", { name: "date", value: new Date(info.date).toJSON() }))
 				form.appendChild(CreateElement("input", { name: "documentType", value: GetType() }))
 				form.submit()

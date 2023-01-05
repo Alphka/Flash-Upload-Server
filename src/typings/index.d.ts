@@ -8,4 +8,9 @@ declare global {
 	}
 }
 
-export {}
+export interface FileInfo {
+	name: string
+	type: string
+	size: number
+	date: number
+}

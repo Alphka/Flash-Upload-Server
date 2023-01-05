@@ -4,15 +4,18 @@ import { join, relative, dirname, sep, parse } from "path"
 import { existsSync, watch, watchFile } from "fs"
 import { readdir, writeFile, mkdir } from "fs/promises"
 import { fileURLToPath } from "url"
-import { GetPort } from "./helpers/ConfigPort.js"
+import { GetConfig } from "./helpers/Config.js"
 import sass from "sass"
 import axios from "axios"
 import webpack from "webpack"
+import GetNumber from "./helpers/GetNumber.js"
 import AddFolderToEntries from "./helpers/AddFolderToEntries.js"
 import WatchedGlobEntries from "webpack-watched-glob-entries-plugin"
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
+
+let config = GetConfig()
 
 const args = process.argv.slice(2)
 const rootFolder = join(__dirname, "..")
@@ -26,7 +29,7 @@ const packageName = process.env.npm_package_name || "package"
 
 if(!isDevelopment) process.env.NODE_ENV = "production"
 
-const port = GetPort()
+const port = GetNumber(3000, process.env.PORT, config.port)
 
 if(isWatching){
 	const pagesFolder = join(rootFolder, "public/pages")

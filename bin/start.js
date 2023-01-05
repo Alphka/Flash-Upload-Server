@@ -1,25 +1,28 @@
 #!/usr/bin/env node
 
+import { GetConfig, SetConfig } from "./helpers/Config.js"
 import { mkdir, writeFile } from "fs/promises"
 import { join, dirname } from "path"
 import { fileURLToPath } from "url"
 import { createServer } from "http"
 import { existsSync } from "fs"
-import { SetPort } from "./helpers/ConfigPort.js"
 import { Server } from "socket.io"
 import express from "express"
+import GetNumber from "./helpers/GetNumber.js"
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
+
+let config = GetConfig()
 
 const app = express()
 const server = createServer(app)
 const isDevelopment = process.env.NODE_ENV === "development"
 const isWatching = Boolean(process.env.NODEMON)
 const mustCache = !isDevelopment
-const port = SetPort()
+const port = GetNumber(3000, process.env.PORT, config.port)
 
-SetPort(port)
+SetConfig(Object.assign(config, { port }))
 
 if(!isDevelopment) process.env.NODE_ENV = "production"
 
@@ -106,12 +109,7 @@ app.post("/api/upload", (request, response, next) => {
 		const initialBoundary = `--${boundary}`
 		const finalBoundary = `--${boundary}--`
 		const endIndex = data.indexOf(finalBoundary)
-
-		const object = /** @type {{
-			file: { filename: string, type: string, content: Buffer }
-			date: string
-			documentType: string
-		}} */ ({})
+		const info = /** @type {import("../typings/index.js").UploadInfo} */ ({})
 
 		const { length: boundaryLength } = initialBoundary
 		let boundaryIndex = 0
@@ -159,13 +157,13 @@ app.post("/api/upload", (request, response, next) => {
 
 			switch(name){
 				case "file":
-					object.file = { filename, type, content }
+					info.file = { filename, type, content }
 				break
 				case "date":
-					object.date = content.toString()
+					info.date = content.toString()
 				break
 				case "documentType":
-					object.documentType = content.toString()
+					info.documentType = content.toString()
 				break
 			}
 
@@ -173,7 +171,7 @@ app.post("/api/upload", (request, response, next) => {
 		}
 
 		try{
-			const { file: { filename, content }, date, documentType } = object
+			const { file: { filename, content }, date, documentType } = info
 
 			// TODO!: Create a list of document types in JSON, and verify if it's valid
 			// TODO: Organize by sectors
