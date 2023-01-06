@@ -1,0 +1,27 @@
+@import url("https://fonts.googleapis.com/css2?family=Alata&display=swap");
+
+main{
+	display: flex;
+	flex-direction: row;
+	justify-content: space-around;
+	align-items: flex-start;
+	font-family: Alata;
+	padding-top: 40pt;
+
+	article{
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		flex: 2;
+	}
+
+	aside{
+		display: flex;
+		flex-direction: row;
+		justify-content: center;
+		align-items: center;
+		flex: 1;
+		margin: auto 0;
+	}
+}

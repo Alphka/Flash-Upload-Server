@@ -1,151 +1,10 @@
-@import url("https://fonts.googleapis.com/css2?family=Alata&family=Michroma&family=Jura&family=Spinnaker&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200");
-
-$primaryColor: rgb(16, 23, 40);
-$secondaryColor: #121d46;
-$terciaryColor: #ec518f;
-$fontColor: white;
-
-:root {
-	color-scheme: dark;
-}
-
-*{
-	outline: none;
-	border: none;
-	margin: 0;
-	padding: 0;
-	box-sizing: border-box;
-	-webkit-tap-highlight-color: transparent;
-}
-
-body{
-	background-color: $primaryColor;
-	font-family: Geneva, Tahoma, Helvetica, Arial, sans-serif;
-	font-size: 16px;
-	color: $fontColor;
-}
-
-nav{
-	$height: 32pt;
-	$logoWidth: $height - 8pt;
-	$logoFontSize: $logoWidth - 2pt;
-	$iconSize: $height - 2pt;
-	$menuWidth: $logoWidth * 10;
-
-	display: flex;
-	flex-direction: row;
-	justify-content: space-between;
-	align-items: center;
-	height: $height;
-
-	header{
-		flex: 1;
-
-		a{
-			display: flex;
-			justify-content: space-evenly;
-			flex-direction: row;
-			align-items: center;
-
-			$spacing: 8pt;
-			$gap: 8pt;
-
-			padding: 4pt $spacing;
-			max-width: $height + $spacing * 2 + $logoFontSize * 5 + $gap;
-			-webkit-user-select: none;
-			user-select: none;
-
-			text-decoration: none;
-			color: inherit;
-			cursor: pointer;
-
-			img{
-				width: $logoWidth;
-				height: $logoWidth;
-			}
-
-			span{
-				font-size: $logoFontSize;
-				line-height: $logoFontSize;
-				font-family: Michroma, "Spinnaker", "Jura", "Gill Sans", "Gill Sans MT", Impact, Verdana, Arial, sans-serif;
-				text-transform: uppercase;
-			}
-		}
-	}
-
-	.icons{
-		display: flex;
-		flex-direction: row;
-		justify-content: space-between;
-		gap: 8pt;
-
-		a{
-			color: inherit;
-		}
-
-		.icon{
-			$weight: 500;
-
-			font-variation-settings: "FILL" 0, "wght" $weight, "GRAD" 0, "opsz" 48;
-			font-size: $iconSize;
-			cursor: pointer;
-			-webkit-user-select: none;
-			user-select: none;
-
-			&.fill{
-				font-variation-settings: "FILL" 1, "wght" $weight, "GRAD" 0, "opsz" 48;
-			}
-		}
-
-		#notifications{
-			position: relative;
-
-			.content{
-				&.hidden{
-					display: none;
-				}
-
-				background-color: white;
-				color: black;
-				position: absolute;
-				top: 100%;
-				right: 0;
-				width: $menuWidth;
-				border-radius: 4pt;
-
-				p.title{
-					font-size: larger;
-					text-align: center;
-					padding: 4pt 0;
-				}
-
-				hr{
-					margin: 4pt auto;
-					border: 1px solid $primaryColor;
-					width: calc(100% - 4pt * 2);
-				}
-			}
-		}
-	}
-}
+@import "./import/global.scss";
+@import "./import/main.scss";
+@import "./import/nav.scss";
 
 main{
-	display: flex;
-	flex-direction: row;
-	justify-content: space-around;
-	align-items: flex-start;
-	font-family: Alata;
-	padding-top: 40pt;
-
 	article{
 		$width: 400pt;
-
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		flex: 2;
 
 		section:nth-of-type(1){
 			display: inline-block;
@@ -223,20 +82,11 @@ main{
 		}
 	}
 
-	aside{
-		display: flex;
-		flex-direction: row;
-		justify-content: center;
-		align-items: center;
-		flex: 1;
-		margin: auto 0;
+	aside img{
+		$size: 400px;
 
-		img{
-			$size: 400px;
-
-			width: $size;
-			height: $size;
-			border-radius: 20px;
-		}
+		width: $size;
+		height: $size;
+		border-radius: 20px;
 	}
 }

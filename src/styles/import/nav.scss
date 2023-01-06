@@ -1,0 +1,105 @@
+@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200");
+
+nav{
+	$height: 32pt;
+	$logoWidth: $height - 8pt;
+	$logoFontSize: $logoWidth - 2pt;
+	$iconSize: $height - 2pt;
+	$menuWidth: $logoWidth * 10;
+
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+	height: $height;
+
+	header{
+		flex: 1;
+
+		a{
+			display: flex;
+			justify-content: space-evenly;
+			flex-direction: row;
+			align-items: center;
+
+			$spacing: 8pt;
+			$gap: 8pt;
+
+			padding: 4pt $spacing;
+			max-width: $height + $spacing * 2 + $logoFontSize * 5 + $gap;
+			-webkit-user-select: none;
+			user-select: none;
+
+			text-decoration: none;
+			color: inherit;
+			cursor: pointer;
+
+			img{
+				width: $logoWidth;
+				height: $logoWidth;
+			}
+
+			span{
+				font-size: $logoFontSize;
+				line-height: $logoFontSize;
+				font-family: Michroma, "Spinnaker", "Jura", "Gill Sans", "Gill Sans MT", Impact, Verdana, Arial, sans-serif;
+				text-transform: uppercase;
+			}
+		}
+	}
+
+	.icons{
+		display: flex;
+		flex-direction: row;
+		justify-content: space-between;
+		gap: 8pt;
+
+		a{
+			color: inherit;
+		}
+
+		.icon{
+			$weight: 500;
+
+			font-variation-settings: "FILL" 0, "wght" $weight, "GRAD" 0, "opsz" 48;
+			font-size: $iconSize;
+			cursor: pointer;
+			-webkit-user-select: none;
+			user-select: none;
+
+			&.fill{
+				font-variation-settings: "FILL" 1, "wght" $weight, "GRAD" 0, "opsz" 48;
+			}
+		}
+
+		#notifications{
+			position: relative;
+
+			.content{
+				&.hidden{
+					display: none;
+				}
+
+				background-color: white;
+				color: black;
+				position: absolute;
+				top: 100%;
+				right: 0;
+				width: $menuWidth;
+				border-radius: 4pt;
+
+				p.title{
+					font-size: larger;
+					text-align: center;
+					padding: 4pt 0;
+				}
+
+				hr{
+					margin: 4pt auto;
+					border: 1px solid $primaryColor;
+					width: calc(100% - 4pt * 2);
+				}
+			}
+		}
+	}
+}

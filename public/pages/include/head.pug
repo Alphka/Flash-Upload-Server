@@ -1,0 +1,35 @@
+meta(charset="UTF-8")
+meta(name="viewport", content="width=device-width, initial-scale=1.0")
+if canonicalURL
+	link(rel="canonical" href=canonicalURL)
+if loadFavicons
+	link(rel="icon" sizes="32x32" href="/images/favicon.ico")
+	link(rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png")
+	link(rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png")
+	link(rel="icon" type="image/png" sizes="192x192" href="/images/android-chrome-192x192.png")
+	link(rel="icon" type="image/png" sizes="512x512" href="/images/android-chrome-512x512.png")
+link(rel="icon" type="image/svg+xml" sizes="any" href="/images/favicon.svg")
+link(rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#121d46")
+link(rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png")
+meta(name="application-name" content="Flash")
+meta(name="apple-mobile-web-app-title" content="Flash")
+meta(name="msapplication-TileColor" content="#101728")
+meta(name="msapplication-config" content="/browserconfig.xml")
+meta(name="theme-color" content="#101728")
+link(rel="manifest" href="/site.webmanifest")
+if isWatching
+	script(src="/socket.io/socket.io.js")
+	script.
+		const socket = io()
+
+		function Reload(){
+			console.log("Reloading browser")
+			document.location.reload()
+		}
+
+		socket.on("browserReload", Reload)
+
+		socket.on("disconnect", () => {
+			console.log("Disconnected")
+			socket.on("connect", Reload)
+		})

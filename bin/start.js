@@ -7,6 +7,8 @@ import { fileURLToPath } from "url"
 import { createServer } from "http"
 import { existsSync } from "fs"
 import { Server } from "socket.io"
+import mime from "mime"
+import Bowser from "bowser"
 import express from "express"
 import GetNumber from "./helpers/GetNumber.js"
 
@@ -49,15 +51,39 @@ const loginPage = join(pagesFolder, "login.pug")
  * @param {import("express").Response} response
  */
 function HandlePugRequests(page, request, response){
+	const { protocol, hostname, url } = request
+	const userAgent = request.header("user-agent")
+
+	let loadFavicons
+
+	if(userAgent){
+		const bowser = Bowser.getParser(userAgent)
+
+		loadFavicons = !bowser.satisfies({
+			mobile: {
+				chrome: ">=108",
+				samsung_internet: ">=13"
+			},
+			opera: ">=92",
+			firefox: ">=108",
+			edge: ">=108",
+			chrome: ">=108"
+		})
+	}
+
+
 	/** @param {import("express").Request} request */
 	const pugOptions = request => ({
 		cache: mustCache,
 		isWatching,
-		canonicalURL: request.protocol + "://" + request.hostname + request.url,
+		canonicalURL: protocol + "://" + hostname + url,
 		notifications: {
 			unread: false,
 			list: []
-		}
+		},
+		loadFavicons,
+		// TODO: Change this
+		loggedIn: !url.startsWith("/login")
 	})
 
 	response.setHeader("Content-Type", "text/html; charset=utf-8")
@@ -66,7 +92,12 @@ function HandlePugRequests(page, request, response){
 }
 
 app.use("/", express.static(staticFolder, { index: false }))
-app.use("/images", express.static(imagesFolder, { index: false }))
+
+app.use("/images", express.static(imagesFolder, {
+	acceptRanges: false,
+	index: false,
+	setHeaders: (response, path) => response.type(mime.getType(path))
+}))
 
 app.get(["/", "/index.html"], (request, response) => HandlePugRequests(indexPage, request, response))
 app.get("/documents", (request, response) => HandlePugRequests(documentsPage, request, response))

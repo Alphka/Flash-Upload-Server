@@ -22,7 +22,6 @@ const rootFolder = join(__dirname, "..")
 const buildFolder = join(rootFolder, "build")
 const srcFolder = join(rootFolder, "src")
 const stylesFolder = join(srcFolder, "styles")
-const scriptsFolder = join(srcFolder, "scripts")
 const isDevelopment = process.env.NODE_ENV === "development"
 const isWatching = args.includes("--watch")
 const packageName = process.env.npm_package_name || "package"
@@ -32,12 +31,14 @@ if(!isDevelopment) process.env.NODE_ENV = "production"
 const port = GetNumber(3000, process.env.PORT, config.port)
 
 if(isWatching){
+	const regex = /\.pug$/i
 	const pagesFolder = join(rootFolder, "public/pages")
 
 	let fired = false
 
 	watch(pagesFolder, async (event, filename) => {
 		if(fired) return
+		if(!regex.test(filename)) return
 
 		fired = true
 

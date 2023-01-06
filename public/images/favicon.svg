@@ -1,41 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <svg viewBox="0 0 512 512" width="512" height="512" xmlns="http://www.w3.org/2000/svg">
   <defs>
-	<clipPath id="clipPath14" clipPathUnits="userSpaceOnUse">
-	  <path id="path12" d="m 0,7.92 h 1024.5 v 576 H 0 Z"/>
-	</clipPath>
-	<clipPath id="clipPath60" clipPathUnits="userSpaceOnUse">
-	  <path style="clip-rule:evenodd" id="path58" d="m 599.3631,75.077301 h 3073.374 V 2326.1752 H 599.3631 Z"/>
-	</clipPath>
-	<linearGradient id="linearGradient68" spreadMethod="pad" gradientTransform="matrix(0.471147, 0, 0, -0.470973, 46.275486, 181.16832)" gradientUnits="userSpaceOnUse" y2="287.19101" x2="419.44501" y1="100.067" x1="95.68">
-	  <stop id="stop64" offset="0" style="stop-opacity:1;stop-color:#9340ff"/>
-	  <stop id="stop66" offset="1" style="stop-opacity:1;stop-color:#ff3c5f"/>
-	</linearGradient>
-	<linearGradient id="linearGradient76" spreadMethod="pad" gradientTransform="matrix(0.471147, 0, 0, -0.470973, 46.246279, 181.168076)" gradientUnits="userSpaceOnUse" y2="214.60001" x2="525.83099" y1="79.709999" x1="303.702">
-	  <stop id="stop72" offset="0" style="stop-opacity:1;stop-color:#9340ff"/>
-	  <stop id="stop74" offset="1" style="stop-opacity:1;stop-color:#ff3c5f"/>
-	</linearGradient>
-	<linearGradient id="linearGradient84" spreadMethod="pad" gradientTransform="matrix(0.471147, 0, 0, -0.470973, 46.246286, 181.000092)" gradientUnits="userSpaceOnUse" y2="278.646" x2="424.383" y1="91.522003" x1="100.619">
-	  <stop id="stop80" offset="0" style="stop-opacity:1;stop-color:#9340ff"/>
-	  <stop id="stop82" offset="1" style="stop-opacity:1;stop-color:#ff3c5f"/>
-	</linearGradient>
-	<linearGradient id="linearGradient92" spreadMethod="pad" gradientTransform="matrix(0.471147, 0, 0, -0.470973, 46.276051, 180.999968)" gradientUnits="userSpaceOnUse" y2="193.99699" x2="22.459999" y1="299.974" x1="239.392">
-	  <stop id="stop88" offset="0" style="stop-opacity:1;stop-color:#9340ff"/>
-	  <stop id="stop90" offset="1" style="stop-opacity:1;stop-color:#ff3c5f"/>
-	</linearGradient>
+    <clipPath id="clipPath14" clipPathUnits="userSpaceOnUse">
+      <path id="path12" d="m 0,7.92 h 1024.5 v 576 H 0 Z"/>
+    </clipPath>
+    <clipPath id="clipPath60">
+      <path style="clip-rule:evenodd" d="m 599.3631,75.077301 h 3073.374 V 2326.1752 H 599.3631 Z"/>
+    </clipPath>
+    <linearGradient id="linearGradient68" spreadMethod="pad" gradientTransform="matrix(0.471147, 0, 0, -0.470973, 46.275486, 181.16832)" gradientUnits="userSpaceOnUse" y2="287.19101" x2="419.44501" y1="100.067" x1="95.68">
+      <stop offset="0" style="stop-color:#9340ff"/>
+      <stop offset="1" style="stop-color:#ff3c5f"/>
+    </linearGradient>
+    <linearGradient id="linearGradient76" spreadMethod="pad" gradientTransform="matrix(0.471147, 0, 0, -0.470973, 46.246279, 181.168076)" gradientUnits="userSpaceOnUse" y2="214.60001" x2="525.83099" y1="79.709999" x1="303.702">
+      <stop offset="0" style="stop-color:#9340ff"/>
+      <stop offset="1" style="stop-color:#ff3c5f"/>
+    </linearGradient>
+    <linearGradient id="linearGradient84" spreadMethod="pad" gradientTransform="matrix(0.471147, 0, 0, -0.470973, 46.246286, 181.000092)" gradientUnits="userSpaceOnUse" y2="278.646" x2="424.383" y1="91.522003" x1="100.619">
+      <stop offset="0" style="stop-color:#9340ff"/>
+      <stop offset="1" style="stop-color:#ff3c5f"/>
+    </linearGradient>
+    <linearGradient id="linearGradient92" spreadMethod="pad" gradientTransform="matrix(0.471147, 0, 0, -0.470973, 46.276051, 180.999968)" gradientUnits="userSpaceOnUse" y2="193.99699" x2="22.459999" y1="299.974" x1="239.392">
+      <stop offset="0" style="stop-color:#9340ff"/>
+      <stop offset="1" style="stop-color:#ff3c5f"/>
+    </linearGradient>
   </defs>
-  <g clip-path="url(#clipPath14)" transform="matrix(0.561646, 0, 0, -0.577742, -27.801661, 404.707642)" id="g10" style="">
-	<g transform="matrix(0.31999998,0,0,0.31999998,0,4.6130666e-5)" id="g16">
-	  <g id="g54" transform="matrix(0.953693, 0, 0, 0.796522, -531.934143, -269.425934)" style="">
-		<g clip-path="url(#clipPath60)" id="g56" transform="matrix(0.974266, 0, 0, 0.869274, 132.627655, 304.062653)" style="">
-		  <g transform="matrix(6.1377239,0,0,6.1354537,602.84662,75.077301)" id="g62">
-			<path id="path70" style="fill:url(#linearGradient68);fill-opacity:1;fill-rule:nonzero;stroke:none" d="M 377.371 62.32 L 0 245.658 L 0 121.684 L 250.12 0.168 L 377.371 62.32 Z"/>
-			<path id="path78" style="fill:url(#linearGradient76);fill-opacity:1;fill-rule:nonzero;stroke:none" d="M 250.09 124.153 L 499.533 245.658 L 499.533 121.684 L 250.12 0.169 L 250.09 124.153 Z"/>
-			<path id="path86" style="fill:url(#linearGradient84);fill-opacity:1;fill-rule:nonzero;stroke:none" d="M 499.533 245.349 L 249.412 366.865 L 122.161 304.713 L 499.533 121.374 L 499.533 245.349 Z"/>
-			<path id="path94" style="fill:url(#linearGradient92);fill-opacity:1;fill-rule:nonzero;stroke:none" d="M 0 245.349 L 249.412 366.865 L 249.78 242.712 L 0 121.374 L 0 245.349 Z"/>
-		  </g>
-		</g>
-	  </g>
-	</g>
+  <g clip-path="url(#clipPath14)" transform="matrix(0.561646,0,0,-0.577742,-27.801661,404.707642)">
+    <g transform="matrix(0.31999998,0,0,0.31999998,0,4.6130666e-5)">
+      <g transform="matrix(0.953693,0,0,0.796522,-531.934143,-269.425934)">
+        <g clip-path="url(#clipPath60)" transform="matrix(0.974266,0,0,0.869274,132.627655,304.062653)">
+          <g transform="matrix(6.1377239,0,0,6.1354537,602.84662,75.077301)">
+            <path style="fill:url(#linearGradient68)" d="M 377.371 62.32 L 0 245.658 L 0 121.684 L 250.12 0.168 L 377.371 62.32 Z"/>
+            <path style="fill:url(#linearGradient76)" d="M 250.09 124.153 L 499.533 245.658 L 499.533 121.684 L 250.12 0.169 L 250.09 124.153 Z"/>
+            <path style="fill:url(#linearGradient84)" d="M 499.533 245.349 L 249.412 366.865 L 122.161 304.713 L 499.533 121.374 L 499.533 245.349 Z"/>
+            <path style="fill:url(#linearGradient92)" d="M 0 245.349 L 249.412 366.865 L 249.78 242.712 L 0 121.374 L 0 245.349 Z"/>
+          </g>
+        </g>
+      </g>
+    </g>
   </g>
 </svg>

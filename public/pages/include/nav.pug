@@ -1,0 +1,28 @@
+nav
+	header
+		a(href="/")
+			img(src="images/logo.svg" alt="Logotipo do site")
+			span Flash
+
+	if loggedIn
+		div.icons
+			div#notifications
+				span.icon.material-symbols-outlined(data-id="notifications" class = notifications.unread && "fill")
+					if notifications.unread
+						| notifications_active
+					else
+						| notifications
+
+				div.content.hidden
+					p.title Notificações
+					hr
+
+					//- each notification in notifications.list
+						//- p notification.title
+						//- p notication.body
+						//- if notification.unread
+
+			a(href="/documents")
+				span.icon.material-symbols-outlined(data-id="documents") description
+			a(href="/login")
+				span.icon.material-symbols-outlined(data-id="logout") logout
