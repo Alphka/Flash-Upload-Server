@@ -49,6 +49,17 @@ if(isWatching){
 	})
 }
 
+let reloadDate = Date.now()
+
+async function ReloadStyle(){
+	const date = Date.now()
+
+	if(reloadDate + 3000 < date){
+		reloadDate = date
+		await axios.get(`http://127.0.0.1:${port}/api/reload?detail=style`)
+	}
+}
+
 readdir(stylesFolder, { withFileTypes: true }).then(async files => {
 	const regex = /\.s[ca]ss$/i
 	const styles = files.filter(file => file.isFile() && regex.test(file.name))
@@ -66,6 +77,7 @@ readdir(stylesFolder, { withFileTypes: true }).then(async files => {
 		const sourceMapName = cssName + ".map"
 		const sourceMapPath = join(outputFolder, sourceMapName)
 		const sepRegex = new RegExp("\\" + sep, "g")
+		const imports = /** @type {string[]} */ (new Array)
 
 		const Compile = () => sass.compileAsync(path, {
 			alertAscii: false,
@@ -74,7 +86,7 @@ readdir(stylesFolder, { withFileTypes: true }).then(async files => {
 			style,
 			sourceMap: true,
 			sourceMapIncludeSources: true
-		}).then(({ css, sourceMap }) => {
+		}).then(({ css, sourceMap, loadedUrls }) => {
 			const { sources } = sourceMap
 			const { length } = sources
 
@@ -89,32 +101,43 @@ readdir(stylesFolder, { withFileTypes: true }).then(async files => {
 
 			writeFile(cssPath, css, "utf8")
 			writeFile(sourceMapPath, JSON.stringify(sourceMap), "utf8")
+
+			for(const url of loadedUrls) imports.push(fileURLToPath(url))
 		})
 
-		promises.push(Compile())
+		promises.push(Compile().then(() => {
+			if(isWatching){
+				/** @type {import("fs").WatchFileOptions & { bigint?: false }} */
+				const config = { interval: 300 }
+				const relativePath = relative(rootFolder, path)
 
-		if(isWatching){
-			const relativePath = relative(rootFolder, path)
+				async function CompileWatched(){
+					const date = Date.now()
 
-			watchFile(path, { interval: 300 }, async () => {
-				const date = Date.now()
+					process.stdout.write(`Compiling style - ${relativePath}`)
 
-				process.stdout.write(`Compiling style - ${relativePath}`)
+					try{
+						await Compile()
 
-				try{
-					await Compile()
+						process.stdout.clearLine(0)
+						process.stdout.cursorTo(0)
+						process.stdout.write(`Style compiled in ${Date.now() - date} ms - ${relativePath}\n`)
 
-					process.stdout.clearLine(0)
-					process.stdout.cursorTo(0)
-					process.stdout.write(`Style compiled in ${Date.now() - date} ms - ${relativePath}\n`)
-
-					await axios.get(`http://127.0.0.1:${port}/api/reload?detail=style`)
-				}catch(error){
-					process.stdout.write("\n")
-					console.error(error)
+						await ReloadStyle()
+					}catch(error){
+						process.stdout.write("\n")
+						console.error(error)
+					}
 				}
-			})
-		}
+
+				watchFile(path, config, CompileWatched)
+
+				for(const file of imports){
+					console.log("Watching %s, (%s)", relative(rootFolder, file), relativePath)
+					watchFile(file, config, CompileWatched)
+				}
+			}
+		}))
 	}
 
 	await Promise.allSettled(promises).then(results => {

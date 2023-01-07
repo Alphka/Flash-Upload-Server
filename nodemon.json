@@ -1,10 +1,10 @@
 {
 	"watch": [
-		"bin/start.js"
+		"bin/start.js",
+		"bin/helpers/*"
 	],
 	"ignore": [
-		"build.js",
-		"helpers"
+		"bin/build.js"
 	],
 	"env": {
 		"NODEMON": "true"
