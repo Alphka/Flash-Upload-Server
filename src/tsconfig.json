@@ -2,6 +2,7 @@
 	"extends": "../tsconfig",
 	"compilerOptions": {
 		"module": "ESNext",
+		"target": "ES6",
 		"lib": [
 			"ESNext",
 			"DOM",

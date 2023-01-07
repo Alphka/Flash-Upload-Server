@@ -4,6 +4,12 @@
 
 main{
 	article{
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		flex: 2;
+
 		$width: 400pt;
 
 		section:nth-of-type(1){
@@ -12,10 +18,23 @@ main{
 			font-weight: bold;
 			text-align: left;
 			max-width: $width;
+			word-break: normal;
+
+			@media screen and (max-width: 600px){
+				display: flex;
+				width: 100%;
+				max-width: none;
+				min-height: 300px;
+				font-size: 15vw;
+				padding: 0 8pt;
+				align-items: center;
+			}
 		}
 
 		section:nth-of-type(2){
-			label{
+			margin: 40pt 0;
+
+			form label{
 				$height: 80pt;
 
 				display: flex;
@@ -29,11 +48,16 @@ main{
 				height: $height;
 				border-radius: $height;
 				cursor: pointer;
-				margin-top: 40pt;
+				overflow: hidden;
+				white-space: nowrap;
+				text-overflow: clip;
 
 				input{
-					height: 1px;
-					width: 1px;
+					display: none;
+					appearance: none;
+					visibility: hidden;
+					height: 0;
+					width: 0;
 					opacity: 0;
 					pointer-events: none;
 					float: right;
@@ -41,7 +65,7 @@ main{
 			}
 
 			#info{
-				background: rgb(2, 0, 36);
+				background: #6e2f77;
 				background: linear-gradient(110deg, #6e2f77 58%, #bf8dba);
 				margin: 20pt 4pt 0;
 				padding: 8pt;
@@ -50,17 +74,17 @@ main{
 				font-family: Verdana, Geneva, Tahoma, sans-serif;
 
 				p{
-					overflow: hidden;
-					text-overflow: ellipsis;
-					white-space: nowrap;
 					padding: 4pt 0;
 
-					.mime{
+					span:last-child{
 						font-weight: 600;
+						overflow: hidden;
+						white-space: nowrap;
+						text-overflow: ellipsis;
 					}
 				}
 
-				input[type=date],
+				input.date,
 				select{
 					padding: 2pt 4pt;
 				}
@@ -73,20 +97,76 @@ main{
 					border-radius: 4pt;
 				}
 
-				input[type=date]::-webkit-calendar-picker-indicator,
+				input.date::-webkit-calendar-picker-indicator,
 				input.submit,
 				select{
 					cursor: pointer;
 				}
 			}
+
+			@media screen and (max-width: 600px){
+				display: flex;
+				align-items: center;
+				flex-direction: column;
+				margin: 20pt 0;
+
+				$width: calc(100% - 12pt);
+
+				form label{
+					width: $width;
+					font-size: 8vw;
+					height: auto;
+					padding: 8pt 24pt;
+				}
+
+				#info{
+					width: $width;
+					max-width: none;
+					margin: 20pt 0;
+
+					p, input, select{
+						font-size: 14px;
+					}
+
+					p > *{
+						display: inline-block;
+
+						&:last-child{
+							float: right;
+							width: 50%;
+						}
+					}
+				}
+			}
+
+			@media screen and (max-width: 300px){
+				#info{
+					p, input, select{
+						font-size: 11px;
+					}
+				}
+			}
 		}
 	}
 
-	aside img{
-		$size: 400px;
+	aside{
+		display: flex;
+		flex-direction: row;
+		justify-content: center;
+		align-items: center;
+		flex: 1;
+		margin: auto 0;
 
-		width: $size;
-		height: $size;
-		border-radius: 20px;
+		img{
+			$size: 400px;
+
+			width: $size;
+			height: $size;
+			border-radius: 20px;
+
+			@media screen and (max-width: 600px){
+				display: none;
+			}
+		}
 	}
 }

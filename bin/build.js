@@ -132,10 +132,7 @@ readdir(stylesFolder, { withFileTypes: true }).then(async files => {
 
 				watchFile(path, config, CompileWatched)
 
-				for(const file of imports){
-					console.log("Watching %s, (%s)", relative(rootFolder, file), relativePath)
-					watchFile(file, config, CompileWatched)
-				}
+				for(const file of imports) watchFile(file, config, CompileWatched)
 			}
 		}))
 	}

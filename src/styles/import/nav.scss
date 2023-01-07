@@ -54,6 +54,11 @@ nav{
 		justify-content: space-between;
 		gap: 8pt;
 
+		@media screen and (max-width: 600px){
+			display: none;
+			flex-direction: column;
+		}
+
 		a{
 			color: inherit;
 		}

@@ -8,7 +8,6 @@ import { createServer } from "http"
 import { existsSync } from "fs"
 import { Server } from "socket.io"
 import mime from "mime"
-import Bowser from "bowser"
 import express from "express"
 import GetNumber from "./helpers/GetNumber.js"
 
@@ -52,25 +51,6 @@ const loginPage = join(pagesFolder, "login.pug")
  */
 function HandlePugRequests(page, request, response){
 	const { protocol, hostname, url } = request
-	const userAgent = request.header("user-agent")
-
-	let loadFavicons
-
-	if(userAgent){
-		const bowser = Bowser.getParser(userAgent)
-
-		loadFavicons = !bowser.satisfies({
-			mobile: {
-				chrome: ">=108",
-				samsung_internet: ">=13"
-			},
-			opera: ">=92",
-			firefox: ">=108",
-			edge: ">=108",
-			chrome: ">=108"
-		})
-	}
-
 
 	/** @param {import("express").Request} request */
 	const pugOptions = request => ({
@@ -81,7 +61,6 @@ function HandlePugRequests(page, request, response){
 			unread: false,
 			list: []
 		},
-		loadFavicons,
 		// TODO: Change this
 		loggedIn: !url.startsWith("/login")
 	})

@@ -1,25 +1,64 @@
 import type { FileInfo } from "../typings"
 import CreateElement from "../helpers/CreateElement"
+import WaitForElement from "../helpers/WaitForElement"
 
 new class Index {
 	constructor(){
+		this.DocumentsImage()
 		this.NotificationHandler()
 		this.UploadHandler()
 	}
-	NotificationHandler(){
-		const container = document.getElementById("notifications") as HTMLDivElement
-		const icon = container.getElementsByClassName("icon")[0] as HTMLSpanElement
-		const content = container.getElementsByClassName("content")[0] as HTMLDivElement
+	async DocumentsImage(){
+		const { userAgentData } = navigator
+
+		let inserted = false, mobile: boolean
+
+		const main = await WaitForElement("main")
+
+		function InsertImage(){
+			if(inserted) return
+
+			if(typeof mobile === "undefined"){
+				if(userAgentData){
+					mobile = userAgentData.mobile
+				}else{
+					const userAgent = navigator.userAgent || navigator.appVersion
+					mobile = !userAgent.includes("Windows") && /\bMobile\b/i.test(userAgent)
+				}
+			}
+
+			if(mobile || document.documentElement.clientWidth > 600){
+				const image = new Image
+				const aside = CreateElement("aside", { children: [image] })
+
+				image.loading = "lazy"
+				image.src = "/images/documents.png"
+				image.alt = "Ilustração de documentos"
+
+				main.appendChild(aside)
+
+				inserted = true
+			}
+		}
+
+		InsertImage()
+
+		window.addEventListener("resize", InsertImage)
+	}
+	async NotificationHandler(){
+		const container = await WaitForElement<HTMLDivElement>("#notifications")
+		const icon = await WaitForElement<HTMLSpanElement>(".icon", { element: container })
+		const content = await WaitForElement<HTMLDivElement>(".content", { element: container })
 
 		icon.addEventListener("click", event => {
 			event.preventDefault()
 			content.classList.toggle("hidden")
 		})
 	}
-	UploadHandler(){
-		const section = document.querySelector("main article section:nth-of-type(2)")!
-		const form = document.forms.namedItem("upload") as HTMLFormElement
-		const fileInput = form.querySelector("input[type=file]") as HTMLInputElement
+	async UploadHandler(){
+		const section = await WaitForElement("main article section:nth-of-type(2)")
+		const form: HTMLFormElement = document.forms.namedItem("upload") ?? await WaitForElement("form[name=upload]", { element: section })
+		const fileInput = await WaitForElement<HTMLInputElement>("input[type=file]", { element: form })
 
 		const documentTypes = [
 			"Ata",
@@ -39,25 +78,42 @@ new class Index {
 			const GetDate = (date: FileInfo["date"]) => new Date(date).toJSON().slice(0, 10),
 			container = CreateElement("div", { id: "info" }),
 			nameElements = {
-				container: CreateElement("p", { textContent: "Nome: " }),
+				container: CreateElement("p", {
+					children: [
+						CreateElement("span", { textContent: "Nome: " })
+					],
+				}),
 				content: CreateElement("span", { textContent: info.name })
 			},
 			typeElements = {
-				container: CreateElement("p", { textContent: "Tipo de arquivo: " }),
+				container: CreateElement("p", {
+					children: [
+						CreateElement("span", { textContent: "Tipo de arquivo: " })
+					]
+				}),
 				content: CreateElement("span", {
 					className: "mime",
 					textContent: info.type
 				})
 			},
 			dateElements = {
-				container: CreateElement("p", { textContent: "Data de criação: " }),
+				container: CreateElement("p", {
+					children: [
+						CreateElement("span", { textContent: "Data de criação: " })
+					]
+				}),
 				input: CreateElement("input", {
 					type: "date",
+					className: "date",
 					value: GetDate(info.date)
 				})
 			},
 			documentType = {
-				container: CreateElement("p", { textContent: "Tipo de documento: " }),
+				container: CreateElement("p", {
+					children: [
+						CreateElement("span", { textContent: "Tipo de documento: " })
+					]
+				}),
 				select: CreateElement("select", { name: "documentType" }),
 				options: documentTypes.map((type, index) => CreateElement("option", {
 					textContent: type,
