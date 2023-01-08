@@ -11,7 +11,9 @@ insert_final_newline = true
 [*.{pug,svg}]
 trim_trailing_whitespace = false
 
-[*.svg]
+[*.{svg,yml}]
 indent_style = space
 indent_size = 2
+
+[*.svg]
 insert_final_newline = false
