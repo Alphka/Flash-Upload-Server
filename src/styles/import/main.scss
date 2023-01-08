@@ -5,7 +5,7 @@ main{
 	align-items: flex-start;
 	margin-top: 40pt;
 
-	@media screen and (max-width: 600px){
+	@media screen and (max-width: $mobileSize){
 		flex-direction: column;
 	}
 }

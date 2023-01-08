@@ -54,9 +54,54 @@ nav{
 		justify-content: space-between;
 		gap: 8pt;
 
-		@media screen and (max-width: 600px){
+		@media screen and (max-width: $mobileSize){
 			display: none;
-			flex-direction: column;
+		}
+
+		&.mobile{
+			display: none;
+			position: relative;
+
+			@media screen and (max-width: $mobileSize){
+				display: block;
+			}
+
+			> .icon{
+				cursor: pointer;
+			}
+
+			.content{
+				display: flex;
+				flex-direction: column;
+				gap: 8pt;
+
+				background-color: white;
+				color: black;
+				position: absolute;
+				top: 100%;
+				right: 4pt;
+				padding: 8pt;
+				border-radius: 12pt;
+				width: 50vw;
+
+				&.hidden{
+					display: none;
+				}
+
+				a{
+					display: flex;
+					flex-direction: row;
+					align-items: center;
+					justify-content: flex-start;
+					text-decoration: none;
+					gap: 8pt;
+					cursor: pointer;
+
+					.icon{
+						font-size: 22pt;
+					}
+				}
+			}
 		}
 
 		a{
@@ -81,10 +126,6 @@ nav{
 			position: relative;
 
 			.content{
-				&.hidden{
-					display: none;
-				}
-
 				background-color: white;
 				color: black;
 				position: absolute;
@@ -92,6 +133,10 @@ nav{
 				right: 0;
 				width: $menuWidth;
 				border-radius: 4pt;
+
+				&.hidden{
+					display: none;
+				}
 
 				p.title{
 					font-size: larger;
@@ -102,7 +147,7 @@ nav{
 				hr{
 					margin: 4pt auto;
 					border: 1px solid $primaryColor;
-					width: calc(100% - 4pt * 2);
+					width: calc(100% - 8pt);
 				}
 			}
 		}

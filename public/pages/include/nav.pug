@@ -7,7 +7,7 @@ nav
 	if loggedIn
 		div.icons
 			div#notifications
-				span.icon.material-symbols-outlined(data-id="notifications" class = notifications.unread && "fill")
+				span.icon.material-symbols-outlined( class = notifications.unread && "fill")
 					if notifications.unread
 						| notifications_active
 					else
@@ -23,6 +23,18 @@ nav
 						//- if notification.unread
 
 			a(href="/documents")
-				span.icon.material-symbols-outlined(data-id="documents") description
+				span.icon.material-symbols-outlined description
 			a(href="/login")
-				span.icon.material-symbols-outlined(data-id="logout") logout
+				span.icon.material-symbols-outlined logout
+
+		div.icons.mobile
+			span.icon.material-symbols-outlined menu
+
+			//- TODO: Implement notifications here
+			div.content.hidden
+				a(href="/documents")
+					span.icon.material-symbols-outlined description
+					| Documentos
+				a(href="/login")
+					span.icon.material-symbols-outlined logout
+					| Sair da conta

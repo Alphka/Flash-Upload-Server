@@ -8,7 +8,7 @@ main{
 		flex-direction: column;
 		justify-content: center;
 		align-items: center;
-		flex: 2;
+		flex: 1;
 
 		$width: 400pt;
 
@@ -20,12 +20,15 @@ main{
 			max-width: $width;
 			word-break: normal;
 
-			@media screen and (max-width: 600px){
+			@media screen and (min-width: $mobileSize) and (max-width: $mediumSize){
+				min-height: 300px;
+			}
+
+			@media screen and (max-width: $mediumSize){
 				display: flex;
 				width: 100%;
 				max-width: none;
-				min-height: 300px;
-				font-size: 15vw;
+				font-size: 11vw;
 				padding: 0 8pt;
 				align-items: center;
 			}
@@ -93,7 +96,7 @@ main{
 					display: block;
 					background-color: $secondaryColor;
 					padding: 4pt 12pt;
-					margin: 4pt auto 0;
+					margin: 8pt auto 0;
 					border-radius: 4pt;
 				}
 
@@ -104,7 +107,7 @@ main{
 				}
 			}
 
-			@media screen and (max-width: 600px){
+			@media screen and (max-width: $mobileSize){
 				display: flex;
 				align-items: center;
 				flex-direction: column;
@@ -114,7 +117,7 @@ main{
 
 				form label{
 					width: $width;
-					font-size: 8vw;
+					font-size: 5vw;
 					height: auto;
 					padding: 8pt 24pt;
 				}
@@ -158,15 +161,13 @@ main{
 		margin: auto 0;
 
 		img{
-			$size: 400px;
-
-			width: $size;
-			height: $size;
+			width: 600px;
 			border-radius: 20px;
+			aspect-ratio: 5 / 4;
+		}
 
-			@media screen and (max-width: 600px){
-				display: none;
-			}
+		@media screen and (max-width: $mediumSize){
+			display: none;
 		}
 	}
 }

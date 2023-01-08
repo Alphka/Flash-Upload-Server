@@ -3,52 +3,40 @@ import CreateElement from "../helpers/CreateElement"
 import WaitForElement from "../helpers/WaitForElement"
 
 new class Index {
+	nav!: HTMLElement
+	main!: HTMLElement
+
 	constructor(){
-		this.DocumentsImage()
-		this.NotificationHandler()
-		this.UploadHandler()
+		WaitForElement("nav").then(nav => {
+			this.nav = nav
+			this.MobileNavigation()
+		})
+
+		WaitForElement("main").then(main => {
+			this.main = main
+			this.DocumentsImage()
+			this.UploadHandler()
+			this.NotificationHandler()
+		})
 	}
 	async DocumentsImage(){
-		const { userAgentData } = navigator
+		const aside = await WaitForElement("aside", { element: this.main })
 
-		let inserted = false, mobile: boolean
-
-		const main = await WaitForElement("main")
-
-		function InsertImage(){
-			if(inserted) return
-
-			if(typeof mobile === "undefined"){
-				if(userAgentData){
-					mobile = userAgentData.mobile
-				}else{
-					const userAgent = navigator.userAgent || navigator.appVersion
-					mobile = !userAgent.includes("Windows") && /\bMobile\b/i.test(userAgent)
-				}
-			}
-
-			if(mobile || document.documentElement.clientWidth > 600){
-				const image = new Image
-				const aside = CreateElement("aside", { children: [image] })
-
-				image.loading = "lazy"
-				image.src = "/images/documents.png"
-				image.alt = "Ilustração de documentos"
-
-				main.appendChild(aside)
-
-				inserted = true
-			}
+		function SetAttribute(set: boolean){
+			aside.ariaHidden = set ? "true" : null
 		}
 
-		InsertImage()
+		SetAttribute(window.getComputedStyle(aside).display === "none")
 
-		window.addEventListener("resize", InsertImage)
+		new ResizeObserver(entries => {
+			const { contentRect } = entries.find(entry => entry.target === aside)!
+			SetAttribute(contentRect.width + contentRect.height === 0)
+		}).observe(aside)
 	}
 	async NotificationHandler(){
 		const container = await WaitForElement<HTMLDivElement>("#notifications")
-		const icon = await WaitForElement<HTMLSpanElement>(".icon", { element: container })
-		const content = await WaitForElement<HTMLDivElement>(".content", { element: container })
+		const icon = container.querySelector(".icon") as HTMLSpanElement
+		const content = container.querySelector(".content") as HTMLDivElement
 
 		icon.addEventListener("click", event => {
 			event.preventDefault()
@@ -56,9 +44,9 @@ new class Index {
 		})
 	}
 	async UploadHandler(){
-		const section = await WaitForElement("main article section:nth-of-type(2)")
-		const form: HTMLFormElement = document.forms.namedItem("upload") ?? await WaitForElement("form[name=upload]", { element: section })
-		const fileInput = await WaitForElement<HTMLInputElement>("input[type=file]", { element: form })
+		const section = await WaitForElement<HTMLElement>("article section:nth-of-type(2)", { element: this.main })
+		const form: HTMLFormElement = document.forms.namedItem("upload") || await WaitForElement("form[name=upload]", { element: section })
+		const fileInput = form.querySelector("input[type=file]") as HTMLInputElement
 
 		const documentTypes = [
 			"Ata",
@@ -196,6 +184,31 @@ new class Index {
 			else menu = CreateInfoMenu(info)
 
 			section.appendChild(menu)
+		})
+	}
+	async MobileNavigation(){
+		const menu = await WaitForElement(".icons.mobile")
+		const openIcon = menu.querySelector(":scope > .icon") as HTMLSpanElement
+		const content = menu.querySelector(".content") as HTMLDivElement
+
+		function CloseHandler(event: MouseEvent){
+			// event.preventDefault()
+			content.classList.add("hidden")
+			window.removeEventListener("click", CloseHandler)
+		}
+
+		menu.addEventListener("click", function(event){
+			event.stopImmediatePropagation()
+
+			if(event.target !== openIcon) return
+
+			if(content.classList.contains("hidden")){
+				content.classList.remove("hidden")
+				window.addEventListener("click", CloseHandler)
+			}else{
+				content.classList.add("hidden")
+				window.removeEventListener("click", CloseHandler)
+			}
 		})
 	}
 }
