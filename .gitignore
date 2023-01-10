@@ -3,5 +3,5 @@ build
 documents
 
 database/*
-!database/accounts.json
+!database/accounts.copy.json
 !database/config.copy.json
