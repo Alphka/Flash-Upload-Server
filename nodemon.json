@@ -1,7 +1,8 @@
 {
 	"watch": [
 		"bin/start.js",
-		"bin/helpers/*"
+		"bin/helpers/*",
+		"bin/controllers/*"
 	],
 	"ignore": [
 		"bin/build.js"
