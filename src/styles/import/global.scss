@@ -1,12 +1,14 @@
 @import url("https://fonts.googleapis.com/css2?family=Alata&family=Michroma&family=Jura&family=Spinnaker&display=swap");
 
-$primaryColor: rgb(16, 23, 40);
+$primaryColor: #101728;
 $secondaryColor: #121d46;
-$terciaryColor: #ec518f;
+$terciaryColor: #9340ff;
 $fontColor: white;
 
 $mobileSize: 600px;
 $mediumSize: 1280px;
+
+$logoFontFamily: Michroma, "Spinnaker", "Jura", "Gill Sans", "Gill Sans MT", Impact, Verdana, Arial, sans-serif;
 
 :root {
 	color-scheme: dark;
@@ -26,4 +28,16 @@ body{
 	font-family: Alata, Geneva, Tahoma, Helvetica, Arial, sans-serif;
 	font-size: 16px;
 	color: $fontColor;
+}
+
+@mixin userSelectNone{
+	user-select: none;
+	-moz-user-select: none;
+	-webkit-user-select: none;
+	-ms-user-select: none;
+}
+
+@mixin notDraggable{
+	user-drag: none;
+	-webkit-user-drag: none;
 }

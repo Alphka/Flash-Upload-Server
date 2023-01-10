@@ -1,8 +1,17 @@
 @import "./import/global.scss";
-@import "./import/main.scss";
 @import "./import/nav.scss";
 
 main{
+	display: flex;
+	flex-direction: row;
+	justify-content: space-around;
+	align-items: flex-start;
+	margin-top: 40pt;
+
+	@media screen and (max-width: $mobileSize){
+		flex-direction: column;
+	}
+
 	article{
 		display: flex;
 		flex-direction: column;
@@ -27,8 +36,8 @@ main{
 			@media screen and (max-width: $mediumSize){
 				display: flex;
 				width: 100%;
-				max-width: none;
-				font-size: 11vw;
+				max-width: 500px;
+				font-size: clamp(18px, 11vw, 56pt);
 				padding: 0 8pt;
 				align-items: center;
 			}
@@ -68,8 +77,8 @@ main{
 			}
 
 			#info{
-				background: #6e2f77;
-				background: linear-gradient(110deg, #6e2f77 58%, #bf8dba);
+				background: $terciaryColor;
+				background: linear-gradient(150deg, $terciaryColor 58%, rgba($color: $terciaryColor, $alpha: 0.3));
 				margin: 20pt 4pt 0;
 				padding: 8pt;
 				max-width: $width;

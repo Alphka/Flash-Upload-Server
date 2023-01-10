@@ -2,20 +2,23 @@ doctype html
 html(lang="pt-BR")
 	head
 		include include/head
+		meta(property="og:title" content="Flash - Login")
 		title Flash &raquo; Login
 		link(rel="stylesheet" href="/styles/login.css")
-		// script(src="scripts/login.js" defer)
+		//- script(src="scripts/login.js" async)
 	body
-		include include/nav
-
 		main
-			article
-				//- Mensagem de login
-				section
-			aside
-				//- Campo para fazer login
+			section
+				img(src="/images/logo.svg" alt="Logotipo do site" draggable="false")
+				span Flash
+			section
 				form(method="post" action="/api/login" name="login")
-					label Usuário
-						input(type="text" name="username")
-					label
-						input(type="password" name="password")
+					fieldset
+						label
+							span Usuário
+							input(type="text" name="username")
+						label
+							span Senha
+							input(type="password" name="password")
+
+					input(type="submit" class="submit" value="Entrar")

@@ -60,9 +60,7 @@ function HandlePugRequests(page, request, response){
 		notifications: {
 			unread: false,
 			list: []
-		},
-		// TODO: Change this
-		loggedIn: !url.startsWith("/login")
+		}
 	})
 
 	response.setHeader("Content-Type", "text/html; charset=utf-8")

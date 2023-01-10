@@ -17,18 +17,17 @@ nav{
 		flex: 1;
 
 		a{
-			display: flex;
-			justify-content: space-evenly;
-			flex-direction: row;
-			align-items: center;
+			@include userSelectNone;
 
 			$spacing: 8pt;
 			$gap: 8pt;
 
+			display: flex;
+			justify-content: space-evenly;
+			flex-direction: row;
+			align-items: center;
 			padding: 4pt $spacing;
 			max-width: $height + $spacing * 2 + $logoFontSize * 5 + $gap;
-			-webkit-user-select: none;
-			user-select: none;
 
 			text-decoration: none;
 			color: inherit;
@@ -42,7 +41,7 @@ nav{
 			span{
 				font-size: $logoFontSize;
 				line-height: $logoFontSize;
-				font-family: Michroma, "Spinnaker", "Jura", "Gill Sans", "Gill Sans MT", Impact, Verdana, Arial, sans-serif;
+				font-family: $logoFontFamily;
 				text-transform: uppercase;
 			}
 		}
@@ -109,13 +108,13 @@ nav{
 		}
 
 		.icon{
+			@include userSelectNone;
+
 			$weight: 500;
 
 			font-variation-settings: "FILL" 0, "wght" $weight, "GRAD" 0, "opsz" 48;
 			font-size: $iconSize;
 			cursor: pointer;
-			-webkit-user-select: none;
-			user-select: none;
 
 			&.fill{
 				font-variation-settings: "FILL" 1, "wght" $weight, "GRAD" 0, "opsz" 48;
