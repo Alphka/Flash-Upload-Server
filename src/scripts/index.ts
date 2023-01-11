@@ -63,77 +63,95 @@ new class Index {
 		}
 
 		function CreateInfoMenu(info: FileInfo){
-			const GetDate = (date: FileInfo["date"]) => new Date(date).toJSON().slice(0, 10),
-			container = CreateElement("div", { id: "info" }),
-			nameElements = {
-				container: CreateElement("p", {
-					children: [
-						CreateElement("span", { textContent: "Nome: " })
-					],
-				}),
-				content: CreateElement("span", { textContent: info.name })
+			let nameElements: {
+				container: HTMLParagraphElement
+				content: HTMLSpanElement
 			},
-			typeElements = {
-				container: CreateElement("p", {
-					children: [
-						CreateElement("span", { textContent: "Tipo de arquivo: " })
-					]
-				}),
-				content: CreateElement("span", {
-					className: "mime",
-					textContent: info.type
-				})
+			typeElements: {
+				container: HTMLParagraphElement
+				content: HTMLSpanElement
 			},
-			dateElements = {
-				container: CreateElement("p", {
-					children: [
-						CreateElement("span", { textContent: "Data de criação: " })
-					]
-				}),
-				input: CreateElement("input", {
-					type: "date",
-					className: "date",
-					value: GetDate(info.date)
-				})
+			dateElements: {
+				container: HTMLParagraphElement
+				input: HTMLInputElement
 			},
-			documentType = {
-				container: CreateElement("p", {
-					children: [
-						CreateElement("span", { textContent: "Tipo de documento: " })
-					]
-				}),
-				select: CreateElement("select", { name: "documentType" }),
-				options: documentTypes.map((type, index) => CreateElement("option", {
-					textContent: type,
-					value: index
-				})),
-				defaultOption: CreateElement("option", {
-					textContent: "Selecione um tipo",
-					selected: true,
-					disabled: true,
-					hidden: true
-				})
-			},
-			submit = CreateElement("input", {
-				type: "button",
-				class: "submit",
-				value: "Enviar"
-			}),
-			GetType = () => documentType.select.options[documentType.select.options.selectedIndex]?.textContent
+			documentType: {
+				container: HTMLParagraphElement
+				select: HTMLSelectElement
+				options: HTMLOptionElement[]
+				defaultOption: HTMLOptionElement
+			}, submit: HTMLInputElement
 
-			nameElements.container.appendChild(nameElements.content)
-			typeElements.container.appendChild(typeElements.content)
-			dateElements.container.appendChild(dateElements.input)
-			documentType.select.options.add(documentType.defaultOption)
-			documentType.container.appendChild(documentType.select)
+			// Typescript errors...
+			nameElements = {} as typeof nameElements
+			typeElements = {} as typeof typeElements
+			dateElements = {} as typeof dateElements
+			documentType = {} as typeof documentType
 
-			documentType.options.forEach(option => documentType.select.options.add(option))
+			function GetDate(date: FileInfo["date"]){
+				return new Date(date).toJSON().slice(0, 10)
+			}
 
-			container.appendChild(nameElements.container)
-			container.appendChild(typeElements.container)
-			container.appendChild(dateElements.container)
-			container.appendChild(documentType.container)
-			container.appendChild(submit)
+			function GetType(){
+				const { select: { options } } = documentType
+				return options[options.selectedIndex]?.textContent
+			}
+
+			const container = CreateElement("div", {
+				id: "info",
+				children: [
+					nameElements.container = CreateElement("p", {
+						children: [
+							CreateElement("span", { textContent: "Nome: " }),
+							nameElements.content = CreateElement("span", { textContent: info.name })
+						],
+					}),
+					typeElements.container = CreateElement("p", {
+						children: [
+							CreateElement("span", { textContent: "Tipo de arquivo: " }),
+							typeElements.content = CreateElement("span", {
+								className: "mime",
+								textContent: info.type
+							})
+						]
+					}),
+					dateElements.container = CreateElement("p", {
+						children: [
+							CreateElement("span", { textContent: "Data de criação: " }),
+							dateElements.input = CreateElement("input", {
+								type: "date",
+								className: "date",
+								value: GetDate(info.date)
+							})
+						]
+					}),
+					documentType.container = CreateElement("p", {
+						children: [
+							CreateElement("span", { textContent: "Tipo de documento: " }),
+							documentType.select = CreateElement("select", {
+								name: "documentType",
+								children: [
+									documentType.defaultOption = CreateElement("option", {
+										textContent: "Selecione um tipo",
+										selected: true,
+										disabled: true,
+										hidden: true
+									}),
+									...(documentType.options = documentTypes.map((type, index) => CreateElement("option", {
+										textContent: type,
+										value: index
+									})))
+								]
+							})
+						]
+					}),
+					submit = CreateElement("input", {
+						type: "button",
+						class: "submit",
+						value: "Enviar"
+					})
+				]
+			})
 
 			submit.addEventListener("click", function(event){
 				// TODO: Verify data (size and type)

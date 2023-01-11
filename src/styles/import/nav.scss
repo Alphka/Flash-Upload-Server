@@ -4,14 +4,15 @@ nav{
 	$height: 32pt;
 	$logoWidth: $height - 8pt;
 	$logoFontSize: $logoWidth - 2pt;
-	$iconSize: $height - 2pt;
-	$menuWidth: $logoWidth * 10;
+	$iconSize: $height - 6pt;
+	$menuWidth: 260pt;
 
 	display: flex;
 	flex-direction: row;
 	justify-content: space-between;
 	align-items: center;
 	height: $height;
+	padding: 0 8pt;
 
 	header{
 		flex: 1;
@@ -51,7 +52,7 @@ nav{
 		display: flex;
 		flex-direction: row;
 		justify-content: space-between;
-		gap: 8pt;
+		gap: 12pt;
 
 		@media screen and (max-width: $mobileSize){
 			display: none;

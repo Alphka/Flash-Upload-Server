@@ -53,6 +53,10 @@ app.set("rootFolder", rootFolder)
 app.set("documentsFolder", documentsFolder)
 app.set("pagesFolder", pagesFolder)
 
+const staticCache = isDevelopment ? "public, no-cache" : "public, max-age=3600, must-revalidate"
+const imageCache = staticCache + ", no-transform"
+const pageCache = "private, " + (isDevelopment ? "no-cache" : "max-age=10, must-revalidate")
+
 /**
  * @param {string} page
  * @param {import("express").Request} request
@@ -73,16 +77,27 @@ function HandlePugRequests(page, request, response){
 	})
 
 	response.setHeader("Content-Type", "text/html; charset=utf-8")
-	response.setHeader("Cache-Control", isDevelopment ? "private, no-cache" : "private, max-age=10, must-revalidate")
+	response.setHeader("Cache-Control", pageCache)
 	response.render(page, pugOptions(request))
 }
 
-app.use("/", express.static(staticFolder, { index: false }))
+app.use("/", express.static(staticFolder, {
+	cacheControl: false,
+	index: false,
+	setHeaders: (response, path) => {
+		response.setHeader("Cache-Control", staticCache)
+		response.type(mime.getType(path))
+	}
+}))
 
 app.use("/images", express.static(imagesFolder, {
 	acceptRanges: false,
+	cacheControl: false,
 	index: false,
-	setHeaders: (response, path) => response.type(mime.getType(path))
+	setHeaders: (response, path) => {
+		response.setHeader("Cache-Control", imageCache)
+		response.type(mime.getType(path))
+	}
 }))
 
 app.get(["/", "/index.html"], (request, response) => HandlePugRequests(indexPage, request, response))
@@ -94,7 +109,7 @@ app.use("/scripts", express.static(scriptsFolder, {
 	acceptRanges: false,
 	cacheControl: false,
 	setHeaders: (response) => {
-		response.setHeader("Cache-Control", "private, no-cache")
+		response.setHeader("Cache-Control", staticCache)
 	}
 }))
 
@@ -103,7 +118,7 @@ app.use("/styles", express.static(stylesFolder, {
 	acceptRanges: false,
 	cacheControl: false,
 	setHeaders: (response) => {
-		response.setHeader("Cache-Control", "private, no-cache")
+		response.setHeader("Cache-Control", staticCache)
 	}
 }))
 
