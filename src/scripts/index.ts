@@ -46,7 +46,8 @@ new class Index {
 	async UploadHandler(){
 		const section = await WaitForElement<HTMLElement>("article section:nth-of-type(2)", { element: this.main })
 		const form: HTMLFormElement = document.forms.namedItem("upload") || await WaitForElement("form[name=upload]", { element: section })
-		const fileInput = form.querySelector("input[type=file]") as HTMLInputElement
+		const fileLabel = form.querySelector("label:has(input[type=file])") as HTMLLabelElement
+		const fileInput = fileLabel.querySelector("input")!
 
 		const documentTypes = [
 			"Ata",
@@ -157,6 +158,8 @@ new class Index {
 				// TODO: Verify data (size and type)
 				// TODO*: Display error if file size is too large
 
+
+				// TODO: Remove this, the element appears when the form is submitted
 				form.appendChild(CreateElement("input", { name: "date", value: new Date(info.date).toJSON() }))
 				form.appendChild(CreateElement("input", { name: "documentType", value: GetType() }))
 				form.submit()
@@ -186,12 +189,26 @@ new class Index {
 			return Object.defineProperty(container, "SetConfig", { value: SetConfig }) as typeof container & { SetConfig: typeof SetConfig }
 		}
 
+		fileLabel.addEventListener("dragover", event => event.preventDefault())
+		fileLabel.addEventListener("dragenter", event => event.preventDefault())
+
+		fileLabel.addEventListener("drop", function(event){
+			event.preventDefault()
+
+			const files = event.dataTransfer?.files
+
+			if(files?.length){
+				fileInput.files = files
+				fileInput.dispatchEvent(new Event("change"))
+			}else DisplayError("Nenhum arquivo foi detectado")
+		})
+
 		fileInput.addEventListener("change", function(event){
 			const file = this.files![0] as File | undefined
 
 			if(!file){
 				menu.remove()
-				DisplayError("No files selected")
+				DisplayError("Nenhum arquivo foi selecionado")
 				return
 			}
 

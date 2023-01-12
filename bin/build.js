@@ -30,34 +30,47 @@ if(!isDevelopment) process.env.NODE_ENV = "production"
 
 const port = GetNumber(3000, process.env.PORT, config.port)
 
+const defaultDelay = 300
+let reloadDate = Date.now()
+
+/** @param {string} query */
+function Reload(query, delay = defaultDelay){
+	const date = Date.now()
+
+	if(reloadDate + delay < date){
+		reloadDate = date
+		return axios.get(`http://127.0.0.1:${port}/api/reload?` + query)
+	}
+}
+
+function ReloadStyle(delay = defaultDelay){
+	return Reload("detail=style", delay)
+}
+
+function ReloadScript(delay = defaultDelay){
+	return Reload("detail=script", delay)
+}
+
+/** @param {string} page */
+function ReloadPage(page, delay = defaultDelay){
+	return Reload(`detail=page&page=${page}`, delay)
+}
+
 if(isWatching){
 	const regex = /\.pug$/i
 	const pagesFolder = join(rootFolder, "public/pages")
 
-	let fired = false
+	readdir(pagesFolder, { withFileTypes: true }).then(all => {
+		const pages = all.filter(file => file.isFile()).filter(({ name }) => regex.test(name))
 
-	watch(pagesFolder, async (event, filename) => {
-		if(fired) return
-		if(!regex.test(filename)) return
+		for(const { name } of pages){
+			const path = join(pagesFolder, name)
 
-		fired = true
-
-		const { name } = parse(filename)
-		await axios.get(`http://127.0.0.1:${port}/api/reload?detail=page&page=${name}`)
-
-		setTimeout(() => fired = false, 300)
+			watchFile(path, { interval: defaultDelay }, (current, previous) => {
+				if(current.mtime !== previous.mtime) return ReloadPage(parse(name).name)
+			})
+		}
 	})
-}
-
-let reloadDate = Date.now()
-
-async function ReloadStyle(){
-	const date = Date.now()
-
-	if(reloadDate + 3000 < date){
-		reloadDate = date
-		await axios.get(`http://127.0.0.1:${port}/api/reload?detail=style`)
-	}
 }
 
 readdir(stylesFolder, { withFileTypes: true }).then(async files => {
@@ -206,5 +219,5 @@ webpack({
 	}))
 
 	if(firstCompilation) firstCompilation = false
-	else if(isWatching) axios.get(`http://127.0.0.1:${port}/api/reload?detail=script`)
+	else if(isWatching) return ReloadScript()
 })

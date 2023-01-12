@@ -89,10 +89,15 @@ main{
 					padding: 4pt 0;
 
 					span:last-child{
+						display: inline-block;
 						font-weight: 600;
-						overflow: hidden;
+						overflow: clip;
 						white-space: nowrap;
 						text-overflow: ellipsis;
+						max-width: 100%;
+						max-width: -moz-available;
+						max-width: -webkit-fill-available;
+						max-width: fill-available;
 					}
 				}
 
