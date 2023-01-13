@@ -15,8 +15,11 @@ html(lang="pt-BR")
 				section Busque com rapidez e facilidade!
 				section
 					form(method="post" action="api/upload" name="upload" enctype="multipart/form-data")
-						label Enviar documento
-							input(type="file" name="file" aria-hidden="true")
+						label(tabindex="0") Enviar documento
+							input(tabindex="-1" type="file" name="file" aria-hidden="true" multiple)
 
 			aside
 				img(src="images/documents.png" alt="Ilustração de documentos" loading="lazy")
+
+		//- Non-blocking styles
+		link(rel="stylesheet" href="styles/overflow.css")
