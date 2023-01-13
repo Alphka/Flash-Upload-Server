@@ -6,7 +6,7 @@ main{
 	display: flex;
 	flex-direction: row;
 	justify-content: space-around;
-	align-items: flex-start;
+	align-items: center;
 	margin-top: 40pt;
 
 	@media screen and (max-width: variables.$mobileSize){
