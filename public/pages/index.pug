@@ -5,6 +5,8 @@ html(lang="pt-BR")
 		title Flash &raquo; Página Inicial
 		link(rel="stylesheet" href="styles/index.css")
 		script(src="scripts/index.js" async)
+		link(rel="preload" href="images/logo.svg" type="image/svg+xml" as="image")
+		link(rel="preload" href="images/documents.png" type="image/png" media="(min-width: 1280px)" as="image")
 	body
 		include include/nav
 
@@ -15,6 +17,3 @@ html(lang="pt-BR")
 					form(method="post" action="api/upload" name="upload" enctype="multipart/form-data")
 						label Enviar documento
 							input(type="file" name="file" aria-hidden="true")
-
-			aside
-				img(src="images/documents.png" alt="Ilustração de documentos" loading="lazy")

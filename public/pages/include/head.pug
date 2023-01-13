@@ -4,6 +4,7 @@ meta(name="viewport", content="width=device-width, initial-scale=1.0, maximum-sc
 meta(property="og:type" content="website")
 meta(property="og:locale" content="pt_BR")
 meta(property="og:site_name" content="Flash")
+
 if canonicalURL
 	meta(property="og:url" content = canonicalURL)
 	meta(property="og:image:url" content = canonicalURL + "/images/apple-touch-icon.png")
@@ -11,6 +12,7 @@ if canonicalURL
 	meta(property="og:image:width" content="192")
 	meta(property="og:image:height" content="192")
 	link(rel="canonical" href = canonicalURL)
+
 link(rel="icon" sizes="32x32" href="/images/favicon.ico")
 link(rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png")
 link(rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png")
@@ -26,19 +28,35 @@ meta(name="msapplication-TileColor" content="#101728")
 meta(name="msapplication-config" content="/browserconfig.xml")
 meta(name="theme-color" content="#101728")
 meta(name="color-scheme" content="dark")
+
+link(rel="preconnect" href="https://fonts.gstatic.com" crossorigin)
+link(rel="preload" href="https://fonts.googleapis.com/css2?family=Alata&family=Michroma&family=Poppins:wght@500;600;700&display=swap" as="style")
+link(rel="preload" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" as="style")
+
 if isWatching
-	script(src="/socket.io/socket.io.js")
 	script.
-		const socket = io()
+		(() => {
+			const script = document.createElement("script")
 
-		function Reload(){
-			console.log("Reloading browser")
-			document.location.reload()
-		}
+			script.async = true
+			script.src = "/socket.io/socket.io.js"
+			script.onload = () => {
+				const socket = io()
 
-		socket.on("browserReload", Reload)
+				function Reload(){
+					console.log("Reloading browser")
+					document.location.reload()
+				}
 
-		socket.on("disconnect", () => {
-			console.log("Disconnected")
-			socket.on("connect", Reload)
-		})
+				socket.on("browserReload", Reload)
+
+				socket.on("disconnect", () => {
+					console.log("Disconnected")
+					socket.on("connect", Reload)
+				})
+
+				script.onload = null
+			}
+
+			document.head.appendChild(script)
+		})()

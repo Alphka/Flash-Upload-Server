@@ -24,16 +24,17 @@ main{
 		section:nth-of-type(1){
 			display: inline-block;
 			font-size: 56pt;
-			font-weight: bold;
+			font-weight: 700;
+			font-family: Alata;
 			text-align: left;
 			max-width: $width;
 			word-break: normal;
 
-			@media screen and (min-width: $mobileSize) and (max-width: $mediumSize){
+			@media screen and (min-width: $mobileSize) and (max-width: #{$largeSize - 1px}){
 				min-height: 300px;
 			}
 
-			@media screen and (max-width: $mediumSize){
+			@media screen and (max-width: #{$largeSize - 1px}){
 				display: flex;
 				width: 100%;
 				max-width: 500px;
@@ -180,7 +181,7 @@ main{
 			aspect-ratio: 5 / 4;
 		}
 
-		@media screen and (max-width: $mediumSize){
+		@media screen and (max-width: #{$largeSize - 1px}){
 			display: none;
 		}
 	}

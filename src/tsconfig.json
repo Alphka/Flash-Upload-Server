@@ -2,7 +2,7 @@
 	"extends": "../tsconfig",
 	"compilerOptions": {
 		"module": "ESNext",
-		"target": "ES6",
+		"target": "ES2019",
 		"moduleResolution": "Node",
 		"lib": [
 			"ESNext",

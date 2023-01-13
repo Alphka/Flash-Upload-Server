@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Alata&family=Michroma&family=Jura&family=Spinnaker&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Alata&family=Michroma&family=Poppins:wght@500;600;700&display=swap");
 
 $primaryColor: #101728;
 $secondaryColor: #121d46;
@@ -6,9 +6,10 @@ $terciaryColor: #9340ff;
 $fontColor: white;
 
 $mobileSize: 600px;
-$mediumSize: 1280px;
+$mediumSize: 1024px;
+$largeSize: 1280px;
 
-$logoFontFamily: Michroma, "Spinnaker", "Jura", "Gill Sans", "Gill Sans MT", Impact, Verdana, Arial, sans-serif;
+$logoFontFamily: Michroma, Verdana, Segoe UI, Arial, sans-serif;
 
 :root {
 	color-scheme: dark;
@@ -25,7 +26,7 @@ $logoFontFamily: Michroma, "Spinnaker", "Jura", "Gill Sans", "Gill Sans MT", Imp
 
 body{
 	background-color: $primaryColor;
-	font-family: Alata, Geneva, Tahoma, Helvetica, Arial, sans-serif;
+	font-family: Poppins, -apple-system, BlinkMacSystemFont, "Segoe UI", Verdana, Arial, sans-serif;
 	font-size: 16px;
 	color: $fontColor;
 }
