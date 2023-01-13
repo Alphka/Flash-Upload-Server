@@ -49,11 +49,8 @@ if isWatching
 				}
 
 				socket.on("browserReload", Reload)
-
-				socket.on("disconnect", () => {
-					console.log("Disconnected")
-					socket.on("connect", Reload)
-				})
+				socket.on("disconnect", () => console.log("Disconnected"))
+				socket.io.on("reconnect", Reload)
 
 				script.onload = null
 			}

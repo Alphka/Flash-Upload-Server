@@ -25,12 +25,15 @@ const stylesFolder = join(srcFolder, "styles")
 const isDevelopment = process.env.NODE_ENV === "development"
 const isWatching = args.includes("--watch")
 const packageName = process.env.npm_package_name || "package"
+const outputStyle = isDevelopment ? "expanded" : "compressed"
 
 if(!isDevelopment) process.env.NODE_ENV = "production"
 
-const port = GetNumber(3000, process.env.PORT, config.port)
-
+const port = isWatching ? GetNumber(3000, process.env.PORT, config.port) : null
 const defaultDelay = 300
+
+/** @type {NodeJS.Timeout | null} */
+let timeout = null
 let reloadDate = Date.now()
 
 /** @param {string} query */
@@ -44,7 +47,12 @@ function Reload(query, delay = defaultDelay){
 }
 
 function ReloadStyle(delay = defaultDelay){
-	return Reload("detail=style", delay)
+	if(timeout) clearTimeout(timeout)
+
+	timeout = setTimeout(() => {
+		timeout = null
+		Reload("detail=style", delay)
+	}, 20)
 }
 
 function ReloadScript(delay = defaultDelay){
@@ -83,23 +91,25 @@ readdir(stylesFolder, { withFileTypes: true }).then(async files => {
 	const promises = []
 
 	for(const { name } of styles){
-		const path = join(stylesFolder, name)
-		const style = isDevelopment ? "expanded" : "compressed"
+		const stylePath = join(stylesFolder, name)
 		const cssName = name.replace(regex, ".css")
 		const cssPath = join(outputFolder, cssName)
 		const sourceMapName = cssName + ".map"
 		const sourceMapPath = join(outputFolder, sourceMapName)
 		const sepRegex = new RegExp("\\" + sep, "g")
-		const imports = /** @type {string[]} */ (new Array)
 
-		const Compile = () => sass.compileAsync(path, {
-			alertAscii: false,
-			alertColor: true,
-			charset: true,
-			style,
-			sourceMap: true,
-			sourceMapIncludeSources: true
-		}).then(({ css, sourceMap, loadedUrls }) => {
+		let firstCompilation = true
+
+		async function Compile(){
+			const { css, sourceMap, loadedUrls } = await sass.compileAsync(stylePath, {
+				alertAscii: false,
+				alertColor: true,
+				charset: true,
+				style: outputStyle,
+				sourceMap: true,
+				sourceMapIncludeSources: true
+			})
+
 			const { sources } = sourceMap
 			const { length } = sources
 
@@ -107,47 +117,43 @@ readdir(stylesFolder, { withFileTypes: true }).then(async files => {
 				const source = sources[index]
 				const path = relative(rootFolder, fileURLToPath(source)).replace(sepRegex, "/")
 
-				sources[index] = `sass://${packageName}/./${path}`
+				sources[index] = `webpack://${packageName}/./${path}`
 			}
 
-			css += `\n/*# sourceMappingURL=${sourceMapName} */`
+			await Promise.all([
+				writeFile(cssPath, css + `\n/*# sourceMappingURL=${sourceMapName} */`, "utf8"),
+				writeFile(sourceMapPath, JSON.stringify(sourceMap), "utf8")
+			])
 
-			writeFile(cssPath, css, "utf8")
-			writeFile(sourceMapPath, JSON.stringify(sourceMap), "utf8")
-
-			for(const url of loadedUrls) imports.push(fileURLToPath(url))
-		})
-
-		promises.push(Compile().then(() => {
 			if(isWatching){
-				/** @type {import("fs").WatchFileOptions & { bigint?: false }} */
+				if(!firstCompilation) return
+
+				firstCompilation = false
+
 				const config = { interval: 300 }
-				const relativePath = relative(rootFolder, path)
+				const relativePath = relative(rootFolder, stylePath)
 
 				async function CompileWatched(){
-					const date = Date.now()
-
-					process.stdout.write(`Compiling style - ${relativePath}`)
-
 					try{
+						const date = Date.now()
 						await Compile()
-
-						process.stdout.clearLine(0)
-						process.stdout.cursorTo(0)
-						process.stdout.write(`Style compiled in ${Date.now() - date} ms - ${relativePath}\n`)
-
-						await ReloadStyle()
+						console.log(`Style compiled in ${Date.now() - date} ms - ${relativePath}`)
+						ReloadStyle()
 					}catch(error){
-						process.stdout.write("\n")
 						console.error(error)
 					}
 				}
 
-				watchFile(path, config, CompileWatched)
+				watchFile(stylePath, config, CompileWatched)
 
-				for(const file of imports) watchFile(file, config, CompileWatched)
+				for(const url of loadedUrls){
+					const file = fileURLToPath(url)
+					if(file !== stylePath) watchFile(file, config, CompileWatched)
+				}
 			}
-		}))
+		}
+
+		promises.push(Compile())
 	}
 
 	await Promise.allSettled(promises).then(results => {
