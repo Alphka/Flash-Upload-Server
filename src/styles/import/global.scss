@@ -1,15 +1,5 @@
+@use "variables.scss";
 @import url("https://fonts.googleapis.com/css2?family=Alata&family=Michroma&family=Poppins:wght@500;600;700&display=swap");
-
-$primaryColor: #101728;
-$secondaryColor: #121d46;
-$terciaryColor: #9340ff;
-$fontColor: white;
-
-$mobileSize: 600px;
-$mediumSize: 1024px;
-$largeSize: 1280px;
-
-$logoFontFamily: Michroma, Verdana, Segoe UI, Arial, sans-serif;
 
 :root {
 	color-scheme: dark;
@@ -25,20 +15,8 @@ $logoFontFamily: Michroma, Verdana, Segoe UI, Arial, sans-serif;
 }
 
 body{
-	background-color: $primaryColor;
+	background-color: variables.$primaryColor;
 	font-family: Poppins, -apple-system, BlinkMacSystemFont, "Segoe UI", Verdana, Arial, sans-serif;
 	font-size: 16px;
-	color: $fontColor;
-}
-
-@mixin userSelectNone{
-	user-select: none;
-	-moz-user-select: none;
-	-webkit-user-select: none;
-	-ms-user-select: none;
-}
-
-@mixin notDraggable{
-	user-drag: none;
-	-webkit-user-drag: none;
+	color: variables.$fontColor;
 }

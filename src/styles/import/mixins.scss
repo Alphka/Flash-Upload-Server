@@ -1,0 +1,11 @@
+@mixin userSelectNone{
+	user-select: none;
+	-moz-user-select: none;
+	-webkit-user-select: none;
+	-ms-user-select: none;
+}
+
+@mixin notDraggable{
+	user-drag: none;
+	-webkit-user-drag: none;
+}

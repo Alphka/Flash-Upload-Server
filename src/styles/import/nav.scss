@@ -1,3 +1,5 @@
+@use "mixins.scss";
+@use "variables.scss";
 @import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200");
 
 nav{
@@ -18,7 +20,7 @@ nav{
 		flex: 1;
 
 		a{
-			@include userSelectNone;
+			@include mixins.userSelectNone;
 
 			$spacing: 8pt;
 			$gap: 8pt;
@@ -42,7 +44,7 @@ nav{
 			span{
 				font-size: $logoFontSize;
 				line-height: $logoFontSize;
-				font-family: $logoFontFamily;
+				font-family: variables.$logoFontFamily;
 				text-transform: uppercase;
 			}
 		}
@@ -54,7 +56,7 @@ nav{
 		justify-content: space-between;
 		gap: 12pt;
 
-		@media screen and (max-width: $mobileSize){
+		@media screen and (max-width: variables.$mobileSize){
 			display: none;
 		}
 
@@ -62,7 +64,7 @@ nav{
 			display: none;
 			position: relative;
 
-			@media screen and (max-width: $mobileSize){
+			@media screen and (max-width: variables.$mobileSize){
 				display: block;
 			}
 
@@ -109,7 +111,7 @@ nav{
 		}
 
 		.icon{
-			@include userSelectNone;
+			@include mixins.userSelectNone;
 
 			$weight: 500;
 
@@ -146,7 +148,7 @@ nav{
 
 				hr{
 					margin: 4pt auto;
-					border: 1px solid $primaryColor;
+					border: 1px solid variables.$primaryColor;
 					width: calc(100% - 8pt);
 				}
 			}
