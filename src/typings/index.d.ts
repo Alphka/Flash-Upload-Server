@@ -13,4 +13,25 @@ export interface FileInfo {
 	type: string
 	size: number
 	date: number
+	file: File
+}
+
+interface FileElements {
+	container: HTMLElement
+	name: HTMLParagraphElement
+	nameLabel: HTMLSpanElement
+	nameContent: HTMLSpanElement
+	mime: HTMLParagraphElement
+	mimeLabel: HTMLSpanElement
+	mimeContent: HTMLSpanElement
+	date: HTMLParagraphElement
+	dateLabel: HTMLSpanElement
+	dateInput: HTMLInputElement
+	type: HTMLParagraphElement
+	typeLabel: HTMLSpanElement
+	typeSelect: HTMLSelectElement
+	defaultOption: HTMLOptionElement
+	checkbox: HTMLParagraphElement
+	checkboxLabel: HTMLSpanElement
+	checkboxInput: HTMLInputElement
 }

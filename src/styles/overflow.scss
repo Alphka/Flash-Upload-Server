@@ -1,0 +1,180 @@
+@use "import/variables.scss";
+@use "import/mixins.scss";
+
+.overflow{
+	position: absolute;
+	background-color: rgba(adjust-color(variables.$primaryColor, $lightness: -3%), 95%);
+	top: 0;
+	right: 0;
+	left: 0;
+	bottom: 0;
+	width: 100vw;
+	min-height: 100vh;
+	overflow: hidden auto;
+
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+
+	> .close{
+		$size: 25pt;
+
+		@include mixins.userSelectNone;
+
+		background-color: black;
+		position: absolute;
+		top: 4pt;
+		right: 4pt;
+		width: $size;
+		height: $size;
+		font-size: $size;
+		line-height: $size;
+		border-radius: 50%;
+		cursor: pointer;
+
+		&:hover{
+			background-color: lighten(black, 20%);
+		}
+
+		@media screen and (max-width: variables.$mobileSize){
+			right: 8pt;
+		}
+	}
+
+	article{
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		width: 80%;
+		max-width: 1920px;
+
+		@media screen and (max-width: variables.$mobileSize){
+			width: calc(100% - 20pt);
+		}
+
+		> section{
+			display: flex;
+			flex-direction: column;
+
+			&.header{
+				width: inherit;
+				align-items: center;
+
+				.title{
+					display: block;
+					font-size: 30pt;
+					text-align: center;
+
+					@media screen and (max-width: variables.$mobileSize){
+						font-size: 28pt;
+						white-space: nowrap;
+					}
+				}
+			}
+
+			&.files{
+				width: calc(100% - 8pt);
+				gap: 4pt;
+
+				.file{
+					position: relative;
+					display: flex;
+					width: 100%;
+					flex-direction: column;
+					margin-top: 8pt;
+					padding-top: 8pt;
+					border-top: 1px solid white;
+					gap: 4pt;
+
+					> .delete{
+						@include mixins.userSelectNone;
+
+						display: none;
+						position: absolute;
+						background-color: adjust-color(red, $lightness: -20%);
+						top: 4pt;
+						right: 4pt;
+						padding: 2pt;
+						border-radius: 2pt;
+						cursor: pointer;
+
+						&:hover{
+							background-color: adjust-color(red, $lightness: -30%);
+						}
+					}
+
+					&:hover > .delete{
+						display: block;
+					}
+
+					p{
+						display: grid;
+						overflow-x: clip;
+						grid-template-columns: 1fr clamp(20px, 60%, 600px);
+
+						@media screen and (max-width: variables.$mobileSize){
+							display: flex;
+							flex-direction: row;
+							flex-wrap: wrap;
+							grid-template-columns: none;
+							column-gap: 4pt;
+						}
+
+						span{
+							&.label{
+								flex: 1;
+							}
+
+							&.content{
+								text-overflow: ellipsis;
+								white-space: nowrap;
+								overflow-x: clip;
+							}
+						}
+
+						&:not(.checkbox) span.label{
+							font-weight: 700;
+						}
+
+						&.date input,
+						&.type select{
+							height: 20pt;
+							padding: 0 4pt;
+							border-radius: 4pt;
+							cursor: pointer;
+						}
+
+						&.checkbox{
+							label{
+								@include mixins.userSelectNone;
+
+								input{
+									margin-right: 4pt;
+								}
+							}
+						}
+					}
+				}
+			}
+
+			&.submit{
+				input{
+					position: relative;
+					background-color: variables.$secondaryColor;
+					box-shadow: 1px 1px 0 variables.$terciaryColor;
+					display: block;
+					padding: 4pt 16pt;
+					margin: 20pt 0;
+					border-radius: 20pt;
+					cursor: pointer;
+					transition: background ease-in-out 0.1s;
+
+					&:hover{
+						background-color: adjust-color(variables.$secondaryColor, $lightness: 10%);
+					}
+				}
+			}
+		}
+	}
+}

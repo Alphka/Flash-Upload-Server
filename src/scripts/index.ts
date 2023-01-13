@@ -1,10 +1,13 @@
-import type { FileInfo } from "../typings"
+import type { FileElements, FileInfo } from "../typings"
 import CreateElement from "../helpers/CreateElement"
 import WaitForElement from "../helpers/WaitForElement"
+import * as focusTrap from "focus-trap"
+import axios from "axios"
 
 new class Index {
 	nav!: HTMLElement
 	main!: HTMLElement
+	uploadMenu: ReturnType<typeof this.CreateUploadMenu>
 
 	constructor(){
 		WaitForElement("nav").then(nav => {
@@ -15,9 +18,14 @@ new class Index {
 		WaitForElement("main").then(main => {
 			this.main = main
 			this.DocumentsImage()
-			this.UploadHandler()
 			this.NotificationHandler()
+
+			WaitForElement<HTMLElement>("article section:nth-of-type(2)", { element: main }).then(section => {
+				this.UploadHandler(section)
+			})
 		})
+
+		this.uploadMenu = this.CreateUploadMenu()
 	}
 	async DocumentsImage(){
 		const aside = await WaitForElement("aside", { element: this.main })
@@ -43,8 +51,7 @@ new class Index {
 			content.classList.toggle("hidden")
 		})
 	}
-	async UploadHandler(){
-		const section = await WaitForElement<HTMLElement>("article section:nth-of-type(2)", { element: this.main })
+	async UploadHandler(section: HTMLElement){
 		const form: HTMLFormElement = document.forms.namedItem("upload") || await WaitForElement("form[name=upload]", { element: section })
 		const fileLabel = form.querySelector("label:has(input[type=file])") as HTMLLabelElement
 		const fileInput = fileLabel.querySelector("input")!
@@ -57,142 +64,10 @@ new class Index {
 			"Nota Fiscal"
 		] as const
 
-		let menu: ReturnType<typeof CreateInfoMenu>
-
-		function DisplayError(error: string){
-			console.error(error)
-		}
-
-		function CreateInfoMenu(info: FileInfo){
-			let nameElements: {
-				container: HTMLParagraphElement
-				content: HTMLSpanElement
-			},
-			typeElements: {
-				container: HTMLParagraphElement
-				content: HTMLSpanElement
-			},
-			dateElements: {
-				container: HTMLParagraphElement
-				input: HTMLInputElement
-			},
-			documentType: {
-				container: HTMLParagraphElement
-				select: HTMLSelectElement
-				options: HTMLOptionElement[]
-				defaultOption: HTMLOptionElement
-			}, submit: HTMLInputElement
-
-			// Typescript errors...
-			nameElements = {} as typeof nameElements
-			typeElements = {} as typeof typeElements
-			dateElements = {} as typeof dateElements
-			documentType = {} as typeof documentType
-
-			function GetDate(date: FileInfo["date"]){
-				return new Date(date).toJSON().slice(0, 10)
-			}
-
-			function GetType(){
-				const { select: { options } } = documentType
-				return options[options.selectedIndex]?.textContent
-			}
-
-			const container = CreateElement("div", {
-				id: "info",
-				children: [
-					nameElements.container = CreateElement("p", {
-						children: [
-							CreateElement("span", { textContent: "Nome: " }),
-							nameElements.content = CreateElement("span", { textContent: info.name })
-						],
-					}),
-					typeElements.container = CreateElement("p", {
-						children: [
-							CreateElement("span", { textContent: "Tipo de arquivo: " }),
-							typeElements.content = CreateElement("span", {
-								className: "mime",
-								textContent: info.type
-							})
-						]
-					}),
-					dateElements.container = CreateElement("p", {
-						children: [
-							CreateElement("span", { textContent: "Data de criação: " }),
-							dateElements.input = CreateElement("input", {
-								type: "date",
-								className: "date",
-								value: GetDate(info.date)
-							})
-						]
-					}),
-					documentType.container = CreateElement("p", {
-						children: [
-							CreateElement("span", { textContent: "Tipo de documento: " }),
-							documentType.select = CreateElement("select", {
-								name: "documentType",
-								children: [
-									documentType.defaultOption = CreateElement("option", {
-										textContent: "Selecione um tipo",
-										selected: true,
-										disabled: true,
-										hidden: true
-									}),
-									...(documentType.options = documentTypes.map((type, index) => CreateElement("option", {
-										textContent: type,
-										value: index
-									})))
-								]
-							})
-						]
-					}),
-					submit = CreateElement("input", {
-						type: "button",
-						class: "submit",
-						value: "Enviar"
-					})
-				]
-			})
-
-			submit.addEventListener("click", function(event){
-				// TODO: Verify data (size and type)
-				// TODO*: Display error if file size is too large
-
-
-				// TODO: Remove this, the element appears when the form is submitted
-				form.appendChild(CreateElement("input", { name: "date", value: new Date(info.date).toJSON() }))
-				form.appendChild(CreateElement("input", { name: "documentType", value: GetType() }))
-				form.submit()
-
-				// TODO: Display error if upload fails
-				// TODO*: Show progress of the upload
-
-				console.log("File sent", {
-					name: info.name,
-					type: info.type,
-					date: info.date,
-					size: info.size,
-					documentType: GetType()
-				})
-			})
-
-			function SetConfig(info: FileInfo): void
-			function SetConfig(){
-				// Overriding variables for the submit handler
-				const { name, type, size, date } = info = arguments[0]
-
-				nameElements.content.textContent = name
-				typeElements.content.textContent = type
-				dateElements.input.value = GetDate(date)
-			}
-
-			return Object.defineProperty(container, "SetConfig", { value: SetConfig }) as typeof container & { SetConfig: typeof SetConfig }
-		}
-
 		fileLabel.addEventListener("dragover", event => event.preventDefault())
 		fileLabel.addEventListener("dragenter", event => event.preventDefault())
 
-		fileLabel.addEventListener("drop", function(event){
+		fileLabel.addEventListener("drop", event => {
 			event.preventDefault()
 
 			const files = event.dataTransfer?.files
@@ -200,26 +75,249 @@ new class Index {
 			if(files?.length){
 				fileInput.files = files
 				fileInput.dispatchEvent(new Event("change"))
-			}else DisplayError("Nenhum arquivo foi detectado")
+			}else this.DisplayError("Nenhum arquivo foi detectado")
 		})
 
-		fileInput.addEventListener("change", function(event){
-			const file = this.files![0] as File | undefined
+		fileLabel.addEventListener("keypress", event => {
+			if(event.key === "Enter"){
+				event.preventDefault()
+				fileInput.click()
+			}
+		})
 
-			if(!file){
-				menu.remove()
-				DisplayError("Nenhum arquivo foi selecionado")
+		fileInput.addEventListener("change", event => {
+			const files = fileInput.files!
+
+			if(!files.length){
+				this.uploadMenu.Close()
+				this.DisplayError("Nenhum arquivo foi selecionado")
 				return
 			}
 
-			const { name, type, size, lastModified } = file
-			const info: FileInfo = { name, type, size, date: lastModified }
+			this.uploadMenu.Append()
 
-			if(menu) menu.SetConfig(info)
-			else menu = CreateInfoMenu(info)
+			for(const file of files){
+				const { name, type, size, lastModified } = file
+				const info: FileInfo = { name, type, size, date: lastModified, file }
 
-			section.appendChild(menu)
+				this.uploadMenu.AddFile(info)
+			}
 		})
+	}
+	CreateUploadMenu(){
+		const { GetInputDate } = this
+
+		const files = new Array<{ info: FileInfo, elements: FileElements }>
+
+		let closeButton: HTMLInputElement,
+		article: HTMLElement,
+		header: HTMLElement,
+		title: HTMLHeadingElement,
+		filesContainer: HTMLElement,
+		submitContainer: HTMLElement,
+		submitButton: HTMLInputElement
+
+		const container = CreateElement("div", {
+			className: "overflow",
+			children: [
+				closeButton = CreateElement("input", {
+					type: "button",
+					className: "close",
+					value: "\u00d7"
+				}),
+				article = CreateElement("article", {
+					children: [
+						header = CreateElement("section", {
+							className: "header",
+							children: [
+								title = CreateElement("h1", {
+									className: "title",
+									textContent: "Enviar arquivos"
+								})
+							]
+						}),
+						filesContainer = CreateElement("section", {
+							className: "files"
+						}),
+						submitContainer = CreateElement("section", {
+							className: "submit",
+							children: [
+								submitButton = CreateElement("input", {
+									type: "button",
+									value: "Enviar"
+								})
+							]
+						})
+					]
+				})
+			]
+		})
+
+		const trap = focusTrap.createFocusTrap(container)
+
+		function ESCListener(event: KeyboardEvent){
+			const { key, target } = event
+
+			if(
+				key !== "Esc" ||
+				target instanceof HTMLInputElement ||
+				target instanceof HTMLSelectElement ||
+				target instanceof HTMLButtonElement
+			) return
+
+			Close()
+			event.preventDefault()
+			window.removeEventListener("keypress", ESCListener)
+		}
+
+		function Append(){
+			document.body.appendChild(container)
+			window.addEventListener("keypress", ESCListener)
+			trap.activate()
+		}
+
+		function Close(){
+			trap.deactivate()
+			window.removeEventListener("keypress", ESCListener)
+			container.remove()
+
+			for(const file of files){
+				DeleteFile(file)
+			}
+
+			files.splice(0, files.length)
+		}
+
+		function AddFile(info: FileInfo){
+			const elements = {} as FileElements
+
+			const deleteButton = CreateElement("button", {
+				className: "icon delete material-symbols-outlined",
+				textContent: "delete"
+			})
+
+			const name = elements.name = CreateElement("p", {
+				className: "name",
+				children: [
+					elements.nameLabel = CreateElement("span", { class: "label", textContent: "Nome" }),
+					elements.nameContent = CreateElement("span", { class: "content", textContent: info.name })
+				]
+			})
+
+			const mime = elements.mime = CreateElement("p", {
+				className: "mime",
+				children: [
+					elements.mimeLabel = CreateElement("span", { class: "label", textContent: "Tipo de arquivo" }),
+					elements.mimeContent = CreateElement("span", { class: "content", textContent: info.type })
+				]
+			})
+
+			const date = elements.date = CreateElement("p", {
+				className: "date",
+				children: [
+					elements.dateLabel = CreateElement("span", { class: "label", textContent: "Data de criação" }),
+					elements.dateInput = CreateElement("input", { type: "date", value: GetInputDate(info.date) })
+				]
+			})
+
+			const type = elements.type = CreateElement("p", {
+				className: "type",
+				children: [
+					elements.typeLabel = CreateElement("span", { class: "label", textContent: "Tipo de documento" }),
+					elements.typeSelect = CreateElement("select", {
+						class: "content",
+						children: [
+							elements.defaultOption = CreateElement("option", {
+								selected: true,
+								disabled: true,
+								hidden: true,
+								textContent: "Selecione um tipo"
+							})
+						]
+					})
+				]
+			})
+
+			// ! TODO: Add options to select (transfer the document types to the database)
+
+			const checkbox = elements.checkbox = CreateElement("p", {
+				className: "checkbox",
+				children: [
+					CreateElement("label", {
+						children: [
+							elements.checkboxInput = CreateElement("input", { type: "checkbox" }),
+							elements.checkboxLabel = CreateElement("span", { className: "label", textContent: "Arquivo privado" })
+						]
+					})
+				]
+			})
+
+			const container = elements.container = CreateElement("section", {
+				className: "file",
+				children: [deleteButton, name, mime, date, type, checkbox]
+			})
+
+			const file = { info, elements }
+
+			deleteButton.addEventListener("click", () => DeleteFile(file))
+
+			files.push(file)
+			filesContainer.appendChild(container)
+
+			return elements
+		}
+
+		function DeleteFile(file: typeof files[number]){
+			file.elements.container.remove()
+			files.splice(files.indexOf(file), 1)
+
+			if(!files.length) Close()
+		}
+
+		closeButton.addEventListener("click", () => Close())
+
+		let busy = false
+
+		submitButton.addEventListener("click", async () => {
+			if(busy) return
+
+			busy = true
+
+			const formData = new FormData()
+
+			for(const { info: { name, file }, elements: { dateInput, typeSelect, checkboxInput } } of files){
+				formData.append("image", file, name)
+				formData.append("date", new Date(`${dateInput.value} GMT-0300`).toISOString())
+				formData.append("type", typeSelect.value)
+				formData.append("isPrivate", String(checkboxInput.checked))
+			}
+
+			axios.post("/api/upload", formData, {
+				headers: {
+					"Content-Type": "multipart/form-data"
+				},
+				withCredentials: true
+			})
+
+			busy = false
+		})
+
+		return {
+			container,
+			closeButton,
+			article,
+			header,
+			title,
+			filesContainer,
+			submitContainer,
+			submitButton,
+			Append,
+			Close,
+			AddFile
+		}
+	}
+	GetInputDate(date: string | number | Date){
+		return new Date(date).toJSON().slice(0, 10)
 	}
 	async MobileNavigation(){
 		const menu = await WaitForElement(".icons.mobile")
@@ -245,5 +343,8 @@ new class Index {
 				window.removeEventListener("click", CloseHandler)
 			}
 		})
+	}
+	DisplayError(error: string){
+		console.error(error)
 	}
 }
