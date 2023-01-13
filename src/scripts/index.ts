@@ -292,14 +292,16 @@ new class Index {
 				formData.append("isPrivate", String(checkboxInput.checked))
 			}
 
-			axios.post("/api/upload", formData, {
-				headers: {
-					"Content-Type": "multipart/form-data"
-				},
-				withCredentials: true
-			})
-
-			busy = false
+			try{
+				await axios.post("/api/upload", formData, {
+					headers: {
+						"Content-Type": "multipart/form-data"
+					},
+					withCredentials: true
+				})
+			}finally{
+				busy = false
+			}
 		})
 
 		return {
