@@ -9,3 +9,25 @@
 	user-drag: none;
 	-webkit-user-drag: none;
 }
+
+@mixin spinner($color, $size: 32px){
+	display: inline-block;
+	background-color: transparent;
+	border: 3px solid $color;
+	border-top-color: transparent;
+	border-right-color: transparent;
+	width: $size;
+	height: $size;
+	border-radius: 50%;
+	animation: spinner-animation 0.65s infinite linear;
+
+	@keyframes spinner-animation{
+		0%{
+			transform: rotate(0deg);
+		}
+
+		100%{
+			transform: rotate(360deg);
+		}
+	}
+}
