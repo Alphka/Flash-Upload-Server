@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { join, relative, dirname, sep, parse } from "path"
-import { existsSync, watch, watchFile } from "fs"
+import { existsSync, unwatchFile, watchFile } from "fs"
 import { readdir, writeFile, mkdir } from "fs/promises"
 import { fileURLToPath } from "url"
 import { GetConfig } from "./helpers/Config.js"
@@ -92,6 +92,7 @@ readdir(stylesFolder, { withFileTypes: true }).then(async files => {
 
 	for(const { name } of styles){
 		const stylePath = join(stylesFolder, name)
+		const relativePath = relative(rootFolder, stylePath)
 		const cssName = name.replace(regex, ".css")
 		const cssPath = join(outputFolder, cssName)
 		const sourceMapName = cssName + ".map"
@@ -101,66 +102,76 @@ readdir(stylesFolder, { withFileTypes: true }).then(async files => {
 		let firstCompilation = true
 
 		async function Compile(){
-			const { css, sourceMap, loadedUrls } = await sass.compileAsync(stylePath, {
-				alertAscii: false,
-				alertColor: true,
-				charset: true,
-				style: outputStyle,
-				sourceMap: true,
-				sourceMapIncludeSources: true
-			})
+			try{
+				if(!existsSync(stylePath)) throw new Error("Style does not exist: " + relativePath)
 
-			const { sources } = sourceMap
-			const { length } = sources
+				const { css, sourceMap, loadedUrls } = sass.compile(stylePath, {
+					alertAscii: false,
+					alertColor: true,
+					charset: true,
+					style: outputStyle,
+					sourceMap: true,
+					sourceMapIncludeSources: true
+				})
 
-			for(let index = 0; index < length; index++){
-				const source = sources[index]
-				const path = relative(rootFolder, fileURLToPath(source)).replace(sepRegex, "/")
+				const { sources } = sourceMap
+				const { length } = sources
 
-				sources[index] = `webpack://${packageName}/./${path}`
-			}
+				for(let index = 0; index < length; index++){
+					const source = sources[index]
+					const path = relative(rootFolder, fileURLToPath(source)).replace(sepRegex, "/")
 
-			await Promise.all([
-				writeFile(cssPath, css + `\n/*# sourceMappingURL=${sourceMapName} */`, "utf8"),
-				writeFile(sourceMapPath, JSON.stringify(sourceMap), "utf8")
-			])
+					sources[index] = `webpack://${packageName}/./${path}`
+				}
 
-			if(isWatching){
-				if(!firstCompilation) return
+				await Promise.all([
+					writeFile(cssPath, css + `\n/*# sourceMappingURL=${sourceMapName} */`, "utf8"),
+					writeFile(sourceMapPath, JSON.stringify(sourceMap), "utf8")
+				])
 
-				firstCompilation = false
+				if(isWatching){
+					if(!firstCompilation) return
 
-				const config = { interval: 300 }
-				const relativePath = relative(rootFolder, stylePath)
+					firstCompilation = false
 
-				async function CompileWatched(){
+					const config = { interval: 300 }
+
+					async function CompileWatched(){
+						try{
+							const date = Date.now()
+							await Compile()
+							console.log(`Style compiled in ${Date.now() - date} ms - ${relativePath}`)
+							ReloadStyle()
+						}catch(error){
+							console.error(error)
+						}
+					}
+
+					watchFile(stylePath, config, CompileWatched)
+
+					for(const url of loadedUrls){
+						const file = fileURLToPath(url)
+						if(file !== stylePath) watchFile(file, config, CompileWatched)
+					}
+				}
+			}catch(error){
+				watchFile(stylePath, async function Listener(){
 					try{
-						const date = Date.now()
+						unwatchFile(stylePath, Listener)
 						await Compile()
-						console.log(`Style compiled in ${Date.now() - date} ms - ${relativePath}`)
-						ReloadStyle()
 					}catch(error){
 						console.error(error)
 					}
-				}
+				})
 
-				watchFile(stylePath, config, CompileWatched)
-
-				for(const url of loadedUrls){
-					const file = fileURLToPath(url)
-					if(file !== stylePath) watchFile(file, config, CompileWatched)
-				}
+				console.error(error)
 			}
 		}
 
 		promises.push(Compile())
 	}
 
-	await Promise.allSettled(promises).then(results => {
-		for(const result of results){
-			if(result.status === "rejected") console.error(result.reason)
-		}
-	})
+	await Promise.all(promises)
 
 	console.log("Stylesheets compiled")
 })
