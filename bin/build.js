@@ -9,6 +9,7 @@ import sass from "sass"
 import axios from "axios"
 import webpack from "webpack"
 import GetNumber from "./helpers/GetNumber.js"
+import GetPackageName from "./helpers/GetPackageName.js"
 import AddFolderToEntries from "./helpers/AddFolderToEntries.js"
 import WatchedGlobEntries from "webpack-watched-glob-entries-plugin"
 
@@ -24,7 +25,7 @@ const srcFolder = join(rootFolder, "src")
 const stylesFolder = join(srcFolder, "styles")
 const isDevelopment = process.env.NODE_ENV === "development"
 const isWatching = args.includes("--watch")
-const packageName = process.env.npm_package_name || "package"
+const packageName = GetPackageName()
 const outputStyle = isDevelopment ? "expanded" : "compressed"
 
 if(!isDevelopment) process.env.NODE_ENV = "production"
@@ -121,7 +122,7 @@ readdir(stylesFolder, { withFileTypes: true }).then(async files => {
 					const source = sources[index]
 					const path = relative(rootFolder, fileURLToPath(source)).replace(sepRegex, "/")
 
-					sources[index] = `webpack://${packageName}/./${path}`
+					sources[index] = `${packageName}://${packageName}/./${path}`
 				}
 
 				await Promise.all([
@@ -190,7 +191,8 @@ webpack({
 	})()),
 	output: {
 		filename: "[name].js",
-		path: buildFolder
+		path: buildFolder,
+		devtoolModuleFilenameTemplate: `${packageName}://${packageName}/[resource-path]?[loaders]`,
 	},
 	module: {
 		rules: [
