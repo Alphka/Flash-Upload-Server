@@ -46,8 +46,8 @@ new class Index {
 	async UploadHandler(){
 		const section = await WaitForElement<HTMLElement>("article section:nth-of-type(2)", { element: this.main })
 		const form: HTMLFormElement = document.forms.namedItem("upload") || await WaitForElement("form[name=upload]", { element: section })
-		const fileLabel = form.querySelector("label:has(input[type=file])") as HTMLLabelElement
-		const fileInput = fileLabel.querySelector("input")!
+		const fileLabel = form.querySelector("label") as HTMLLabelElement
+		const fileInput = fileLabel.querySelector("input[type=file]") as HTMLInputElement
 
 		const documentTypes = [
 			"Ata",

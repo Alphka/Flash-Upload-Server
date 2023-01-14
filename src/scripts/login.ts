@@ -11,7 +11,7 @@ new class Login {
 
 	readonly apiErrors = {
 		400: "Este formato não é válido.",
-		401: "Usuário ou senha incorretos.",
+		401: "Usuário ou senha estão incorretos.",
 		406: "Not Acceptable",
 		411: "As informações que você está tentando enviar são muito grande."
 	}

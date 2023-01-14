@@ -10,6 +10,10 @@ import mime from "mime"
 import express from "express"
 import GetNumber from "./helpers/GetNumber.js"
 import ApiRouter from "./controllers/api/index.js"
+import cookieParser from "cookie-parser"
+import Authenticate from "./controllers/Authenticate.js"
+import HandleAuthError from "./controllers/api/HandleAuthError.js"
+import GetPackageName, { CapitalizedName } from "./helpers/GetPackageName.js"
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -22,6 +26,7 @@ const isDevelopment = process.env.NODE_ENV === "development"
 const isWatching = Boolean(process.env.NODEMON)
 const mustCache = !isDevelopment
 const port = GetNumber(3000, process.env.PORT, config.port)
+const websiteName = CapitalizedName(GetPackageName("project"))
 
 SetConfig(Object.assign(config, { port }))
 
@@ -68,6 +73,7 @@ function HandlePugRequests(page, request, response){
 	/** @param {import("express").Request} request */
 	const pugOptions = request => ({
 		cache: mustCache,
+		websiteName,
 		isWatching,
 		canonicalURL: protocol + "://" + hostname + url,
 		notifications: {
@@ -80,6 +86,8 @@ function HandlePugRequests(page, request, response){
 	response.setHeader("Cache-Control", pageCache)
 	response.render(page, pugOptions(request))
 }
+
+app.use(cookieParser())
 
 app.use("/", express.static(staticFolder, {
 	cacheControl: false,
@@ -100,8 +108,8 @@ app.use("/images", express.static(imagesFolder, {
 	}
 }))
 
-app.get(["/", "/index.html"], (request, response) => HandlePugRequests(indexPage, request, response))
-app.get("/documents", (request, response) => HandlePugRequests(documentsPage, request, response))
+app.get(["/", "/index.html"], Authenticate, (request, response) => HandlePugRequests(indexPage, request, response))
+app.get("/documents", Authenticate, (request, response) => HandlePugRequests(documentsPage, request, response))
 app.get("/login", (request, response) => HandlePugRequests(loginPage, request, response))
 
 app.use("/scripts", express.static(scriptsFolder, {
@@ -122,7 +130,20 @@ app.use("/styles", express.static(stylesFolder, {
 	}
 }))
 
-app.use(ApiRouter)
+app.use("/api", ApiRouter)
+
+app.use((error, request, response, next) => {
+	if(error.includes("auth")){
+		if(error === "auth:api") return HandleAuthError(request, response, next)
+		return response.statusMessage = "Access denied", response.redirect("/login")
+	}
+
+	console.error(error)
+
+	response.writeHead(500, "Internal Server Error")
+	response.write("Algo deu errado")
+	response.end()
+})
 
 async function WaitBuild(){
 	if(!isWatching) return

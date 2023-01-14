@@ -1,12 +1,17 @@
 doctype html
 html(lang="pt-BR")
 	head
+		- const description = "Página inicial"
+		- const title = `${websiteName} - Página inicial`
+
 		include include/head
-		title Flash &raquo; Página Inicial
-		link(rel="stylesheet" href="styles/index.css")
+
 		script(src="scripts/index.js" async)
+		link(rel="stylesheet" href="styles/index.css")
 		link(rel="preload" href="images/logo.svg" type="image/svg+xml" as="image")
 		link(rel="preload" href="images/documents.png" type="image/png" media="(min-width: 1280px)" as="image")
+
+		include include/head-end
 	body
 		include include/nav
 

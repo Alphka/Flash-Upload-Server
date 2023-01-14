@@ -1,8 +1,7 @@
+import { AddToken, CreateToken } from "../Token.js"
 import { mkdir, writeFile } from "fs/promises"
 import { GetAccounts } from "../../helpers/Accounts.js"
-import { randomBytes } from "crypto"
 import { existsSync } from "fs"
-import { promisify } from "util"
 import { Router } from "express"
 import { join } from "path"
 import Crypto from "crypto"
@@ -23,7 +22,7 @@ function ValidateAccept(accept){
 	return /\btext\/html\b|\*\/\*/.test(accept)
 }
 
-router.post("/api/upload", async (request, response, next) => {
+router.post("/upload", async (request, response, next) => {
 	if(!ValidateSize(request.header("content-length"))) return next("length")
 	if(!ValidateAccept(request.header("accept"))) return next("accept")
 	if(!request.header("origin")) return next("origin")
@@ -125,12 +124,7 @@ router.post("/api/upload", async (request, response, next) => {
 	}
 })
 
-async function CreateToken(){
-	const buffer = await promisify(randomBytes)(48)
-	return buffer.toString("hex")
-}
-
-router.post("/api/login", async (request, response, next) => {
+router.post("/login", async (request, response, next) => {
 	if(!request.accepts("json")) return next("accept")
 	if(!ValidateSize(request.header("content-length"), false)) return next("length")
 	if(request.header("content-type") !== "application/x-www-form-urlencoded") return next("contentType")
@@ -165,8 +159,12 @@ router.post("/api/login", async (request, response, next) => {
 			sameSite: "lax"
 		})
 
-		response.status(200)
-		response.json({ success: true })
+		try{
+			await AddToken(token)
+			response.status(200).json({ success: true })
+		}catch(error){
+			response.status(500).json({ success: false, error: "Failed to store token" })
+		}
 	}
 
 	if(username in accounts.byUsername){
@@ -189,7 +187,7 @@ router.use((error, request, response, next) => {
 	 * @param {string} [message]
 	 */
 	function SendError(status, message){
-		if(response.headersSent) return console.error(new Error(`Could not send error status (${status}) for ${request.url}`)), response.end()
+		if(response.headersSent) return console.error(new Error(`API: Could not send error status (${status}) for ${request.url}`)), response.end()
 		if(message) response.statusMessage = message
 		response.status(status)
 		response.end()
