@@ -1,11 +1,16 @@
 doctype html
 html(lang="pt-BR")
 	head
+		- const description = "Página de login"
+		- const title = `${websiteName} - Login`
+
 		include include/head
-		meta(property="og:title" content="Flash - Login")
-		title Flash &raquo; Login
-		link(rel="stylesheet" href="/styles/login.css")
+
 		script(src="scripts/login.js" async)
+		link(rel="stylesheet" href="/styles/login.css")
+		link(rel="preload" href="images/logo.svg" type="image/svg+xml" as="image")
+
+		include include/head-end
 	body
 		main
 			section
@@ -16,9 +21,9 @@ html(lang="pt-BR")
 					fieldset
 						label
 							span Usuário
-							input(type="text" name="username")
+							input.no-outline(type="text" name="username")
 						label
 							span Senha
-							input(type="password" name="password")
+							input.no-outline(type="password" name="password")
 
-					input(type="submit" class="submit" value="Entrar")
+					button.no-outline.submit(type="submit") Entrar

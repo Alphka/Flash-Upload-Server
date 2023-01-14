@@ -1,9 +1,10 @@
+import { AddToken, CreateToken } from "../Token.js"
 import { mkdir, writeFile } from "fs/promises"
 import { GetAccounts } from "../../helpers/Accounts.js"
-import { randomBytes } from "crypto"
 import { existsSync } from "fs"
 import { Router } from "express"
 import { join } from "path"
+import Crypto from "crypto"
 import IsNumber from "../../helpers/IsNumber.js"
 
 const router = Router()
@@ -21,7 +22,7 @@ function ValidateAccept(accept){
 	return /\btext\/html\b|\*\/\*/.test(accept)
 }
 
-router.post("/api/upload", async (request, response, next) => {
+router.post("/upload", async (request, response, next) => {
 	if(!ValidateSize(request.header("content-length"))) return next("length")
 	if(!ValidateAccept(request.header("accept"))) return next("accept")
 	if(!request.header("origin")) return next("origin")
@@ -123,11 +124,9 @@ router.post("/api/upload", async (request, response, next) => {
 	}
 })
 
-router.post("/api/login", async (request, response, next) => {
+router.post("/login", async (request, response, next) => {
+	if(!request.accepts("json")) return next("accept")
 	if(!ValidateSize(request.header("content-length"), false)) return next("length")
-	if(!ValidateAccept(request.header("accept"))) return next("accept")
-	if(!request.header("origin")) return next("origin")
-	if(!request.header("user-agent")) return next("userAgent")
 	if(request.header("content-type") !== "application/x-www-form-urlencoded") return next("contentType")
 
 	let data = ""
@@ -143,23 +142,43 @@ router.post("/api/login", async (request, response, next) => {
 		return [key, decodeURIComponent(value)]
 	}))
 
+	function Unauthorize(){
+		response.status(401)
+		response.json({ success: false })
+	}
+
+	async function Register(){
+		const token = await CreateToken()
+		const date = new Date
+
+		date.setMonth(date.getMonth() + 1)
+
+		response.cookie("token", token, {
+			maxAge: date.getTime(),
+			httpOnly: true,
+			sameSite: "lax"
+		})
+
+		try{
+			await AddToken(token)
+			response.status(200).json({ success: true })
+		}catch(error){
+			response.status(500).json({ success: false, error: "Failed to store token" })
+		}
+	}
+
 	if(username in accounts.byUsername){
 		const login = accounts.byUsername[username]
 
-		// TODO: Implement hash system
-		if(password === login.password) return randomBytes(48, function(error, buffer) {
-			if(error) return next(error)
+		if(password){
+			const hash = Crypto.createHash("md5").update(password).digest("hex")
+			return hash === login.password ? Register() : Unauthorize()
+		}
 
-			response.cookie("token", buffer.toString("hex"), {
-				httpOnly: true,
-				sameSite: "lax"
-			})
-
-			response.status(200).json({ success: true })
-		})
+		return login.password ? Unauthorize() : Register()
 	}
 
-	response.status(401).json({ success: false })
+	return Unauthorize()
 })
 
 router.use((error, request, response, next) => {
@@ -168,7 +187,7 @@ router.use((error, request, response, next) => {
 	 * @param {string} [message]
 	 */
 	function SendError(status, message){
-		if(response.headersSent) return console.error(new Error(`Could not send error status (${status}) for ${request.url}`)), response.end()
+		if(response.headersSent) return console.error(new Error(`API: Could not send error status (${status}) for ${request.url}`)), response.end()
 		if(message) response.statusMessage = message
 		response.status(status)
 		response.end()
