@@ -34,4 +34,10 @@ export interface FileElements {
 	checkbox: HTMLParagraphElement
 	checkboxLabel: HTMLSpanElement
 	checkboxInput: HTMLInputElement
+	error?: HTMLParagraphElement
+}
+
+export interface FileObject {
+	info: FileInfo
+	elements: FileElements
 }
