@@ -24,7 +24,4 @@ export interface FilePart {
 	isFile?: boolean
 }
 
-export interface UploadFileError {
-	message: string
-	filename?: string
-}
+export type { UploadFileError } from "../../typings/api.js"

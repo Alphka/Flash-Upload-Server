@@ -1,5 +1,6 @@
-export type APIResponse<T extends any = any> = APIResponseSuccess<T> | APIResponseError
-export type APIResponseMultiple<T extends any = any> = APIResponseSuccess<T> | APIResponseMultipleErrors
+export type APIResponse<T extends any = any> =
+	| APIResponseSuccess<T>
+	| APIResponseError
 
 export type APIResponseSuccess<T extends any = any> = {
 	success: true
@@ -12,7 +13,17 @@ export interface APIResponseError {
 	error?: string
 }
 
-export interface APIResponseMultipleErrors {
+export interface UploadFileError {
+	message: string
+	filename?: string
+}
+
+export type APIUploadResponse = {
+	success: boolean
+	message: string
+	errors: UploadFileError[]
+	uploaded: string[]
+} | {
 	success: false
-	error?: string
+	error: string
 }

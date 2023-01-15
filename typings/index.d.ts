@@ -1,3 +1,5 @@
+import type internal from "stream"
+
 declare global {
 	namespace NodeJS {
 		interface ProcessEnv {
@@ -7,4 +9,4 @@ declare global {
 	}
 }
 
-export {}
+export type BusboyStream = internal.Readable & { truncated: boolean }

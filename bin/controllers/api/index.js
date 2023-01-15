@@ -75,6 +75,10 @@ router.post("/upload", async (request, response, next) => {
 		const parts = []
 		/** @type {import("../../typings/index.js").UploadFileError[]} */
 		const errors = []
+		/** @type {string[]} */
+		const uploaded = []
+		/** @type {Promise<any>[]} */
+		const filePromises = []
 
 		busboy.on("field", (name, value) => {
 			const part = (() => {
@@ -100,14 +104,12 @@ router.post("/upload", async (request, response, next) => {
 			fieldEnum[name]?.()
 		})
 
-		busboy.on("file", async (name, stream, { filename }) => {
-			const part = parts.at(-1)
-
-			if(!part) return errors.push({ message: `O arquivo '${filename}' não contém informações` })
-			if(name !== "image") return stream.resume()
-
-			part.isFile = true
-
+		/**
+		 * @param {import("../../typings/index.js").FilePart} part
+		 * @param {import("../../../typings/index.js").BusboyStream} stream
+		 * @param {string} filename
+		 */
+		async function FilePromise(part, stream, filename){
 			try{
 				const { typeId } = part
 				const type = GetTypeById(typeId)
@@ -136,6 +138,8 @@ router.post("/upload", async (request, response, next) => {
 
 					fileStream.on("error", reject)
 				})
+
+				uploaded.push(filename)
 			}catch(error){
 				if(typeof error === "string"){
 					errors.push({
@@ -148,6 +152,17 @@ router.post("/upload", async (request, response, next) => {
 
 				console.error(error)
 			}
+		}
+
+		busboy.on("file", (name, stream, { filename }) => {
+			const part = parts.at(-1)
+
+			if(!part) return errors.push({ message: `O arquivo '${filename}' não contém informações` })
+			if(name !== "image") return stream.resume()
+
+			part.isFile = true
+
+			filePromises.push(FilePromise(part, stream, filename))
 		})
 
 		request.pipe(busboy)
@@ -157,9 +172,12 @@ router.post("/upload", async (request, response, next) => {
 			busboy.on("error", reject)
 		})
 
+		await Promise.all(filePromises)
+
 		response.status(200).json({
 			success: true,
 			errors,
+			uploaded,
 			message: "Upload successful"
 		})
 	}catch(error){

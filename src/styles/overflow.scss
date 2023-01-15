@@ -55,10 +55,12 @@
 		> section{
 			display: flex;
 			flex-direction: column;
+			align-items: flex-start;
 
 			&.header{
 				width: inherit;
 				align-items: center;
+				margin: 4pt 0 12pt;
 
 				.title{
 					display: block;
@@ -74,17 +76,31 @@
 
 			&.files{
 				width: calc(100% - 8pt);
-				gap: 4pt;
 
 				.file{
 					position: relative;
 					display: flex;
 					width: 100%;
 					flex-direction: column;
-					margin-top: 8pt;
-					padding-top: 8pt;
+					padding: 8pt 4pt;
 					border-top: 1px solid white;
+					transition: background .3s ease-in;
 					gap: 4pt;
+
+					&.success{
+						background-color: #125a34;
+
+						&.hidden{
+							opacity: 0;
+							border-width: 0;
+							transform: translateY(-100%);
+							transition: transform .3s, opacity .3s;
+						}
+
+						&:hover > .delete{
+							display: none;
+						}
+					}
 
 					> .delete{
 						@include mixins.userSelectNone;
@@ -153,24 +169,66 @@
 								}
 							}
 						}
+
+						&.error{
+							display: block;
+							color: variables.$errorColor;
+							text-align: center;
+							font-weight: normal;
+							font-family: Segoe UI, Verdana, sans-serif;
+						}
 					}
 				}
 			}
 
 			&.submit{
+				width: 100%;
+
 				input{
 					position: relative;
 					background-color: variables.$secondaryColor;
 					box-shadow: 1px 1px 0 variables.$terciaryColor;
 					display: block;
+					max-width: 62pt;
+					align-self: center;
 					padding: 4pt 16pt;
-					margin: 20pt 0;
+					margin: 20pt 0 8pt;
 					border-radius: 20pt;
 					cursor: pointer;
 					transition: background ease-in-out 0.1s;
 
 					&:hover{
 						background-color: adjust-color(variables.$secondaryColor, $lightness: 10%);
+					}
+				}
+
+				.progress{
+					$color: darken(gray, 20%);
+					$progressColor: #4169ff;
+
+					background-color: $color;
+					position: relative;
+					display: block;
+					width: 100%;
+					height: 1.5em;
+					margin: 4pt 0 10pt;
+					border-radius: 8pt;
+					overflow: hidden;
+
+					.bar{
+						background: $progressColor;
+						background: linear-gradient(130deg, #{lighten($progressColor, 10%)}, $progressColor, #{darken($progressColor, 25%)});
+						width: var(--width);
+						height: inherit;
+						transition: width .3s ease-out;
+					}
+
+					.percentage{
+						position: absolute;
+						left: 50%;
+						top: 0%;
+						padding: 0;
+						line-height: 1.5;
 					}
 				}
 			}
