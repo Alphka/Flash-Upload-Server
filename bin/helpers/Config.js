@@ -10,12 +10,12 @@ const databaseFolder = join(__dirname, "../../database")
 const config = join(databaseFolder, "config.json")
 const configCopy = join(databaseFolder, "config.copy.json")
 
-/** @type {import("../../typings/index.js").Config} */
+/** @type {import("../typings/index.js").Config} */
 let configData = {}
 
 const ConfigString = () => JSON.stringify(configData, null, "\t") + "\n"
 
-/** @type {import("../../typings/index.js").CreateConfig} */
+/** @type {import("../typings/index.js").CreateConfig} */
 const CreateConfig = (async = false) => {
 	if(async) return (async () => {
 		if(existsSync(config)) return
@@ -32,7 +32,7 @@ const CreateConfig = (async = false) => {
 	writeFileSync(config, copyData)
 }
 
-/** @type {import("../../typings/index.js").GetConfig} */
+/** @type {import("../typings/index.js").GetConfig} */
 export const GetConfig = (async = false) => {
 	if(async) return CreateConfig(true)
 		.then(() => readFile(config, "utf8"))
@@ -41,7 +41,7 @@ export const GetConfig = (async = false) => {
 	return CreateConfig(false), configData = JSON.parse(readFileSync(config, "utf8"))
 }
 
-/** @type {import("../../typings/index.js").SetConfig} */
+/** @type {import("../typings/index.js").SetConfig} */
 export const SetConfig = (data, async = false) => {
 	configData = data
 
