@@ -154,39 +154,44 @@ new class Index {
 			]
 		})
 
-		const trap = focusTrap.createFocusTrap(container)
+		const trap = focusTrap.createFocusTrap(container, {
+			escapeDeactivates: false,
+			returnFocusOnDeactivate: false
+		})
 
-		function ESCListener(event: KeyboardEvent){
+		function EscListener(event: KeyboardEvent){
 			const { key, target } = event
 
-			if(
-				key !== "Esc" ||
-				target instanceof HTMLInputElement ||
-				target instanceof HTMLSelectElement ||
-				target instanceof HTMLButtonElement
-			) return
+			if(key !== "Escape") return
+
+			switch((target as HTMLElement)?.tagName){
+				case "input":
+				case "select":
+				case "button":
+					return
+			}
 
 			Close()
 			event.preventDefault()
-			window.removeEventListener("keypress", ESCListener)
+			event.stopPropagation()
+			window.removeEventListener("keydown", EscListener)
 		}
 
 		function Append(){
 			document.body.appendChild(container)
-			window.addEventListener("keypress", ESCListener)
+			window.addEventListener("keydown", EscListener)
 			trap.activate()
 		}
 
 		function Close(){
 			trap.deactivate()
-			window.removeEventListener("keypress", ESCListener)
+			window.removeEventListener("keydown", EscListener)
 			container.remove()
+			window.focus()
 
-			for(const file of files){
+			for(const file of [...files].reverse()){
 				DeleteFile(file)
 			}
-
-			files.splice(0, files.length)
 		}
 
 		const AddFile = (info: FileInfo) => {
@@ -269,7 +274,7 @@ new class Index {
 
 			const file = { info, elements }
 
-			deleteButton.addEventListener("click", () => DeleteFile(file))
+			deleteButton.addEventListener("click", () => DeleteFile(file, true))
 
 			files.push(file)
 			filesContainer.appendChild(container)
@@ -277,11 +282,11 @@ new class Index {
 			return elements
 		}
 
-		function DeleteFile(file: typeof files[number]){
+		function DeleteFile(file: typeof files[number], close = false){
 			file.elements.container.remove()
 			files.splice(files.indexOf(file), 1)
 
-			if(!files.length) Close()
+			if(close && !files.length) Close()
 		}
 
 		closeButton.addEventListener("click", () => Close())
@@ -399,7 +404,6 @@ new class Index {
 		}
 
 		console.error(error)
-		console.trace()
 	}
 	DisplayError(error: string){
 		console.error(error)
