@@ -16,7 +16,7 @@ export interface FileInfo {
 	file: File
 }
 
-interface FileElements {
+export interface FileElements {
 	container: HTMLElement
 	name: HTMLParagraphElement
 	nameLabel: HTMLSpanElement

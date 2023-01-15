@@ -1,132 +1,185 @@
+import { createWriteStream, existsSync } from "fs"
 import { AddToken, CreateToken } from "../Token.js"
-import { mkdir, writeFile } from "fs/promises"
 import { GetAccounts } from "../../helpers/Accounts.js"
-import { existsSync } from "fs"
 import { Router } from "express"
+import { mkdir } from "fs/promises"
 import { join } from "path"
 import Crypto from "crypto"
+import Busboy from "busboy"
 import IsNumber from "../../helpers/IsNumber.js"
+import SendError from "./SendError.js"
 
 const router = Router()
 const accounts = GetAccounts()
 
-/** @param {string | undefined} length */
-function ValidateSize(length, mandatory = true){
+/**
+ * @param {string | undefined} length
+ * @param {import("../../../typings/database.js").Config} config
+ * @param {boolean} [mandatory]
+ */
+function ValidateSize(length, { maxFileSize, maxFiles }, mandatory = true){
 	if(!IsNumber(length)) return !mandatory
-	return Number(length) / 2**20 <= 30
+	return Number(length) <= maxFileSize * maxFiles + 1048576
 }
 
-/** @param {string | undefined} accept */
-function ValidateAccept(accept){
-	if(typeof accept !== "string") return false
-	return /\btext\/html\b|\*\/\*/.test(accept)
+/** @param {string | Date} date */
+function GetFormattedDate(date){
+	if(typeof date === "string") date = new Date(date)
+	return date.toLocaleDateString("pt-BR").replaceAll("/", "")
 }
+
+router.get("/config/types", (request, response) => {
+	if(!request.accepts("json")) return SendError.call([request, response], 406)
+
+	response.status(200)
+	response.setHeader("Connection", "close")
+	response.json({
+		success: true,
+		data: request.app.get("config").types
+	})
+})
 
 router.post("/upload", async (request, response, next) => {
-	if(!ValidateSize(request.header("content-length"))) return next("length")
-	if(!ValidateAccept(request.header("accept"))) return next("accept")
+	/** @type {import("../../../typings/database.js").Config} */
+	const config = request.app.get("config")
+
+	if(!ValidateSize(request.header("content-length"), config)) return next("length")
 	if(!request.header("origin")) return next("origin")
 	if(!request.header("user-agent")) return next("userAgent")
 	if(!request.header("content-type")?.match(/^multipart\/form-data; boundary=/)) return next("contentType")
 
-	const boundary = request.header("content-type").split(";")[1].split("=")[1]
-	const initialBoundary = `--${boundary}`
-	const finalBoundary = `--${boundary}--`
-	const boundaryLength = initialBoundary.length
+	const documentsFolder = request.app.get("documentsFolder")
 
-	let data = Buffer.alloc(0)
+	/** @param {number | string} value */
+	function GetTypeById(value){
+		if(!IsNumber(value)) return undefined
 
-	await new Promise((resolve, reject) => {
-		request.on("data", chunk => data = Buffer.concat([data, Buffer.from(chunk)]))
-		request.on("end", resolve)
-		request.on("error", reject)
-	})
-
-	/** @type {import("../../../typings/index.js").UploadInfo} */
-	const info = {}
-	const endIndex = data.indexOf(finalBoundary)
-
-	let boundaryIndex = 0
-
-	while(boundaryIndex !== endIndex){
-		const nextBoundaryIndex = data.indexOf(initialBoundary, boundaryIndex + 1)
-		const headerIndex = boundaryIndex + boundaryLength + 2
-		const headerEndIndex = data.indexOf("\r\n".repeat(2), headerIndex)
-		const contentIndex = headerEndIndex + 4
-		const contentEndIndex = nextBoundaryIndex - 2
-		const headers = data.subarray(headerIndex, headerEndIndex)
-		const content = data.subarray(contentIndex, contentEndIndex)
-
-		/** @type {string} */
-		let name,
-		/** @type {string} */
-		filename,
-		/** @type {string} */
-		type
-
-		for(const line of headers.toString().split("\r\n")){
-			const [header, value] = line.split(": ")
-
-			switch(header){
-				case "Content-Disposition":
-					const values = value.split("; ").slice(1)
-					const entries = values.map(disposition => disposition.split("="))
-
-					for(const [key, value] of entries){
-						switch(key){
-							case "filename":
-								filename = JSON.parse(value)
-							break
-							case "name":
-								name = JSON.parse(value)
-							break
-						}
-					}
-				break
-				case "Content-Type":
-					type = value
-				break
-			}
-		}
-
-		switch(name){
-			case "file":
-				info.file = { filename, type, content }
-			break
-			case "date":
-				info.date = content.toString()
-			break
-			case "documentType":
-				info.documentType = content.toString()
-			break
-		}
-
-		boundaryIndex = nextBoundaryIndex
+		const { types } = config
+		const id = Number(value)
+		return types.find(type => type.id === id)
 	}
 
 	try{
-		const { file: { filename, content }, date, documentType } = info
+		// TODO: Make an api route to send this to the client
+		const { maxFileSize, maxFiles } = config
 
-		// TODO!: Create a list of document types in JSON, and verify if it's valid
-		// TODO: Organize by sectors
-		const folder = join(request.app.get("documentsFolder"), documentType)
-		const path = join(folder, filename)
+		const busboy = Busboy({
+			headers: request.headers,
+			limits: {
+				files: maxFiles,
+				fileSize: maxFileSize
+			}
+		})
 
-		if(!existsSync(folder)) await mkdir(folder, { recursive: true })
+		/** @type {import("../../typings/index.js").FilePart[]} */
+		const parts = []
+		/** @type {import("../../typings/index.js").UploadFileError[]} */
+		const errors = []
 
-		// TODO: Do something with the file date
-		await writeFile(path, content)
+		busboy.on("field", (name, value) => {
+			const part = (() => {
+				const lastPart = parts.at(-1)
 
-		response.status(200).send("Upload successful")
+				function CreatePart(){
+					/** @type {import("../../typings/index.js").FilePart} */
+					const part = {}
+					parts.push(part)
+					return part
+				}
+
+				if(lastPart) return lastPart.isFile ? CreatePart() : lastPart
+				else return CreatePart()
+			})()
+
+			const fieldEnum = {
+				date: () => part.date = GetFormattedDate(value),
+				type: () => part.typeId = value,
+				isPrivate: () => part.folder = value === "true" ? "private" : "public"
+			}
+
+			fieldEnum[name]?.()
+		})
+
+		busboy.on("file", async (name, stream, { filename }) => {
+			const part = parts.at(-1)
+
+			if(!part) return errors.push({ message: `O arquivo '${filename}' não contém informações` })
+			if(name !== "image") return stream.resume()
+
+			part.isFile = true
+
+			try{
+				const { typeId } = part
+				const type = GetTypeById(typeId)
+
+				if(!type) throw "O tipo de documento não é válido"
+
+				let { folder, date } = part
+
+				if(!folder) folder = part.folder = "public"
+				if(!date) date = part.date = GetFormattedDate(new Date)
+
+				const directory = join(documentsFolder, folder, type.reduced || type.name)
+				const path = join(directory, `${date}_${filename}`)
+
+				if(!existsSync(directory)) await mkdir(directory, { recursive: true })
+
+				await new Promise((resolve, reject) => {
+					const fileStream = createWriteStream(path)
+
+					stream.pipe(fileStream)
+
+					fileStream.on("finish", () => {
+						if(stream.truncated) reject("O arquivo é muito grande")
+						resolve()
+					})
+
+					fileStream.on("error", reject)
+				})
+			}catch(error){
+				if(typeof error === "string"){
+					errors.push({
+						message: error,
+						filename
+					})
+
+					return stream.resume()
+				}
+
+				console.error(error)
+			}
+		})
+
+		request.pipe(busboy)
+
+		await new Promise((resolve, reject) => {
+			busboy.on("close", resolve)
+			busboy.on("error", reject)
+		})
+
+		response.status(200).json({
+			success: true,
+			errors,
+			message: "Upload successful"
+		})
 	}catch(error){
+		const args = [request, response]
+
+		if(typeof error === "string"){
+			console.error(new Error(error))
+			SendError.call(args, 400, null, error)
+		}
+
 		console.error(error)
-		response.status(500).send("Upload failed")
+		SendError.call(args, 500, null, "Upload failed")
 	}
 })
 
 router.post("/login", async (request, response, next) => {
+	const config = request.app.get("config")
+
 	if(!request.accepts("json")) return next("accept")
-	if(!ValidateSize(request.header("content-length"), false)) return next("length")
+	if(!ValidateSize(request.header("content-length"), config)) return next("length")
 	if(request.header("content-type") !== "application/x-www-form-urlencoded") return next("contentType")
 
 	let data = ""
@@ -163,7 +216,9 @@ router.post("/login", async (request, response, next) => {
 			await AddToken(token)
 			response.status(200).json({ success: true })
 		}catch(error){
-			response.status(500).json({ success: false, error: "Failed to store token" })
+			const message = "Failed to store token"
+			console.error(new Error(message))
+			SendError.call([request, response], 500, null, message)
 		}
 	}
 
@@ -182,31 +237,22 @@ router.post("/login", async (request, response, next) => {
 })
 
 router.use((error, request, response, next) => {
-	/**
-	 * @param {number} status
-	 * @param {string} [message]
-	 */
-	function SendError(status, message){
-		if(response.headersSent) return console.error(new Error(`API: Could not send error status (${status}) for ${request.url}`)), response.end()
-		if(message) response.statusMessage = message
-		response.status(status)
-		response.end()
-	}
+	const args = [request, response]
 
 	switch(typeof error){
 		case "string":
 			switch(error){
-				case "length": return SendError(411, "File size is too large")
-				case "accept": return SendError(406)
+				case "length": return SendError.call(args, 413, null, "File size is too large")
+				case "accept": return SendError.call(args, 406)
 				case "origin":
-				case "userAgent": return SendError(403)
-				case "contentType": return SendError(400)
+				case "userAgent": return SendError.call(args, 403)
+				case "contentType": return SendError.call(args, 400)
 			}
 		break
-		case "number": return SendError(error)
+		case "number": return SendError.call(args, error)
 	}
 
-	console.error(error), SendError(500)
+	console.error(error), SendError.call(args, 500)
 })
 
 export default router

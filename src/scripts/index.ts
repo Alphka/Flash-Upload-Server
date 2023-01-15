@@ -1,12 +1,15 @@
+import type { APIResponse, APIResponseError } from "../../typings/api"
 import type { FileElements, FileInfo } from "../typings"
+import type { DocumentTypeInfo } from "../../typings/database"
 import CreateElement from "../helpers/CreateElement"
 import WaitForElement from "../helpers/WaitForElement"
 import * as focusTrap from "focus-trap"
-import axios from "axios"
+import axios, { type AxiosError } from "axios"
 
 new class Index {
 	nav!: HTMLElement
 	main!: HTMLElement
+	documentTypes!: DocumentTypeInfo[]
 	uploadMenu: ReturnType<typeof this.CreateUploadMenu>
 
 	constructor(){
@@ -26,6 +29,7 @@ new class Index {
 		})
 
 		this.uploadMenu = this.CreateUploadMenu()
+		this.SetDocumentTypes()
 	}
 	async DocumentsImage(){
 		const aside = await WaitForElement("aside", { element: this.main })
@@ -55,14 +59,6 @@ new class Index {
 		const form: HTMLFormElement = document.forms.namedItem("upload") || await WaitForElement("form[name=upload]", { element: section })
 		const fileLabel = form.querySelector("label") as HTMLLabelElement
 		const fileInput = fileLabel.querySelector("input[type=file]") as HTMLInputElement
-
-		const documentTypes = [
-			"Ata",
-			"Procedimento Operacional Padrão",
-			"Inventário",
-			"Ordem de Serviço",
-			"Nota Fiscal"
-		] as const
 
 		fileLabel.addEventListener("dragover", event => event.preventDefault())
 		fileLabel.addEventListener("dragenter", event => event.preventDefault())
@@ -94,13 +90,18 @@ new class Index {
 				return
 			}
 
-			this.uploadMenu.Append()
+			try{
+				this.uploadMenu.Append()
 
-			for(const file of files){
-				const { name, type, size, lastModified } = file
-				const info: FileInfo = { name, type, size, date: lastModified, file }
+				for(const file of files){
+					const { name, type, size, lastModified } = file
+					const info: FileInfo = { name, type, size, date: lastModified, file }
 
-				this.uploadMenu.AddFile(info)
+					this.uploadMenu.AddFile(info)
+				}
+			}catch(error){
+				if(typeof error === "string") this.DisplayError(error)
+				console.error(error)
 			}
 		})
 	}
@@ -188,7 +189,9 @@ new class Index {
 			files.splice(0, files.length)
 		}
 
-		function AddFile(info: FileInfo){
+		const AddFile = (info: FileInfo) => {
+			if(!this.documentTypes) throw "Não foi possível criar o menu para o envio dos arquivos"
+
 			const elements = {} as FileElements
 
 			const deleteButton = CreateElement("button", {
@@ -238,7 +241,14 @@ new class Index {
 				]
 			})
 
-			// ! TODO: Add options to select (transfer the document types to the database)
+			this.documentTypes.forEach(({ id, name }) => {
+				const option = CreateElement("option", {
+					value: id,
+					textContent: name
+				})
+
+				elements.typeSelect.appendChild(option)
+			})
 
 			const checkbox = elements.checkbox = CreateElement("p", {
 				className: "checkbox",
@@ -286,10 +296,10 @@ new class Index {
 			const formData = new FormData()
 
 			for(const { info: { name, file }, elements: { dateInput, typeSelect, checkboxInput } } of files){
-				formData.append("image", file, name)
 				formData.append("date", new Date(`${dateInput.value} GMT-0300`).toISOString())
 				formData.append("type", typeSelect.value)
 				formData.append("isPrivate", String(checkboxInput.checked))
+				formData.append("image", file, name)
 			}
 
 			try{
@@ -299,6 +309,8 @@ new class Index {
 					},
 					withCredentials: true
 				})
+			}catch(error){
+				this.HandleRequestError(error)
 			}finally{
 				busy = false
 			}
@@ -320,6 +332,39 @@ new class Index {
 	}
 	GetInputDate(date: string | number | Date){
 		return new Date(date).toJSON().slice(0, 10)
+	}
+	async SetDocumentTypes(){
+		async function Request(){
+			const response = await axios.get<APIResponse<DocumentTypeInfo[]>>("/api/config/types", {
+				headers: { "Accept": "application/json" },
+				withCredentials: true,
+				responseType: "json"
+			})
+
+			if(response.data.success){
+				const { data } = response.data
+				return data!
+			}else throw false
+		}
+
+		for(let times = 0; !this.documentTypes; times++){
+			try{
+				const types = await Request()
+				this.documentTypes = types
+			}catch(error){
+				// If Response.success is false
+				if(error === false){
+					if(times === 3){
+						this.HandleRequestError("Não foi possível definir os tipos de documentos")
+						break
+					}
+
+					continue
+				}
+
+				this.HandleRequestError(error)
+			}
+		}
 	}
 	async MobileNavigation(){
 		const menu = await WaitForElement(".icons.mobile")
@@ -345,6 +390,16 @@ new class Index {
 				window.removeEventListener("click", CloseHandler)
 			}
 		})
+	}
+	HandleRequestError(error: any){
+		if(error.isAxiosError){
+			const { message, response } = error as AxiosError<APIResponseError>
+			if(response) this.DisplayError(response.data.error!)
+			return console.error(message)
+		}
+
+		console.error(error)
+		console.trace()
 	}
 	DisplayError(error: string){
 		console.error(error)

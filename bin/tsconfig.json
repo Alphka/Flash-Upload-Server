@@ -6,10 +6,16 @@
 		"moduleResolution": "NodeNext",
 		"allowJs": true,
 		"checkJs": true,
-		"strict": true,
+		"strict": false,
 		"noImplicitAny": false,
+		"noStrictGenericChecks": false,
 		"strictNullChecks": false,
 		"esModuleInterop": false,
-		"allowSyntheticDefaultImports": true
+		"allowSyntheticDefaultImports": true,
+		"typeRoots": [
+			"typings",
+			"../typings",
+			"node_modules/@types"
+		]
 	}
 }

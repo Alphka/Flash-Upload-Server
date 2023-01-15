@@ -34,6 +34,7 @@ if(!isDevelopment) process.env.NODE_ENV = "production"
 
 app.set("port", port)
 app.set("watch", isWatching)
+app.set("config", config)
 app.set("development", isDevelopment)
 app.set("view engine", "pug")
 app.set("view cache", mustCache)

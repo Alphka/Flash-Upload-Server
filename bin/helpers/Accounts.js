@@ -1,7 +1,7 @@
 // @ts-nocheck
 
-import { copyFileSync, existsSync, readFileSync, writeFileSync } from "fs"
-import { copyFile, readFile, writeFile } from "fs/promises"
+import { copyFileSync, existsSync, readFileSync } from "fs"
+import { copyFile, readFile } from "fs/promises"
 import { dirname, join } from "path"
 import { fileURLToPath } from "url"
 
@@ -13,8 +13,8 @@ const accountsFile = join(databaseFolder, "accounts.json")
 const accountsFileCopy = join(databaseFolder, "accounts.copy.json")
 
 /**
- * @param {import("../../typings/index.js").LoginDatabase} accounts
- * @returns {import("../../typings/index.js").Accounts}
+ * @param {import("../../typings/database.js").LoginDatabase} accounts
+ * @returns {import("../typings/index.js").Accounts}
  */
 function CreateObject(accounts){
 	const object = {
@@ -32,17 +32,24 @@ function CreateObject(accounts){
 	return object
 }
 
-/** @type {import("../../typings/index.js").CreateAccounts} */
+/** @type {import("../typings/index.js").CreateAccounts} */
 const CreateAccounts = (async = false) => {
-	if(existsSync(accountsFile)) return async ? Promise.resolve() : undefined
-	return (async ? copyFile : copyFileSync)(accountsFileCopy, accountsFile)
+	if(async){
+		if(existsSync(accountsFile)) return Promise.resolve()
+		return copyFile(accountsFileCopy, accountsFile)
+	}
+
+	if(!existsSync(accountsFile)) copyFileSync(accountsFileCopy, accountsFile)
 }
 
-/** @type {import("../../typings/index.js").GetAccounts} */
+
+/** @type {import("../typings/index.js").GetAccounts} */
 export const GetAccounts = (async = false) => {
-	if(async) return CreateAccounts(async)
-		.then(readFile(accountsFile, "utf8"))
+	if(async) return CreateAccounts(true)
+		.then(() => readFile(accountsFile, "utf8"))
 		.then(content => CreateObject(JSON.parse(content)))
 
-	return CreateAccounts(), CreateObject(JSON.parse(readFileSync(accountsFile, "utf8")))
+	CreateAccounts(false)
+
+	return CreateObject(JSON.parse(readFileSync(accountsFile, "utf8")))
 }
