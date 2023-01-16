@@ -16,8 +16,8 @@ export default function SendError(status, statusMessage, error = undefined){
 
 	if(statusMessage) response.statusMessage = statusMessage
 
+	response.shouldKeepAlive = false
 	response.status(status)
-	response.setHeader("Connection", "close")
 	response.setHeader("Cache-Control", "no-store")
 	response.json({ success: false, error })
 }

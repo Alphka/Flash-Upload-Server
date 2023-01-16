@@ -32,7 +32,13 @@ router.get("/config/types", (request, response) => {
 	if(!request.accepts("json")) return SendError.call([request, response], 406)
 
 	response.status(200)
-	response.setHeader("Connection", "close")
+
+	if(request.app.get("development")) response.shouldKeepAlive = false
+	else{
+		response.shouldKeepAlive = true
+		response.setHeader("Cookie", "private, max-age=5, must-revalidate")
+	}
+
 	response.json({
 		success: true,
 		data: request.app.get("config").types
@@ -68,7 +74,9 @@ router.post("/upload", async (request, response, next) => {
 			limits: {
 				files: maxFiles,
 				fileSize: maxFileSize
-			}
+			},
+			defCharset: "utf8",
+			defParamCharset: "utf8"
 		})
 
 		/** @type {import("../../typings/index.js").FilePart[]} */
