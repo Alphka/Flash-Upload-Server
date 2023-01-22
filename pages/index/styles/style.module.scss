@@ -1,0 +1,115 @@
+@use "../../../styles/import/variables.scss";
+
+.main{
+	display: flex;
+	flex-direction: row;
+	justify-content: space-around;
+	align-items: center;
+	margin-top: 40pt;
+
+	@media screen and (max-width: variables.$mobileSize){
+		flex-direction: column;
+	}
+
+	article{
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		flex: 1;
+
+		$width: 400pt;
+
+		section.title{
+			display: inline-block;
+			font-size: 56pt;
+			font-weight: 700;
+			font-family: Alata;
+			text-align: left;
+			max-width: $width;
+			word-break: normal;
+
+			@media screen and (min-width: variables.$mobileSize) and (max-width: #{variables.$largeSize - 1px}){
+				min-height: 300px;
+			}
+
+			@media screen and (max-width: #{variables.$largeSize - 1px}){
+				display: flex;
+				width: 100%;
+				max-width: 500px;
+				font-size: clamp(18px, 11vw, 56pt);
+				padding: 0 8pt;
+				align-items: center;
+			}
+		}
+
+		section.button{
+			margin: 40pt 0;
+
+			@media screen and (max-width: variables.$mobileSize){
+				display: flex;
+				align-items: center;
+				flex-direction: column;
+				margin: 20pt 0;
+			}
+
+			form label{
+				$height: 80pt;
+
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				background-color: variables.$secondaryColor;
+				box-shadow: 5px 5px 0 variables.$terciaryColor;
+				font-size: 30pt;
+				font-weight: 600;
+				width: $width;
+				height: $height;
+				border-radius: $height;
+				cursor: pointer;
+				overflow: hidden;
+				white-space: nowrap;
+				text-overflow: clip;
+
+				@media screen and (max-width: variables.$mobileSize){
+					$width: calc(100% - 12pt);
+
+					width: $width;
+					font-size: 5vw;
+					height: auto;
+					padding: 8pt 24pt;
+				}
+
+				input{
+					display: none;
+					appearance: none;
+					visibility: hidden;
+					height: 0;
+					width: 0;
+					opacity: 0;
+					pointer-events: none;
+					float: right;
+				}
+			}
+		}
+	}
+
+	aside{
+		display: flex;
+		flex-direction: row;
+		justify-content: center;
+		align-items: center;
+		flex: 1;
+		margin: auto 0;
+
+		img{
+			width: 600px;
+			border-radius: 20px;
+			aspect-ratio: 5 / 4;
+		}
+
+		@media screen and (max-width: #{variables.$largeSize - 1px}){
+			display: none;
+		}
+	}
+}

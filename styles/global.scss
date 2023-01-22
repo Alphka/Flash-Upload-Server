@@ -1,0 +1,26 @@
+@use "import/variables.scss";
+
+@import url("https://fonts.googleapis.com/css2?family=Alata&family=Michroma&family=Poppins:wght@500;600;700&display=swap");
+
+:root {
+	color-scheme: dark;
+}
+
+*{
+	border: none;
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+	-webkit-tap-highlight-color: transparent;
+}
+
+body{
+	background-color: variables.$primaryColor;
+	font-family: Poppins, -apple-system, BlinkMacSystemFont, "Segoe UI", Verdana, Arial, sans-serif;
+	font-size: 16px;
+	color: variables.$fontColor;
+}
+
+.no-outline{
+	outline: none;
+}

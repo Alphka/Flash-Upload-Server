@@ -1,5 +1,7 @@
+.next
+.env
+next-env.d.ts
 node_modules
-build
 documents
 
 database/*
