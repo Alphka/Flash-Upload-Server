@@ -7,7 +7,7 @@ import { useState, useEffect } from "react"
 import { toast } from "react-toastify"
 import axios from "axios"
 import FileContainer from "./FileContainer"
-import overflowStyle from "../../styles/overflow.module.scss"
+import overflowStyle from "../../styles/modules/overflow.module.scss"
 
 interface UploadMenuProps {
 	inputFiles: FileInfo[]

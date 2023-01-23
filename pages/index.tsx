@@ -2,7 +2,7 @@ import type { RefObject } from "react"
 import type { FileInfo } from "../typings"
 import { useCallback, useState } from "react"
 import Image from "next/image"
-import style from "../styles/index.module.scss"
+import style from "../styles/modules/index.module.scss"
 import Navigation from "../components/Nav"
 import UploadForm from "../components/UploadForm"
 import UploadMenu from "../components/UploadMenu"
@@ -39,7 +39,7 @@ export default function IndexPage(){
 			</article>
 
 			<aside>
-				<Image src="/images/documents.png" alt="Ilustração de documentos" loading="lazy" width={600} height={480} />
+				<Image src="/images/documents.png" alt="Ilustração de documentos" width={600} height={480} priority={true} />
 			</aside>
 
 		</main>
