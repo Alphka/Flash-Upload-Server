@@ -2,8 +2,8 @@ import type { APIUploadResponse, UploadFileError } from "../../typings/api"
 import type { NextApiRequest, NextApiResponse } from "next"
 import type { BusboyStream, FilePart } from "../../typings"
 import type { Config } from "../../typings/database"
-import { appendFileSync, createWriteStream, existsSync, writeFileSync } from "fs"
-import { GetConfigAsync } from "../../helpers/Config"
+import { createWriteStream, existsSync } from "fs"
+import { GetCachedConfig } from "../../helpers/Config"
 import { dirname, join } from "path"
 import { fileURLToPath } from "url"
 import { mkdir } from "fs/promises"
@@ -32,7 +32,7 @@ function GetFormattedDate(date: string | Date){
 
 export default async function Upload(request: NextApiRequest, response: NextApiResponse<APIUploadResponse>){
 	const HandleError = HandleAPIError.bind(undefined, response)
-	const config = await GetConfigAsync()
+	const config = GetCachedConfig()
 
 	if(!ValidateSize(request.headers["content-length"], config)) return HandleError("length")
 	if(!request.headers["origin"]) return HandleError("origin")
@@ -162,4 +162,12 @@ export default async function Upload(request: NextApiRequest, response: NextApiR
 		console.error(error)
 		SendError(response, 500, null, "O envio dos arquivos falhou")
 	}
+}
+
+export const config = {
+    api: {
+        bodyParser: {
+            sizeLimit: "500mb"
+        }
+    }
 }

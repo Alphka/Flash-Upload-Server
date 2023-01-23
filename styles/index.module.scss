@@ -1,4 +1,4 @@
-@use "../../../styles/import/variables.scss";
+@use "./import/variables.scss";
 
 .main{
 	display: flex;
@@ -24,7 +24,7 @@
 			display: inline-block;
 			font-size: 56pt;
 			font-weight: 700;
-			font-family: Alata;
+			font-family: Alata, var(--font-family);
 			text-align: left;
 			max-width: $width;
 			word-break: normal;

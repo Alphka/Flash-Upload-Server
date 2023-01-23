@@ -3,6 +3,7 @@ import { readFile, writeFile } from "fs/promises"
 import { dirname, join } from "path"
 import { fileURLToPath } from "url"
 import { Config } from "../typings/database"
+import Crypto from "crypto"
 
 const rootFolder = join(dirname(fileURLToPath(import.meta.url)), "..")
 const databaseFolder = join(rootFolder, "database")
@@ -50,3 +51,19 @@ export async function SetConfigAsync(data: Config){
 	await CreateConfigAsync()
 	await writeFile(config, ConfigString(), "utf8")
 }
+
+export const GetCachedConfig = (() => {
+	let hash: ReturnType<typeof GetHash>
+
+	const GetContent = () => readFileSync(config)
+	const GetHash = (content: ReturnType<typeof GetContent>) => Crypto.createHash("md5").update(content).digest()
+
+	return () => {
+		const content = GetContent()
+		const newHash = GetHash(content)
+
+		if(hash && hash.equals(newHash)) return console.log("Getting cached config"), configData
+
+		return hash = newHash, configData = JSON.parse(content.toString("utf8")) as Config
+	}
+})()

@@ -4,6 +4,7 @@
 
 :root {
 	color-scheme: dark;
+	--font-family: Poppins, -apple-system, BlinkMacSystemFont, "Segoe UI", Verdana, Arial, sans-serif;
 }
 
 *{
@@ -16,7 +17,7 @@
 
 body{
 	background-color: variables.$primaryColor;
-	font-family: Poppins, -apple-system, BlinkMacSystemFont, "Segoe UI", Verdana, Arial, sans-serif;
+	font-family: var(--font-family);
 	font-size: 16px;
 	color: variables.$fontColor;
 }

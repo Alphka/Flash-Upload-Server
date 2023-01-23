@@ -1,7 +1,7 @@
-import type { FileInfo, FilesMap } from "../../../typings"
-import type { DocumentTypeInfo } from "../../../typings/database"
+import type { FileInfo, FilesMap } from "../../typings"
+import type { DocumentTypeInfo } from "../../typings/database"
 import { useCallback, useRef, useState } from "react"
-import overflowStyle from "../styles/overflow.module.scss"
+import overflowStyle from "../../styles/overflow.module.scss"
 
 interface FileContainerProps {
 	files: FilesMap

@@ -1,5 +1,5 @@
 import type { Dispatch, RefObject, SetStateAction } from "react"
-import type { FileInfo } from "../../../typings"
+import type { FileInfo } from "../typings"
 import { useRef } from "react"
 import { toast } from "react-toastify"
 
@@ -23,18 +23,17 @@ export default function UploadForm({ setIsUploadMenu, AddFileInfos, SetInputRef 
 					event.preventDefault()
 
 					const files = event.dataTransfer?.files
+					const filesInput = filesInputRef.current!
 
 					if(!files?.length) return toast.error("Nenhum arquivo foi detectado")
 
-					if(filesInputRef.current){
-						filesInputRef.current.files = files
-						filesInputRef.current.dispatchEvent(new Event("change", { bubbles: true }))
-					}
+					filesInput.files = files
+					filesInput.dispatchEvent(new Event("change", { bubbles: true }))
 				}}
 				onKeyPress={event => {
 					if(event.key === "Enter"){
 						event.preventDefault()
-						filesInputRef.current?.click()
+						filesInputRef.current!.click()
 					}
 				}
 			}>

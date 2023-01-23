@@ -1,13 +1,13 @@
-import type { APIResponse, APIResponseError, APIUploadResponse } from "../../../typings/api"
+import type { APIResponse, APIResponseError, APIUploadResponse } from "../../typings/api"
 import type { Dispatch, SetStateAction, CSSProperties } from "react"
-import type { FileInfo, FilesMap } from "../../../typings"
-import type { DocumentTypeInfo } from "../../../typings/database"
+import type { FileInfo, FilesMap } from "../../typings"
+import type { DocumentTypeInfo } from "../../typings/database"
 import type { AxiosError } from "axios"
 import { useState, useEffect } from "react"
 import { toast } from "react-toastify"
 import axios from "axios"
 import FileContainer from "./FileContainer"
-import overflowStyle from "../styles/overflow.module.scss"
+import overflowStyle from "../../styles/overflow.module.scss"
 
 interface UploadMenuProps {
 	inputFiles: FileInfo[]
@@ -18,10 +18,8 @@ interface UploadMenuProps {
 
 function HandleRequestError(error: any){
 	if(error.isAxiosError){
-		const { message, response } = error as AxiosError<APIResponseError>
-		toast.error(response?.data.error ?? "Algo deu errado")
-		console.error(message)
-		return
+		const { code, response } = error as AxiosError<APIResponseError>
+		toast.error(code === "ERR_NETWORK" ? "Conexão com a internet indisponível" : response?.data.error ?? "Algo deu errado")
 	}
 
 	console.error(error)
@@ -70,6 +68,8 @@ export default function UploadMenu({ inputFiles, isUploadMenu, setIsUploadMenu, 
 			document.body.style.setProperty("overflow", "hidden")
 			window.addEventListener("keydown", EscListener)
 		}
+
+		if(!isProgressBar && uploadPercentage !== 0) setUploadPercentage(0)
 	})
 
 	useEffect(() => {
@@ -163,7 +163,7 @@ export default function UploadMenu({ inputFiles, isUploadMenu, setIsUploadMenu, 
 										? progressEvent.progress * 100
 										: (progressEvent.loaded * 100 / progressEvent.total!)
 
-									setUploadPercentage(progress)
+									setUploadPercentage(Math.trunc(progress))
 								}
 							})
 
