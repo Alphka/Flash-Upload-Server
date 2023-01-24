@@ -1,6 +1,10 @@
 import type { Dispatch, SetStateAction } from "react"
 import type internal from "stream"
 
+export type Optional<T> = {
+	[K in keyof T]?: T[K]
+}
+
 declare global {
 	interface File extends Blob {
 		readonly lastModified: number;

@@ -27,3 +27,7 @@ export type APIUploadResponse = {
 	success: false
 	error: string
 }
+
+export type APILoginResponse = {
+	success: true
+} | APIResponseError

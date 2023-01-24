@@ -29,11 +29,10 @@
 		.image{
 			position: relative;
 			height: 32pt * 5;
-			width: 40pt * 5;
+			aspect-ratio: 5 / 4;
 
 			img{
 				@include mixins.notDraggable;
-				aspect-ratio: 5 / 4;
 			}
 		}
 

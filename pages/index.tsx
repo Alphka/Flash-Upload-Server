@@ -39,7 +39,7 @@ export default function IndexPage(){
 			</article>
 
 			<aside>
-				<Image src="/images/documents.png" alt="Ilustração de documentos" width={600} height={480} priority={true} />
+				<Image src="/images/documents.png" alt="Ilustração de documentos" width={600} height={480} priority={true} quality={80} />
 			</aside>
 
 		</main>
