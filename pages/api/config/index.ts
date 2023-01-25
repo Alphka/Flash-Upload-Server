@@ -3,11 +3,14 @@ import type { APIResponse } from "../../../typings/api"
 import type { Config } from "../../../typings/database"
 import { GetConfigAsync } from "../../../helpers/Config"
 import accepts from "accepts"
+import HandleAPIError from "../../../helpers/HandleAPIError"
 
 export default async function Config(request: NextApiRequest, response: NextApiResponse<APIResponse<Config>>){
+	const HandleError = HandleAPIError.bind(undefined, response)
 	const accept = accepts(request)
 
-	if(!accept.types("json")) return response.status(406).end()
+	if(request.method !== "GET") return HandleError("method")
+	if(!accept.types("json")) return HandleError("accept")
 
 	response.status(200)
 

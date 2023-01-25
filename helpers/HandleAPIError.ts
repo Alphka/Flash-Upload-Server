@@ -7,11 +7,13 @@ type APIErrors =
 	| "origin"
 	| "userAgent"
 	| "contentType"
+	| "method"
 
 export default function HandleAPIError(response: NextApiResponse, error: number | APIErrors | Error){
 	switch(typeof error){
 		case "string":
 			switch(error){
+				case "method": return SendError(response, 405)
 				case "length": return SendError(response, 413, null, "File size is too large")
 				case "accept": return SendError(response, 406)
 				case "origin":

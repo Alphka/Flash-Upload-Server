@@ -34,6 +34,7 @@ export default async function Upload(request: NextApiRequest, response: NextApiR
 	const HandleError = HandleAPIError.bind(undefined, response)
 	const config = GetCachedConfig()
 
+	if(request.method !== "POST") return HandleError("method")
 	if(!ValidateSize(request.headers["content-length"], config)) return HandleError("length")
 	if(!request.headers["origin"]) return HandleError("origin")
 	if(!request.headers["user-agent"]) return HandleError("userAgent")
