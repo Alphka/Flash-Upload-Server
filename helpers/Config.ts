@@ -1,11 +1,10 @@
 import { existsSync, readFileSync, writeFileSync } from "fs"
 import { readFile, writeFile } from "fs/promises"
-import { dirname, join } from "path"
-import { fileURLToPath } from "url"
 import { Config } from "../typings/database"
+import { join } from "path"
 import Crypto from "crypto"
 
-const rootFolder = join(dirname(fileURLToPath(import.meta.url)), "..")
+const rootFolder = process.cwd()
 const databaseFolder = join(rootFolder, "database")
 const config = join(databaseFolder, "config.json")
 const configCopy = join(databaseFolder, "config.copy.json")
@@ -62,7 +61,7 @@ export const GetCachedConfig = (() => {
 		const content = GetContent()
 		const newHash = GetHash(content)
 
-		if(hash && hash.equals(newHash)) return console.log("Getting cached config"), configData
+		if(hash && hash.equals(newHash)) return configData
 
 		return hash = newHash, configData = JSON.parse(content.toString("utf8")) as Config
 	}

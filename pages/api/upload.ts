@@ -13,7 +13,7 @@ import SendError from "../../helpers/SendAPIError"
 import IsNumber from "../../helpers/IsNumber"
 import Busboy from "busboy"
 
-const rootFolder = join(dirname(fileURLToPath(import.meta.url)), "../..")
+const rootFolder = process.cwd()
 const documentsFolder = join(rootFolder, "documents")
 
 function GetTypeById(config: Config, value: number | string | undefined){
