@@ -7,5 +7,8 @@ module.exports = {
 	poweredByHeader: false,
 	sassOptions: {
 		includePaths: [join(__dirname, "styles")]
+	},
+	experimental: {
+		legacyBrowsers: false
 	}
 }

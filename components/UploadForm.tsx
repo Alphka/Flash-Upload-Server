@@ -1,15 +1,17 @@
-import type { Dispatch, RefObject, SetStateAction } from "react"
+import type { RefObject } from "react"
 import type { FileInfo } from "../typings"
-import { useRef } from "react"
+import type { Config } from "../typings/database"
+import { memo, useRef } from "react"
 import { toast } from "react-toastify"
 
 interface UploadFormProps {
-	setIsUploadMenu: Dispatch<SetStateAction<boolean>>
+	config: Config
+	setIsUploadMenu: (state: boolean) => any
 	AddFileInfos: (infos: FileInfo[]) => any
-	SetInputRef(ref: RefObject<HTMLInputElement>): void
+	SetInputRef(ref: RefObject<HTMLInputElement>): any
 }
 
-export default function UploadForm({ setIsUploadMenu, AddFileInfos, SetInputRef }: UploadFormProps){
+const UploadForm = memo(function UploadForm({ config, setIsUploadMenu, AddFileInfos, SetInputRef }: UploadFormProps){
 	const filesInputRef = useRef<HTMLInputElement>(null)
 
 	SetInputRef(filesInputRef)
@@ -44,13 +46,35 @@ export default function UploadForm({ setIsUploadMenu, AddFileInfos, SetInputRef 
 					if(!files?.length){
 						setIsUploadMenu(false)
 						toast.error("Nenhum arquivo foi selecionado")
+
+						return
+					}
+
+					const { maxFiles, maxFileSize } = config
+
+					if(files.length > maxFiles){
+						setIsUploadMenu(false)
+						toast.error(`O número máximo de arquivos permitidos é ${maxFiles}`)
+
+						return
+					}
+
+					const filesArray = Array.from(files)
+
+					if(filesArray.some(file => file.size > maxFileSize)){
+						const sizeMB = maxFileSize / 2**20
+						const sizeString = `${sizeMB % 1 === 0 ? sizeMB : sizeMB.toFixed(2)} MB`
+
+						setIsUploadMenu(false)
+						toast.error(`O tamanho máximo por arquivo é ${sizeString}`)
+
 						return
 					}
 
 					try{
 						setIsUploadMenu(true)
 
-						AddFileInfos(Array.from(files).map(file => {
+						AddFileInfos(filesArray.map(file => {
 							const { name, type, size, lastModified: date } = file
 							return { name, type, size, date, file } as FileInfo
 						}))
@@ -62,4 +86,6 @@ export default function UploadForm({ setIsUploadMenu, AddFileInfos, SetInputRef 
 			</label>
 		</form>
 	)
-}
+})
+
+export default UploadForm

@@ -6,6 +6,21 @@ export type Optional<T> = {
 }
 
 declare global {
+	var mongoose: {
+		connection: typeof import("mongoose") | null,
+		promise: Promise<typeof import("mongoose")> | null
+	}
+
+	namespace NodeJS {
+		interface ProcessEnv {
+			NODE_ENV?: "development" | "production"
+			PORT?: string
+			API_URL?: string
+			API_TOKEN?: string
+			MONGO_URL?: string
+		}
+	}
+
 	interface File extends Blob {
 		readonly lastModified: number;
 		/** @deprecated */

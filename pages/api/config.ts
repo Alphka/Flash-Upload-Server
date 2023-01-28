@@ -1,9 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from "next"
-import type { APIResponse } from "../../../typings/api"
-import type { Config } from "../../../typings/database"
-import { GetConfigAsync } from "../../../helpers/Config"
+import type { APIResponse } from "../../typings/api"
+import type { Config } from "../../typings/database"
+import { GetConfigAsync } from "../../helpers/Config"
 import accepts from "accepts"
-import HandleAPIError from "../../../helpers/HandleAPIError"
+import HandleAPIError from "../../helpers/HandleAPIError"
 
 export default async function Config(request: NextApiRequest, response: NextApiResponse<APIResponse<Config>>){
 	const HandleError = HandleAPIError.bind(undefined, response)
@@ -18,7 +18,7 @@ export default async function Config(request: NextApiRequest, response: NextApiR
 		response.shouldKeepAlive = false
 	}else{
 		response.shouldKeepAlive = true
-		response.setHeader("Cookie", "private, max-age=5, must-revalidate")
+		response.setHeader("Cookie", "private, max-age=10, must-revalidate")
 	}
 
 	try{
@@ -29,7 +29,7 @@ export default async function Config(request: NextApiRequest, response: NextApiR
 	}catch{
 		response.json({
 			success: false,
-			error: "Failed to get config"
+			error: "Não foi possível obter as configurações"
 		})
 	}
 }

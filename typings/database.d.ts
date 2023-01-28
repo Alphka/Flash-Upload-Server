@@ -5,7 +5,6 @@ export interface DocumentTypeInfo {
 }
 
 export interface Config {
-	port: number
 	maxFileSize: number
 	maxFiles: number
 	types: DocumentTypeInfo[]

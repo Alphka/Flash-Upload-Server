@@ -1,17 +1,17 @@
-import type { APIResponse, APIResponseError, APIUploadResponse } from "../../typings/api"
-import type { Dispatch, SetStateAction, CSSProperties } from "react"
-import type { FileInfo, FilesMap } from "../../typings"
+import type { APIResponseError, APIUploadResponse } from "../../typings/api"
+import type { FileInfo, FileObject, FilesMap } from "../../typings"
 import type { DocumentTypeInfo } from "../../typings/database"
-import type { AxiosError } from "axios"
+import type { CSSProperties } from "react"
 import { useState, useEffect } from "react"
 import { toast } from "react-toastify"
-import axios from "axios"
 import FileContainer from "./FileContainer"
 import overflowStyle from "../../styles/modules/overflow.module.scss"
+import axios, { type AxiosError } from "axios"
 
 interface UploadMenuProps {
+	types: DocumentTypeInfo[]
 	inputFiles: FileInfo[]
-	setIsUploadMenu: Dispatch<SetStateAction<boolean>>
+	setIsUploadMenu: (state: boolean) => any
 	isUploadMenu: boolean
 	ClearInput: () => any
 }
@@ -25,12 +25,10 @@ function HandleRequestError(error: any){
 	console.error(error)
 }
 
-export default function UploadMenu({ inputFiles, isUploadMenu, setIsUploadMenu, ClearInput }: UploadMenuProps){
+export default function UploadMenu({ types, inputFiles, isUploadMenu, setIsUploadMenu, ClearInput }: UploadMenuProps){
 	const [uploadPercentage, setUploadPercentage] = useState(0)
 	const [isProgressBar, setIsProgressBar] = useState(false)
 	const [files, setFiles] = useState<FilesMap>(new Map)
-	const [types, setTypes] = useState<DocumentTypeInfo[] | null>(null)
-	const [isFetching, setIsFetching] = useState(false)
 	const [submitBusy, setSubmitBusy] = useState(false)
 
 	function CloseMenu(){
@@ -50,13 +48,15 @@ export default function UploadMenu({ inputFiles, isUploadMenu, setIsUploadMenu, 
 	}
 
 	function EscListener(event: KeyboardEvent){
-		if(
-			!isUploadMenu ||
-			event.key !== "Escape" ||
-			event.shiftKey ||
-			event.ctrlKey ||
-			["input", "select", "button"].includes((event.target as HTMLElement)?.tagName.toLowerCase())
-		) return
+		if(!isUploadMenu) return
+		if(event.key !== "Escape") return
+		if(event.shiftKey) return
+		if(event.ctrlKey) return
+
+		const { tagName } = event.target as HTMLElement
+		const allowedTags = ["input", "select", "button"]
+
+		if(allowedTags.includes(tagName.toLowerCase())) return
 
 		event.preventDefault()
 		CloseMenu()
@@ -72,22 +72,9 @@ export default function UploadMenu({ inputFiles, isUploadMenu, setIsUploadMenu, 
 		if(!isProgressBar && uploadPercentage !== 0) setUploadPercentage(0)
 	})
 
-	useEffect(() => {
-		setIsFetching(true)
-
-		axios.get<APIResponse<DocumentTypeInfo[]>>("/api/config/types", {
-			headers: { "Accept": "application/json" },
-			withCredentials: true,
-			responseType: "json"
-		}).then(response => {
-			if(response.data.success) setTypes(response.data.data!)
-			else toast.error(response.data.error)
-
-			setIsFetching(false)
-		}).catch((error: AxiosError) => {
-			toast.error(error.response?.statusText || "Erro: Não foi possível definir os tipos de documentos")
-		})
-	}, [])
+	function setFile(filename: string, data: FileObject){
+		files.set(filename, data)
+	}
 
 	function deleteFile(filename: string, deleteContainer?: boolean){
 		inputFiles.splice(inputFiles.findIndex(info => info.name === filename), 1)
@@ -114,7 +101,7 @@ export default function UploadMenu({ inputFiles, isUploadMenu, setIsUploadMenu, 
 
 				<section className={overflowStyle.files}>
 					{inputFiles.map(info => (
-						<FileContainer key={info.name} {...{ files, info, deleteFile, types }} />
+						<FileContainer key={info.name} {...{ info, setFile, deleteFile, types }} />
 					))}
 				</section>
 
@@ -195,7 +182,9 @@ export default function UploadMenu({ inputFiles, isUploadMenu, setIsUploadMenu, 
 								deleteFile(filename, true)
 							}
 
-							if(response.data.message) toast.success(response.data.message)
+							if(response.data.message){
+								toast[response.data.uploaded.length ? "success" : "error"](response.data.message)
+							}
 						}catch(error){
 							HandleRequestError(error)
 						}finally{
