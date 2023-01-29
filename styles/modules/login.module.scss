@@ -1,7 +1,7 @@
 @use "../import/variables.scss";
 @use "../import/mixins.scss";
 
-.main{
+main.main{
 	display: flex;
 	flex-direction: row;
 	justify-content: space-evenly;
@@ -128,9 +128,7 @@
 				}
 
 				.spinner{
-					@include mixins.spinner($color, $height);
-
-					display: block;
+					@include mixins.spinner($color, $height - 4pt, block);
 				}
 			}
 		}

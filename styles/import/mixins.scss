@@ -10,8 +10,8 @@
 	-webkit-user-drag: none;
 }
 
-@mixin spinner($color, $size: 32px){
-	display: inline-block;
+@mixin spinner($color, $size: 32px, $display: inline-block){
+	display: $display;
 	background-color: transparent;
 	border: 3px solid $color;
 	border-top-color: transparent;
