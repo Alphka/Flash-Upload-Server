@@ -1,0 +1,5 @@
+.env.example
+.editorconfig
+
+database/*
+!database/config.json
