@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { memo, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 
@@ -53,34 +53,47 @@ function MobileMenu(){
 	)
 }
 
-export default function Navigation(){
+const Logo = memo(function Logo(){
+	return (
+		<header>
+			<Link href="/" prefetch={false}>
+				<Image src="/images/logo.svg" alt={locales.siteLogo} loading="eager" width={32} height={32} />
+				<span>Flash</span>
+			</Link>
+		</header>
+	)
+})
+
+const Notifications = memo(function Notifications(){
 	const [contentHidden, setContentHidden] = useState(true)
 
+	// TODO: Fix the notifications
+	return (
+		<div id="notifications">
+			<span className={"icon material-symbols-outlined".concat(notifications.unread ? " fill" : "")} onClick={event => {
+				event.preventDefault()
+				setContentHidden(!contentHidden)
+			}} aria-label={locales.notifications}>
+				{notifications.unread ? "notifications_active" : "notifications"}
+			</span>
+
+			<div className={"content".concat(contentHidden ? " hidden" : "")}>
+				<p className="title">
+					{locales.notifications}
+				</p>
+				<hr />
+			</div>
+		</div>
+	)
+})
+
+export default function Navigation(){
 	return (
 		<nav>
-			<header>
-				<Link href="/" prefetch={false}>
-					<Image src="/images/logo.svg" alt={locales.siteLogo} loading="eager" width={32} height={32} />
-					<span>Flash</span>
-				</Link>
-			</header>
+			<Logo />
 
 			<div className="icons">
-				<div id="notifications">
-					<span className={"icon material-symbols-outlined".concat(notifications.unread ? " fill" : "")} onClick={event => {
-						event.preventDefault()
-						setContentHidden(!contentHidden)
-					}} aria-label={locales.notifications}>
-						{notifications.unread ? "notifications_active" : "notifications"}
-					</span>
-
-					<div className={"content".concat(contentHidden ? " hidden" : "")}>
-						<p className="title">
-							{locales.notifications}
-						</p>
-						<hr />
-					</div>
-				</div>
+				<Notifications />
 
 				<Link href="/documents" prefetch={false} aria-label={locales.documents}>
 					<span className="icon material-symbols-outlined">description</span>

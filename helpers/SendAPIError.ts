@@ -1,6 +1,6 @@
 import type { NextApiResponse } from "next"
 
-export default function SendError(response: NextApiResponse, status = 500, statusMessage?: string | null, error: string | undefined = undefined){
+export default function SendAPIError(response: NextApiResponse, status = 500, error: string | null | undefined = undefined, statusMessage?: string){
 	if(statusMessage) response.statusMessage = statusMessage
 
 	response.shouldKeepAlive = false

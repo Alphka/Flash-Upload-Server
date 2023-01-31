@@ -4,13 +4,6 @@ import Router from "next/router"
 import Image from "next/image"
 import style from "../styles/modules/login.module.scss"
 
-const ApiErrors = {
-	400: "Este formato não é válido.",
-	401: "Usuário ou senha estão incorretos.",
-	406: "Not Acceptable",
-	411: "As informações que você está tentando enviar são muito grande."
-} as const
-
 const Logo = memo(function Logo(){
 	return <>
 		<div className={style.image}>
@@ -55,8 +48,6 @@ export default function LoginPage(){
 								method: "POST"
 							})
 
-							if(!response.ok) throw response.status
-
 							const data = await response.json()
 
 							if(!data.success) throw data.error ?? data.success
@@ -67,12 +58,7 @@ export default function LoginPage(){
 							setSpinner(false)
 						}
 					}catch(error){
-						switch(typeof error){
-							case "string": return toast.error(error)
-							case "number":
-								if(error in ApiErrors) return toast.error(ApiErrors[error as keyof typeof ApiErrors])
-							break
-						}
+						if(typeof error === "string") return toast.error(error)
 
 						toast.error("Algo deu errado")
 						console.error(error)

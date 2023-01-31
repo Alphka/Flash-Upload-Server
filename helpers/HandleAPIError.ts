@@ -1,5 +1,5 @@
 import type { NextApiResponse } from "next"
-import SendError from "./SendAPIError"
+import SendAPIError from "./SendAPIError"
 
 type APIErrors =
 	| "length"
@@ -10,20 +10,22 @@ type APIErrors =
 	| "method"
 
 export default function HandleAPIError(response: NextApiResponse, error: number | APIErrors | Error){
+	const SendError = SendAPIError.bind(undefined, response)
+
 	switch(typeof error){
 		case "string":
 			switch(error){
-				case "method": return SendError(response, 405)
-				case "length": return SendError(response, 413, null, "File size is too large")
-				case "accept": return SendError(response, 406)
+				case "method": return SendError(405)
+				case "length": return SendError(413, "File size is too large")
+				case "accept": return SendError(406)
 				case "origin":
-				case "userAgent": return SendError(response, 403)
-				case "contentType": return SendError(response, 400)
+				case "userAgent": return SendError(403)
+				case "contentType": return SendError(400)
 			}
 		break
-		case "number": return SendError(response, error)
+		case "number": return SendError(error)
 	}
 
 	console.error(error)
-	SendError(response, 500)
+	SendError(500)
 }

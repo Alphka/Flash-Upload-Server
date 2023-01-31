@@ -5,7 +5,7 @@ import { memo, useCallback, useState } from "react"
 import { GetCachedConfig } from "../helpers/Config"
 import Image from "next/image"
 import style from "../styles/modules/index.module.scss"
-import Navigation from "../components/Nav"
+import Navigation from "../components/Navigation"
 import UploadForm from "../components/UploadForm"
 import UploadMenu from "../components/UploadMenu"
 

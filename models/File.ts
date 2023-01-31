@@ -1,7 +1,19 @@
-import type { Model, InferSchemaType } from "mongoose"
+import type { Model } from "mongoose"
 import { Schema, model, models } from "mongoose"
 
-const FileSchema = new Schema({
+interface IFile {
+	hash: string
+	filename: string
+	hashFilename: string
+	createdAt: Date | number | string
+	uploadedAt: Date | number | string
+	access?: "public" | "all"
+	type: number
+}
+
+type FileModel = Model<IFile>
+
+const FileSchema = new Schema<IFile, FileModel>({
 	hash: {
 		type: String,
 		required: true,
@@ -38,6 +50,6 @@ const FileSchema = new Schema({
 	}
 })
 
-const File: Model<InferSchemaType<typeof FileSchema>> = models.File || model("File", FileSchema)
+const File: FileModel = models.File || model<IFile, FileModel>("File", FileSchema)
 
 export default File
