@@ -22,7 +22,7 @@ export default async function ConnectDatabase(){
 	}
 
 	try{
-		await cached.promise
+		cached.connection = await cached.promise
 	}catch(error){
 		cached.promise = null
 		throw error
