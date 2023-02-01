@@ -51,18 +51,28 @@ export async function SetConfigAsync(data: Config){
 	await writeFile(config, ConfigString(), "utf8")
 }
 
+function CreateConfigHash(content: Buffer){
+	return Crypto.createHash("md5").update(content).digest()
+}
+
 export const GetCachedConfig = (() => {
-	let hash: ReturnType<typeof GetHash>
+	let hash: ReturnType<typeof CreateConfigHash>
 
-	const GetContent = () => readFileSync(config)
-	const GetHash = (content: ReturnType<typeof GetContent>) => Crypto.createHash("md5").update(content).digest()
-
-	return () => {
-		const content = GetContent()
-		const newHash = GetHash(content)
+	function CheckConfig(content: Buffer){
+		const newHash = CreateConfigHash(content)
 
 		if(hash && hash.equals(newHash)) return configData
 
-		return hash = newHash, configData = JSON.parse(content.toString("utf8")) as Config
+		hash = newHash
+		return configData = JSON.parse(content.toString("utf8")) as Config
 	}
+
+	function GetConfig(async: true): Promise<Config>
+	function GetConfig(async?: false): Config
+	function GetConfig(async?: boolean){
+		if(async) return readFile(config).then(CheckConfig)
+		return CheckConfig(readFileSync(config))
+	}
+
+	return GetConfig
 })()

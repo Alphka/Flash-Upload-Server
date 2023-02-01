@@ -8,7 +8,7 @@ import { extname } from "path"
 import ConnectDatabase from "../../lib/ConnectDatabase"
 import HandleAPIError from "../../helpers/HandleAPIError"
 import ValidateSize from "../../helpers/ValidateSize"
-import SendError from "../../helpers/SendAPIError"
+import SendAPIError from "../../helpers/SendAPIError"
 import IsNumber from "../../helpers/IsNumber"
 import Busboy from "busboy"
 import Crypto from "crypto"
@@ -29,7 +29,8 @@ function GetTypeById(config: Config, value: number | string | undefined){
 
 export default async function Upload(request: NextApiRequest, response: NextApiResponse<APIUploadResponse>){
 	const HandleError = HandleAPIError.bind(undefined, response)
-	const config = GetCachedConfig()
+	const SendError = SendAPIError.bind(undefined, response)
+	const config = await GetCachedConfig(true)
 
 	if(request.method !== "POST") return HandleError("method")
 	if(!ValidateSize(request.headers["content-length"], config)) return HandleError("length")
@@ -184,11 +185,11 @@ export default async function Upload(request: NextApiRequest, response: NextApiR
 	}catch(error){
 		if(typeof error === "string"){
 			console.error(new Error(error))
-			SendError(response, 400, null, error)
+			SendError(400, error)
 		}
 
 		console.error(error)
-		SendError(response, 500, null, "O envio dos arquivos falhou")
+		SendError(500, "O envio dos arquivos falhou")
 	}
 }
 
