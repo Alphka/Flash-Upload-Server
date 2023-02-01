@@ -1,4 +1,4 @@
-import type { Model } from "mongoose"
+import type { Model, Document, Types } from "mongoose"
 import { Schema, model, models } from "mongoose"
 
 export type AccessTypes = "all" | "public"
@@ -12,6 +12,8 @@ interface IUser {
 interface IUserMethods {
 	ValidatePassword(password: string): string
 }
+
+export type Users = (Document<unknown, any, IUser> & IUser & { _id: Types.ObjectId } & IUserMethods)[]
 
 type UserModel = Model<IUser, {}, IUserMethods>
 
