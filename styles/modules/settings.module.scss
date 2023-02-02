@@ -1,0 +1,179 @@
+@use "./import/variables";
+@use "./import/mixins";
+
+main.main{
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	margin-top: 40pt;
+}
+
+.user_management{
+	width: 100%;
+	padding: 0 8pt;
+
+	header .title{
+		font-weight: 600;
+		margin-bottom: 8pt;
+	}
+
+	.users{
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(230px, 320px));
+		width: 100%;
+		gap: 10px;
+
+		.user{
+			$backroundColor: #262626;
+
+			background-color: $backroundColor;
+			border-radius: 4pt;
+
+			.header, .controls{
+				margin: 0 4pt;
+			}
+
+			.header{
+				@include mixins.userSelectNone;
+
+				display: flex;
+				align-items: center;
+				justify-content: flex-start;
+				border-bottom: 1px solid #ccc;
+				padding: 2pt 0;
+				gap: 4pt;
+
+				&:hover{
+					color: lighten(blue, 20%);
+				}
+
+				.username{
+					flex: 1;
+				}
+
+				.remove{
+					background-color: #9d2929;
+					border-radius: 4pt;
+					transform: scale(0.9);
+					cursor: pointer;
+				}
+			}
+
+			.controls{
+				display: flex;
+				flex-direction: column;
+				gap: 4pt;
+				padding: 4pt 0;
+
+				div{
+					display: flex;
+					align-items: center;
+					justify-content: space-between;
+					flex-wrap: wrap;
+					gap: 4pt;
+
+					.label{
+						min-width: clamp(100px, 150px, 30vw);
+						font-weight: 500;
+						flex: 1;
+					}
+
+					.error{
+						display: block;
+						position: relative;
+						color: variables.$errorColor;
+						font-size: 11px;
+					}
+
+					input{
+						background-color: var(--color);
+						padding: 4pt 8pt;
+						border-radius: 2pt;
+						flex: 3;
+
+						&[type=button],
+						&[type=submit]{
+							cursor: pointer;
+
+							:hover{
+								filter: brightness(0.9);
+							}
+						}
+
+						&[type=text],
+						&[type=password]{
+							&::placeholder{
+								color: darken(variables.$fontColor, 30%);
+							}
+
+							&:focus{
+								box-shadow: inset 0 0 4pt rgba($backroundColor, 0.95);
+
+								&::placeholder{
+									visibility: hidden;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		.add{
+			.header{
+				cursor: pointer;
+			}
+
+			.controls{
+				div{
+					position: relative;
+
+					input{
+						background-color: #484848;
+						width: clamp(150px, 200px, 100%);
+					}
+
+					:global .icon{
+						@include mixins.userSelectNone;
+
+						position: absolute;
+						right: 4pt;
+
+						&:hover{
+							filter: brightness(0.8);
+							cursor: pointer;
+						}
+					}
+
+					&.submit{
+						justify-content: center;
+
+						button{
+							$height: 28px;
+
+							background-color: #284e28;
+							border-radius: 2pt;
+							margin: 4pt 0;
+							height: $height;
+							width: 60px;
+							text-align: center;
+
+							&:hover{
+								cursor: pointer;
+								filter: brightness(0.9);
+								box-shadow: 0 1px 3px black;
+							}
+
+							.spinner{
+								@include mixins.spinner(variables.$fontColor, calc(#{$height} - 6pt), block, 1px);
+
+								display: inline-block;
+								vertical-align: middle;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}

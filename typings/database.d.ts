@@ -8,6 +8,7 @@ export interface Config {
 	maxFileSize: number
 	maxFiles: number
 	types: DocumentTypeInfo[]
+	accessTypes: LoginAccess[]
 }
 
 export type LoginAccess =

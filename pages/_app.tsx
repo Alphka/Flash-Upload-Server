@@ -21,6 +21,12 @@ const infoPages = {
 		isLoggedIn: {
 			description: "Página de acesso para os documentos do Flash."
 		}
+	},
+	settings: {
+		title: "Configurações",
+		isLoggedIn: {
+			description: "Página de configuração do site."
+		}
 	}
 } as const
 

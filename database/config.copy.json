@@ -5,5 +5,9 @@
 		"id": 0,
 		"name": "Manual",
 		"reduced": "Manual"
-	}
+	},
+	"accessTypes": [
+		"all",
+		"public"
+	]
 }

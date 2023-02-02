@@ -39,7 +39,6 @@ export default async function Upload(request: NextApiRequest, response: NextApiR
 	if(!request.headers["content-type"]?.startsWith("multipart/form-data; boundary=")) return HandleError("contentType")
 
 	try{
-		// TODO: Verify if document is already uploaded
 		await ConnectDatabase()
 
 		const { maxFileSize, maxFiles } = config
