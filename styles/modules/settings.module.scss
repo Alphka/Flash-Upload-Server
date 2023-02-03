@@ -43,10 +43,6 @@ main.main{
 				padding: 2pt 0;
 				gap: 4pt;
 
-				&:hover{
-					color: lighten(blue, 20%);
-				}
-
 				.username{
 					flex: 1;
 				}
@@ -76,6 +72,10 @@ main.main{
 						min-width: clamp(100px, 150px, 30vw);
 						font-weight: 500;
 						flex: 1;
+
+						.password{
+							-webkit-text-security: disc;
+						}
 					}
 
 					.error{
@@ -122,6 +122,10 @@ main.main{
 		.add{
 			.header{
 				cursor: pointer;
+
+				&:hover{
+					color: lighten(blue, 20%);
+				}
 			}
 
 			.controls{
