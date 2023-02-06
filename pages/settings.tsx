@@ -1,15 +1,15 @@
 import type { InputHTMLAttributes, CSSProperties, MouseEvent, KeyboardEvent, RefObject } from "react"
+import type { Config, LoginAccess } from "../typings/database"
 import type { GetServerSideProps } from "next"
 import type { APIResponse } from "../typings/api"
-import type { Config, LoginAccess } from "../typings/database"
-import { memo, forwardRef, useRef, useMemo, useState, useCallback, useEffect } from "react"
+import { memo, forwardRef, useRef, useState, useCallback, useEffect } from "react"
 import { GetCachedConfig } from "../helpers/Config"
 import { toast } from "react-toastify"
 import useForwardedRef from "../helpers/useForwardedRef"
 import ConnectDatabase from "../lib/ConnectDatabase"
 import Navigation from "../components/Navigation"
 import style from "../styles/modules/settings.module.scss"
-import User, { type Users } from "../models/User"
+import User, { type IUser, type AccessTypes } from "../models/User"
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 	label: string
@@ -22,7 +22,7 @@ interface PasswordInputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 interface SettingsPageProps {
-	users: Users
+	users?: IUser[]
 	config: Config
 }
 
@@ -30,10 +30,12 @@ interface UserProps {
 	username: string
 	password: string
 	access: string
+	removeUser: (username: string) => any
 }
 
 interface AddUserProps {
 	config: Config
+	addUser: (user: IUser) => any
 }
 
 function ClickInput<T extends HTMLElement, E extends HTMLElement>(input: RefObject<T>){
@@ -42,13 +44,28 @@ function ClickInput<T extends HTMLElement, E extends HTMLElement>(input: RefObje
 	}
 }
 
-const UserComponent = memo(function User({ username, password, access }: UserProps){
+const UserComponent = memo(function User({ username, password, access, removeUser }: UserProps){
 	return (
 		<div className={style.user}>
 			<div className={style.header}>
 				<span className="icon material-symbols-outlined">person</span>
 				<span className={style.username}>{username}</span>
-				<span className={`icon ${style.remove} material-symbols-outlined`} title="Remover usuário">close</span>
+				<span className={`icon ${style.remove} material-symbols-outlined`} title="Remover usuário" onClick={async event =>{
+					event.preventDefault()
+
+					const response = await fetch("/api/user", {
+						body: new URLSearchParams({ username }),
+						method: "DELETE",
+						credentials: "include"
+					})
+
+					const data = await response.json() as APIResponse
+
+					if(data.success){
+						removeUser(username)
+						toast.success("Usuário removido com sucesso")
+					}else toast.error(data.error)
+				}}>close</span>
 			</div>
 
 			<div className={style.controls}>
@@ -74,7 +91,7 @@ const UserComponent = memo(function User({ username, password, access }: UserPro
 	)
 })
 
-const AddUser = memo(function AddUser({ config }: AddUserProps){
+const AddUser = memo(function AddUser({ config, addUser }: AddUserProps){
 	const usernameRef = useRef<HTMLInputElement>(null)
 	const passwordRef = useRef<HTMLInputElement>(null)
 	const accessRef = useRef<HTMLInputElement>(null)
@@ -100,7 +117,7 @@ const AddUser = memo(function AddUser({ config }: AddUserProps){
 
 			const username = usernameRef.current.value?.trim()
 			const password = passwordRef.current.value?.trim()
-			const access = accessRef.current.value?.trim()
+			const access = accessRef.current.value?.trim() as AccessTypes | "" | undefined
 
 			let errored = false
 
@@ -120,7 +137,8 @@ const AddUser = memo(function AddUser({ config }: AddUserProps){
 				errored = true
 			}
 
-			if(errored) return
+			// Type checking
+			if(errored || !access) return
 
 			return (async function Fetch(){
 				setFetching(true)
@@ -134,8 +152,11 @@ const AddUser = memo(function AddUser({ config }: AddUserProps){
 
 					const data: APIResponse = await response.json()
 
-					if(data.success) toast.success("Usuário criado com sucesso")
-					else toast.error(data.error)
+					if(data.success){
+						addUser({ name: username, password, access })
+						toast.success("Usuário criado com sucesso")
+						usernameRef.current!.value = passwordRef.current!.value = accessRef.current!.value = ""
+					}else toast.error(data.error)
 				}finally{
 					setFetching(false)
 				}
@@ -269,7 +290,23 @@ const PasswordInput = memo(forwardRef<HTMLInputElement, PasswordInputProps>(func
 	}} />
 }))
 
-export default function SettingsPage({ users, config }: SettingsPageProps){
+export default function SettingsPage({ config, ...props }: SettingsPageProps){
+	const [users, setUsers] = useState<Map<string, IUser>>(new Map((props.users || []).map(user => [user.name, user])))
+
+	delete props.users
+
+	const addUser = useCallback((user: IUser) => {
+		const map = new Map(users)
+		map.set(user.name, user)
+		setUsers(map)
+	}, [users])
+
+	const removeUser = useCallback((username: string) => {
+		const map = new Map(users)
+		map.delete(username)
+		setUsers(map)
+	}, [users])
+
 	return <>
 		<Navigation />
 
@@ -280,13 +317,14 @@ export default function SettingsPage({ users, config }: SettingsPageProps){
 				</header>
 
 				<article className={style.users}>
-					<AddUser config={config} />
+					<AddUser {...{ config, addUser }} />
 
-					{users.map(({ name, password, access }, index) => (
+					{Array.from(users.values()).map(({ name, password, access }, index) => (
 						<UserComponent {...{
 							username: name,
 							password,
-							access
+							access,
+							removeUser
 						}} key={`user-${index}`} />
 					))}
 				</article>
@@ -299,12 +337,12 @@ export const getServerSideProps: GetServerSideProps = async () => {
 	try{
 		await ConnectDatabase()
 
-		const users = await User.find({}, { _id: 0 }).lean()
+		const users = await User.find({}, { _id: 0, __v: 0 }).lean() as IUser[]
 		const config = await GetCachedConfig(true)
 
 		return { props: { users, config } }
 	}catch(error){
 		console.error(error)
-		return { notFound: true, error }
+		return { notFound: true }
 	}
 }

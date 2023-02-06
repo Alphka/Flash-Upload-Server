@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next"
-import type { AccessTypes } from "../../models/User"
+import type { AccessTypes, IUser } from "../../models/User"
+import type { MongoServerError } from "mongodb"
 import type { Config } from "../../typings/database"
 import { GetCachedConfig } from "../../helpers/Config"
 import ConnectDatabase from "../../lib/ConnectDatabase"
@@ -27,15 +28,46 @@ async function AddUser(data: IAddUser, { accessTypes }: Config, request: NextApi
 		if(!password || !(password = password.trim())) throw "Senha inválida"
 		if(!access || !(access = access.trim() as AccessTypes) || !accessTypes.includes(access)) throw "Tipo de acesso inválido"
 
-		const user = await User.create({ name: username, password, access })
+		const userObject: IUser = { name: username, password, access }
+
+		await User.create(userObject)
 
 		response.status(200).json({
 			success: true,
-			data: user.toJSON()
+			data: userObject
 		})
 	}catch(error){
 		if(typeof error === "string") return SendAPIError(response, 400, error)
-		if(error instanceof Error) error.stack = "Failed to create user"
+
+		if(error instanceof Error){
+			if((error as MongoServerError).code === 11000) error.stack = "Este nome de usuário já existe"
+			else error.stack = "Falha ao criar o usuário"
+		}
+
+		throw error
+	}
+}
+
+async function DeleteUser(username: string | undefined, request: NextApiRequest, response: NextApiResponse){
+	await ConnectDatabase()
+
+	try{
+		if(!username || !(username = username.trim())) throw "Usuário inválido"
+
+		// TODO: Remove all userTokens related with this username
+		const user = await User.findOneAndDelete({ name: username })
+
+		if(!user) return SendAPIError(response, 404, "Este usuário não existe")
+
+		response.status(200).json({ success: true })
+	}catch(error){
+		if(typeof error === "string") return SendAPIError(response, 400, error)
+
+		if(error instanceof Error){
+			console.error(error)
+			error.stack = "Falha ao remover o usuário"
+		}
+
 		throw error
 	}
 }
@@ -65,6 +97,11 @@ export default async function UserAPI(request: NextApiRequest, response: NextApi
 				const body = (await ParseBody()).toString()
 				const data = Object.fromEntries(new URLSearchParams(body)) as unknown as IAddUser
 				return await AddUser(data, config, request, response)
+			}
+			case "DELETE": {
+				const body = (await ParseBody()).toString()
+				const { username } = Object.fromEntries(new URLSearchParams(body)) as { username?: string }
+				return await DeleteUser(username, request, response)
 			}
 			default: return HandleError("method")
 		}

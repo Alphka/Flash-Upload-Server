@@ -3,7 +3,7 @@ import { Schema, model, models } from "mongoose"
 
 export type AccessTypes = "all" | "public"
 
-interface IUser {
+export interface IUser {
 	name: string
 	password: string
 	access: AccessTypes
@@ -12,8 +12,6 @@ interface IUser {
 interface IUserMethods {
 	ValidatePassword(password: string): string
 }
-
-export type Users = (Document<unknown, any, IUser> & IUser & { _id: Types.ObjectId } & IUserMethods)[]
 
 type UserModel = Model<IUser, {}, IUserMethods>
 

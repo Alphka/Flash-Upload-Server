@@ -1,4 +1,4 @@
-import { memo, useRef, useState } from "react"
+import { memo, Ref, RefObject, useRef, useState } from "react"
 import { toast } from "react-toastify"
 import Router from "next/router"
 import Image from "next/image"
@@ -18,7 +18,6 @@ export default function LoginPage(){
 	const passwordRef = useRef<HTMLInputElement>(null)
 	const submitRef = useRef<HTMLButtonElement>(null)
 	const [fetching, setFetching] = useState(false)
-	const [spinner, setSpinner] = useState(false)
 
 	return (
 		<main className={style.main}>
@@ -30,10 +29,15 @@ export default function LoginPage(){
 					event.preventDefault()
 
 					try{
-						if(fetching) throw "Já existe um envio sendo feito"
+						if(fetching) throw "Por favor, aguarde."
+
+						const GetValue = <T extends HTMLInputElement>(ref: RefObject<T>) => ref.current?.value.trim()
+						const username = GetValue(usernameRef), password = GetValue(passwordRef)
+
+						if(!username) throw "Usuário inválido"
+						if(!password) throw "Senha inválida"
 
 						setFetching(true)
-						setSpinner(true)
 
 						try{
 							const response = await fetch("/api/login", {
@@ -41,10 +45,7 @@ export default function LoginPage(){
 									"Accept": "text/html,*/*",
 									"Content-Type": "application/x-www-form-urlencoded"
 								},
-								body: new URLSearchParams({
-									username: usernameRef.current!.value,
-									password: passwordRef.current!.value
-								}),
+								body: new URLSearchParams({ username, password }),
 								method: "POST"
 							})
 
@@ -55,7 +56,6 @@ export default function LoginPage(){
 							Router.push("/")
 						}finally{
 							setFetching(false)
-							setSpinner(false)
 						}
 					}catch(error){
 						if(typeof error === "string") return toast.error(error)
@@ -86,7 +86,7 @@ export default function LoginPage(){
 					</fieldset>
 
 					<button className={`no-outline ${style.submit}`} type="submit" ref={submitRef}>
-						{spinner ? <div className={style.spinner}></div> : "Entrar"}
+						{fetching ? <div className={style.spinner}></div> : "Entrar"}
 					</button>
 				</form>
 			</section>

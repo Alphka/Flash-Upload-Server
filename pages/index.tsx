@@ -11,7 +11,7 @@ import Navigation from "../components/Navigation"
 import UploadForm from "../components/UploadForm"
 import UploadMenu from "../components/UploadMenu"
 
-export const getServerSideProps: GetServerSideProps = async ({ req }) => {
+export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
 	try{
 		await ConnectDatabase()
 
@@ -26,6 +26,8 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
 			}
 		}
 
+		res.setHeader("set-cookie", "token=; Max-Age=0; Path=/; SameSite=Strict; Secure; HttpOnly")
+
 		return {
 			redirect: {
 				statusCode: 302,
@@ -33,7 +35,8 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
 			}
 		}
 	}catch(error){
-		return { notFound: true, error }
+		console.error(error)
+		return { notFound: true }
 	}
 }
 
