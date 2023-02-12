@@ -7,7 +7,9 @@ import { GetCachedConfig } from "../helpers/Config"
 import { toast } from "react-toastify"
 import useForwardedRef from "../helpers/useForwardedRef"
 import ConnectDatabase from "../lib/ConnectDatabase"
+import Unauthorize from "../helpers/Unauthorize"
 import Navigation from "../components/Navigation"
+import UserToken from "../models/UserToken"
 import style from "../styles/modules/settings.module.scss"
 import User, { type IUser, type AccessTypes } from "../models/User"
 
@@ -24,6 +26,7 @@ interface PasswordInputProps extends InputHTMLAttributes<HTMLInputElement> {
 interface SettingsPageProps {
 	users?: IUser[]
 	config: Config
+	userAccess: AccessTypes
 }
 
 interface UserProps {
@@ -294,7 +297,7 @@ const PasswordInput = memo(forwardRef<HTMLInputElement, PasswordInputProps>(func
 	}} />
 }))
 
-export default function SettingsPage({ config, ...props }: SettingsPageProps){
+export default function SettingsPage({ config, userAccess, ...props }: SettingsPageProps){
 	const [users, setUsers] = useState<Map<string, IUser>>(new Map((props.users || []).map(user => [user.name, user])))
 
 	delete props.users
@@ -312,7 +315,7 @@ export default function SettingsPage({ config, ...props }: SettingsPageProps){
 	}, [users])
 
 	return <>
-		<Navigation />
+		<Navigation {...{ userAccess }} />
 
 		<main className={style.main}>
 			<section className={style.user_management}>
@@ -337,14 +340,22 @@ export default function SettingsPage({ config, ...props }: SettingsPageProps){
 	</>
 }
 
-export const getServerSideProps: GetServerSideProps = async () => {
+export const getServerSideProps: GetServerSideProps<SettingsPageProps> = async ({ req, res }) => {
 	try{
 		await ConnectDatabase()
 
+		const { token } = req.cookies
 		const users = await User.find({}, { _id: 0, __v: 0 }).lean() as IUser[]
+		const user = token ? await UserToken.findOne({ token }) : null
+
+		if(!user){
+			if(users.length) return Unauthorize(res)
+			else console.log("No users found, access permitted")
+		}
+
 		const config = await GetCachedConfig(true)
 
-		return { props: { users, config } }
+		return { props: { users, config, userAccess: user?.access || "all" } }
 	}catch(error){
 		console.error(error)
 		return { notFound: true }

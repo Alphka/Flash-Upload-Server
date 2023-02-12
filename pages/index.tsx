@@ -1,9 +1,12 @@
-import type { GetServerSideProps, InferGetServerSidePropsType } from "next"
+import type { GetServerSideProps } from "next"
+import type { AccessTypes } from "../models/User"
 import type { RefObject } from "react"
 import type { FileInfo } from "../typings"
+import type { Config } from "../typings/database"
 import { memo, useCallback, useState } from "react"
 import { GetCachedConfig } from "../helpers/Config"
 import ConnectDatabase from "../lib/ConnectDatabase"
+import Unauthorize from "../helpers/Unauthorize"
 import UserToken from "../models/UserToken"
 import Image from "next/image"
 import style from "../styles/modules/index.module.scss"
@@ -11,7 +14,12 @@ import Navigation from "../components/Navigation"
 import UploadForm from "../components/UploadForm"
 import UploadMenu from "../components/UploadMenu"
 
-export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
+interface IndexProps {
+	config: Config
+	userAccess: AccessTypes
+}
+
+export const getServerSideProps: GetServerSideProps<IndexProps> = async ({ req, res }) => {
 	try{
 		await ConnectDatabase()
 
@@ -22,25 +30,18 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
 
 			if(user){
 				const config = await GetCachedConfig(true)
-				return { props: { config } }
+				return { props: { config, userAccess: user.access } }
 			}
 		}
 
-		res.setHeader("set-cookie", "token=; Max-Age=0; Path=/; SameSite=Strict; Secure; HttpOnly")
-
-		return {
-			redirect: {
-				statusCode: 302,
-				destination: "/login"
-			}
-		}
+		return Unauthorize(res)
 	}catch(error){
 		console.error(error)
 		return { notFound: true }
 	}
 }
 
-const IndexPage = memo(function Index({ config }: InferGetServerSidePropsType<typeof getServerSideProps>){
+const IndexPage = memo(function Index({ config, userAccess }: IndexProps){
 	const [isUploadMenu, setIsUploadMenu] = useState(false)
 	const [files] = useState<FileInfo[]>([])
 
@@ -55,7 +56,7 @@ const IndexPage = memo(function Index({ config }: InferGetServerSidePropsType<ty
 	}, [])
 
 	return <>
-		<Navigation />
+		<Navigation {...{ userAccess }} />
 
 		<main className={style.main}>
 			<article>

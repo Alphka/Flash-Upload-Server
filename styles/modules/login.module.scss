@@ -17,6 +17,10 @@ main.main{
 		gap: 20pt;
 	}
 
+	@media screen and (min-width: #{variables.$mobileSize + 1px}) and (max-width: 700px){
+		justify-content: space-around;
+	}
+
 	section:nth-of-type(1){
 		@include mixins.userSelectNone;
 

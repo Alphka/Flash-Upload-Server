@@ -1,5 +1,8 @@
-import { memo, Ref, RefObject, useRef, useState } from "react"
+import type { GetServerSideProps } from "next"
+import { memo, useRef, useState, type RefObject } from "react"
 import { toast } from "react-toastify"
+import ConnectDatabase from "../lib/ConnectDatabase"
+import UserToken from "../models/UserToken"
 import Router from "next/router"
 import Image from "next/image"
 import style from "../styles/modules/login.module.scss"
@@ -92,4 +95,18 @@ export default function LoginPage(){
 			</section>
 		</main>
 	)
+}
+
+export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
+	await ConnectDatabase()
+
+	const { token } = req.cookies
+
+	if(token){
+		const user = await UserToken.findOne({ token })
+		user?.delete()
+		res.setHeader("set-cookie", "token=; Max-Age=0; Path=/; SameSite=Strict; Secure; HttpOnly")
+	}
+
+	return { props: {} }
 }
