@@ -1,6 +1,14 @@
+import type { AccessTypes } from "../models/User"
 import { memo, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
+
+interface GlobalProps {
+	userAccess: AccessTypes
+}
+
+interface NavigationProps extends GlobalProps {}
+interface MobileProps extends GlobalProps {}
 
 const notifications = {
 	unread: false
@@ -10,11 +18,15 @@ const locales = {
 	siteLogo: "Logotipo do site",
 	notifications: "Notificações",
 	documents: "Documentos",
+	settings: "Configurações",
 	logout: "Sair da conta",
 	menu: "Menu"
 }
 
-function MobileMenu(){
+const iconClass = "icon material-symbols-outlined"
+const fillIconClass = "icon fill material-symbols-outlined"
+
+function MobileMenu({ userAccess }: MobileProps){
 	const [contentHidden, setContentHidden] = useState(true)
 
 	return (
@@ -36,16 +48,23 @@ function MobileMenu(){
 				window.removeEventListener("click", CloseHandler)
 			}
 		}}>
-			<span className="icon material-symbols-outlined" aria-label={locales.menu}>menu</span>
+			<span className={iconClass} aria-label={locales.menu}>menu</span>
 
 			<div className={contentHidden ? "content hidden" : "content"} aria-hidden={contentHidden}>
 				<Link href="/documents" prefetch={false} aria-label={locales.documents}>
-					<span className="icon material-symbols-outlined">description</span>
+					<span className={iconClass}>description</span>
 					{locales.documents}
 				</Link>
 
+				{userAccess === "all" && (
+					<Link href="/settings" prefetch={false} aria-label={locales.settings}>
+						<span className={iconClass}>settings</span>
+						{locales.settings}
+					</Link>
+				)}
+
 				<Link href="/login" prefetch={false} aria-label={locales.logout}>
-					<span className="icon material-symbols-outlined">logout</span>
+					<span className={iconClass}>logout</span>
 					{locales.logout}
 				</Link>
 			</div>
@@ -66,15 +85,16 @@ const Logo = memo(function Logo(){
 
 const Notifications = memo(function Notifications(){
 	const [contentHidden, setContentHidden] = useState(true)
+	const { unread } = notifications
 
 	// TODO: Fix the notifications
 	return (
 		<div id="notifications">
-			<span className={"icon material-symbols-outlined".concat(notifications.unread ? " fill" : "")} onClick={event => {
+			<span className={unread ? fillIconClass : iconClass} onClick={event => {
 				event.preventDefault()
 				setContentHidden(!contentHidden)
 			}} aria-label={locales.notifications}>
-				{notifications.unread ? "notifications_active" : "notifications"}
+				{unread ? "notifications_active" : "notifications"}
 			</span>
 
 			<div className={"content".concat(contentHidden ? " hidden" : "")}>
@@ -87,7 +107,7 @@ const Notifications = memo(function Notifications(){
 	)
 })
 
-export default function Navigation(){
+const Navigation = memo(function Navigation({ userAccess }: NavigationProps){
 	return (
 		<nav>
 			<Logo />
@@ -95,16 +115,24 @@ export default function Navigation(){
 			<div className="icons">
 				<Notifications />
 
-				<Link href="/documents" prefetch={false} aria-label={locales.documents}>
-					<span className="icon material-symbols-outlined">description</span>
+				<Link href="/documents" aria-label={locales.documents}>
+					<span className={iconClass}>description</span>
 				</Link>
 
+				{userAccess === "all" && (
+					<Link href="/settings" prefetch={false} aria-label={locales.settings}>
+						<span className={iconClass}>settings</span>
+					</Link>
+				)}
+
 				<Link href="/login" prefetch={false} aria-label={locales.logout}>
-					<span className="icon material-symbols-outlined">logout</span>
+					<span className={iconClass}>logout</span>
 				</Link>
 			</div>
 
-			<MobileMenu />
+			<MobileMenu {...{ userAccess }} />
 		</nav>
 	)
-}
+})
+
+export default Navigation

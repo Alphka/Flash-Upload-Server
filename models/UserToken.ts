@@ -14,8 +14,7 @@ type UserTokenModel = Model<IUserToken>
 const UserTokenSchema = new Schema<IUserToken, UserTokenModel>({
 	name: {
 		type: String,
-		required: true,
-		unique: true
+		required: true
 	},
 	token: {
 		type: String,
