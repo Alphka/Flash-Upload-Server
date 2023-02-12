@@ -348,7 +348,14 @@ export const getServerSideProps: GetServerSideProps<SettingsPageProps> = async (
 		const users = await User.find({}, { _id: 0, __v: 0 }).lean() as IUser[]
 		const user = token ? await UserToken.findOne({ token }) : null
 
-		if(!user){
+		if(user){
+			if(user.access !== "all") return {
+				redirect: {
+					destination: "/?denied",
+					permanent: false
+				}
+			}
+		}else{
 			if(users.length) return Unauthorize(res)
 			else console.log("No users found, access permitted")
 		}

@@ -1,10 +1,12 @@
 import type { GetServerSideProps } from "next"
 import type { AccessTypes } from "../models/User"
-import type { RefObject } from "react"
 import type { FileInfo } from "../typings"
 import type { Config } from "../typings/database"
 import { memo, useCallback, useState } from "react"
+import { useEffect, type RefObject } from "react"
 import { GetCachedConfig } from "../helpers/Config"
+import { useRouter } from "next/router"
+import { toast } from "react-toastify"
 import ConnectDatabase from "../lib/ConnectDatabase"
 import Unauthorize from "../helpers/Unauthorize"
 import UserToken from "../models/UserToken"
@@ -44,6 +46,7 @@ export const getServerSideProps: GetServerSideProps<IndexProps> = async ({ req, 
 const IndexPage = memo(function Index({ config, userAccess }: IndexProps){
 	const [isUploadMenu, setIsUploadMenu] = useState(false)
 	const [files] = useState<FileInfo[]>([])
+	const router = useRouter()
 
 	let fileInputRef: RefObject<HTMLInputElement>
 
@@ -53,6 +56,13 @@ const IndexPage = memo(function Index({ config, userAccess }: IndexProps){
 	const ClearInput = useCallback(() => {
 		const input = fileInputRef.current
 		if(input?.files!.length) input.files = new DataTransfer().files
+	}, [])
+
+	useEffect(() => {
+		if("denied" in router.query){
+			toast.error("Você não tem permissão para acessar essa página")
+			router.push("/", undefined, { shallow: true })
+		}
 	}, [])
 
 	return <>
