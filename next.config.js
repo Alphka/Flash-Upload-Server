@@ -10,5 +10,6 @@ module.exports = {
 	},
 	experimental: {
 		legacyBrowsers: false
-	}
+	},
+	swcMinify: true
 }
