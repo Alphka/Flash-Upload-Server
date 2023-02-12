@@ -3,6 +3,7 @@ import type { Model } from "mongoose"
 import { Schema, model, models } from "mongoose"
 
 interface IUserToken {
+	name: string
 	token: string
 	access: AccessTypes
 	expires: Date | number | string
@@ -11,6 +12,11 @@ interface IUserToken {
 type UserTokenModel = Model<IUserToken>
 
 const UserTokenSchema = new Schema<IUserToken, UserTokenModel>({
+	name: {
+		type: String,
+		required: true,
+		unique: true
+	},
 	token: {
 		type: String,
 		required: true,

@@ -25,7 +25,7 @@ export default async function Login(request: NextApiRequest, response: NextApiRe
 	if(!request.headers["user-agent"]) return HandleError("userAgent")
 	if(!ValidateSize(request.headers["content-length"], maxSize)) return HandleError("length")
 
-	async function Register(access: AccessTypes){
+	async function Register(name: string, access: AccessTypes){
 		const token = await CreateToken()
 		const date = new Date
 
@@ -33,6 +33,7 @@ export default async function Login(request: NextApiRequest, response: NextApiRe
 
 		try{
 			await UserToken.create({
+				name,
 				token,
 				access,
 				expires: date
@@ -77,7 +78,7 @@ export default async function Login(request: NextApiRequest, response: NextApiRe
 		const user = await User.findOne({ name: username })
 
 		if(user){
-			if(user.ValidatePassword(password!)) await Register(user.access)
+			if(user.ValidatePassword(password!)) await Register(username, user.access)
 			else Unauthorize("Senha inválida")
 		}else Unauthorize("Usuário inválido")
 	}catch(error){

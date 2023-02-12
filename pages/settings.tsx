@@ -62,8 +62,12 @@ const UserComponent = memo(function User({ username, password, access, removeUse
 					const data = await response.json() as APIResponse
 
 					if(data.success){
+						const { message } = data
+
 						removeUser(username)
 						toast.success("Usuário removido com sucesso")
+
+						if(message) toast.error(message)
 					}else toast.error(data.error)
 				}}>close</span>
 			</div>

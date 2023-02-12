@@ -7,6 +7,7 @@ import ConnectDatabase from "../../lib/ConnectDatabase"
 import HandleAPIError from "../../helpers/HandleAPIError"
 import ValidateSize from "../../helpers/ValidateSize"
 import SendAPIError from "../../helpers/SendAPIError"
+import UserToken from "../../models/UserToken"
 import typeis from "type-is"
 import User from "../../models/User"
 
@@ -54,12 +55,22 @@ async function DeleteUser(username: string | undefined, request: NextApiRequest,
 	try{
 		if(!username || !(username = username.trim())) throw "Usuário inválido"
 
-		// TODO: Remove all userTokens related with this username
 		const user = await User.findOneAndDelete({ name: username })
 
-		if(!user) return SendAPIError(response, 404, "Este usuário não existe")
+		if(user){
+			let message: string | undefined
 
-		response.status(200).json({ success: true })
+			try{
+				await UserToken.deleteMany({ name: username })
+			}catch(error){
+				console.error(error)
+				message = "Falha ao deletar os tokens"
+			}
+
+			return response.status(200).json({ success: true, message })
+		}
+
+		return SendAPIError(response, 404, "Este usuário não existe")
 	}catch(error){
 		if(typeof error === "string") return SendAPIError(response, 400, error)
 
