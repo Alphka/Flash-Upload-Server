@@ -11,7 +11,11 @@ import Unauthorize from "../helpers/Unauthorize"
 import Navigation from "../components/Navigation"
 import UserToken from "../models/UserToken"
 import style from "../styles/modules/settings.module.scss"
+import Head from "next/head"
 import User, { type IUser, type AccessTypes } from "../models/User"
+
+const title = "Configurações"
+const description = "Página de configuração do site."
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 	label: string
@@ -315,6 +319,13 @@ export default function SettingsPage({ config, userAccess, ...props }: SettingsP
 	}, [users])
 
 	return <>
+		<Head>
+			<title>Flash - {title}</title>
+			<meta name="description" content={description} />
+			<meta property="og:title" content={`Flash - ${title}`} />
+			<meta property="og:description" content={description} />
+		</Head>
+
 		<Navigation {...{ userAccess }} />
 
 		<main className={style.main}>

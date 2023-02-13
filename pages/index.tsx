@@ -2,14 +2,15 @@ import type { GetServerSideProps } from "next"
 import type { AccessTypes } from "../models/User"
 import type { FileInfo } from "../typings"
 import type { Config } from "../typings/database"
-import { memo, useCallback, useState } from "react"
 import { useEffect, type RefObject } from "react"
+import { useCallback, useState } from "react"
 import { GetCachedConfig } from "../helpers/Config"
 import { useRouter } from "next/router"
 import { toast } from "react-toastify"
 import ConnectDatabase from "../lib/ConnectDatabase"
 import Unauthorize from "../helpers/Unauthorize"
 import UserToken from "../models/UserToken"
+import Head from "next/head"
 import Image from "next/image"
 import style from "../styles/modules/index.module.scss"
 import Navigation from "../components/Navigation"
@@ -20,6 +21,9 @@ interface IndexProps {
 	config: Config
 	userAccess: AccessTypes
 }
+
+const title = "Página inicial"
+const description = "Arquive seus documentos da Qualidade com facilidade e segurança!"
 
 export const getServerSideProps: GetServerSideProps<IndexProps> = async ({ req, res }) => {
 	try{
@@ -43,7 +47,7 @@ export const getServerSideProps: GetServerSideProps<IndexProps> = async ({ req, 
 	}
 }
 
-const IndexPage = memo(function Index({ config, userAccess }: IndexProps){
+export default function IndexPage({ config, userAccess }: IndexProps){
 	const [isUploadMenu, setIsUploadMenu] = useState(false)
 	const [files] = useState<FileInfo[]>([])
 	const router = useRouter()
@@ -66,6 +70,13 @@ const IndexPage = memo(function Index({ config, userAccess }: IndexProps){
 	}, [])
 
 	return <>
+		<Head>
+			<title>Flash - {title}</title>
+			<meta name="description" content={description} />
+			<meta property="og:title" content={`Flash - ${title}`} />
+			<meta property="og:description" content={description} />
+		</Head>
+
 		<Navigation {...{ userAccess }} />
 
 		<main className={style.main}>
@@ -79,11 +90,8 @@ const IndexPage = memo(function Index({ config, userAccess }: IndexProps){
 			<aside>
 				<Image src="/images/documents.png" alt="Ilustração de documentos" width={600} height={480} priority={true} quality={80} />
 			</aside>
-
 		</main>
 
 		<UploadMenu {...{ inputFiles: files, isUploadMenu, setIsUploadMenu, ClearInput, types: config.types }} />
 	</>
-})
-
-export default IndexPage
+}
