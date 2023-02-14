@@ -1,7 +1,0 @@
-@use "../import/variables.scss";
-
-:export{
-	mobileSize: variables.$mobileSize;
-	mediumSize: variables.$mediumSize;
-	largeSize: variables.$largeSize;
-}

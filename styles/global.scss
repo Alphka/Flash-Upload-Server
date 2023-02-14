@@ -5,7 +5,15 @@
 
 :root {
 	color-scheme: dark;
+	--background: #{variables.$primaryColor};
+	--background-dark: #222;
+	--background-dark-light: #484848;
+	--secondary-color: #{variables.$secondaryColor};
+	--terciary-color: #{variables.$terciaryColor};
+	--font-color: white;
+	--error-color: #ff4646;
 	--font-family: Poppins, -apple-system, BlinkMacSystemFont, "Segoe UI", Verdana, Arial, sans-serif;
+	--logo-font-family: Michroma, Verdana, Segoe UI, Arial, sans-serif;
 }
 
 *{
@@ -20,7 +28,7 @@ body{
 	background-color: variables.$primaryColor;
 	font-family: var(--font-family);
 	font-size: 16px;
-	color: variables.$fontColor;
+	color: var(--font-color);
 }
 
 .no-outline{

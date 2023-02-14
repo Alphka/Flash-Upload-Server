@@ -41,7 +41,7 @@ main.main{
 		span{
 			font-size: 40pt;
 			font-weight: 700;
-			font-family: variables.$logoFontFamily;
+			font-family: var(--logo-font-family);
 			text-transform: uppercase;
 		}
 	}

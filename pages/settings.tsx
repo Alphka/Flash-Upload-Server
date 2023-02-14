@@ -331,7 +331,7 @@ export default function SettingsPage({ config, userAccess, ...props }: SettingsP
 		<main className={style.main}>
 			<section className={style.user_management}>
 				<header>
-					<h2 className={style.title}>Gerenciamento de Usuários</h2>
+					<h2 className={style.title}><span className="icon material-symbols-outlined">manage_accounts</span>Gerenciamento de Usuários</h2>
 				</header>
 
 				<article className={style.users}>

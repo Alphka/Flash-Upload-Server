@@ -158,7 +158,7 @@
 
 						&.error{
 							display: block;
-							color: variables.$errorColor;
+							color: var(--error-color);
 							text-align: center;
 							font-weight: normal;
 							font-family: Segoe UI, Verdana, sans-serif;
@@ -172,8 +172,8 @@
 
 				input{
 					position: relative;
-					background-color: variables.$secondaryColor;
-					box-shadow: 1px 1px 0 variables.$terciaryColor;
+					background-color: var(--secondary-color);
+					box-shadow: 1px 1px 0 var(--terciary-color);
 					display: block;
 					max-width: 62pt;
 					align-self: center;
@@ -183,7 +183,7 @@
 					cursor: pointer;
 
 					&:hover{
-						background-color: adjust-color(variables.$secondaryColor, $lightness: 10%);
+						filter: brightness(0.9);
 					}
 				}
 

@@ -13,15 +13,30 @@ main.main{
 	padding: 0 8pt;
 
 	header .title{
+		display: flex;
+		justify-content: flex-start;
+		align-items: center;
 		font-weight: 600;
-		margin-bottom: 8pt;
+		margin-bottom: 12pt;
+		line-height: 100%;
+		gap: 5px;
+	}
+
+	@media screen and (max-width: variables.$mobileSize){
+		padding: 0 10pt;
 	}
 
 	.users{
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(230px, 320px));
 		width: 100%;
-		gap: 10px;
+		gap: 8pt;
+
+		@media screen and (max-width: variables.$mobileSize){
+			display: flex;
+			flex-direction: column;
+			grid-template-columns: none;
+		}
 
 		.user{
 			$backroundColor: #262626;
@@ -81,7 +96,7 @@ main.main{
 					.error{
 						display: block;
 						position: relative;
-						color: variables.$errorColor;
+						color: var(--error-color);
 						font-size: 11px;
 					}
 
@@ -103,7 +118,7 @@ main.main{
 						&[type=text],
 						&[type=password]{
 							&::placeholder{
-								color: darken(variables.$fontColor, 30%);
+								color: darken(white, 30%);
 							}
 
 							&:focus{
@@ -133,7 +148,7 @@ main.main{
 					position: relative;
 
 					input{
-						background-color: #484848;
+						background-color: var(--background-dark-light);
 						width: clamp(150px, 200px, 100%);
 					}
 
@@ -169,7 +184,7 @@ main.main{
 							}
 
 							.spinner{
-								@include mixins.spinner(variables.$fontColor, calc(#{$height} - 6pt), block, 1px);
+								@include mixins.spinner(var(--font-color), calc(#{$height} - 6pt), block, 1px);
 
 								display: inline-block;
 								vertical-align: middle;

@@ -43,7 +43,7 @@ nav{
 			span{
 				font-size: $logoFontSize;
 				line-height: $logoFontSize;
-				font-family: variables.$logoFontFamily;
+				font-family: var(--logo-font-family);
 				text-transform: uppercase;
 			}
 		}
@@ -76,13 +76,14 @@ nav{
 				flex-direction: column;
 				gap: 8pt;
 
-				background-color: white;
-				color: black;
+				background-color: var(--background-dark);
+				box-shadow: 1px 1px 3px black;
+				color: var(--font-color);
 				position: absolute;
 				top: 100%;
 				right: 4pt;
 				padding: 8pt;
-				border-radius: 12pt;
+				border-radius: 4pt;
 				width: 50vw;
 
 				&.hidden{
@@ -127,8 +128,8 @@ nav{
 			position: relative;
 
 			.content{
-				background-color: white;
-				color: black;
+				background-color: var(--background-dark);
+				color: var(--font-color);
 				position: absolute;
 				top: 100%;
 				right: 0;
@@ -147,7 +148,7 @@ nav{
 
 				hr{
 					margin: 4pt auto;
-					border: 1px solid variables.$primaryColor;
+					border: 1px solid var(--font-color);
 					width: calc(100% - 8pt);
 				}
 			}
