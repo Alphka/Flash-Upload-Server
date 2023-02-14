@@ -320,7 +320,7 @@ export default function SettingsPage({ config, userAccess, ...props }: SettingsP
 
 	return <>
 		<Head>
-			<title>Flash - {title}</title>
+			<title>{`Flash - ${title}`}</title>
 			<meta name="description" content={description} />
 			<meta property="og:title" content={`Flash - ${title}`} />
 			<meta property="og:description" content={description} />

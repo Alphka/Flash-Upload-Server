@@ -12,7 +12,7 @@ import Unauthorize from "../helpers/Unauthorize"
 import UserToken from "../models/UserToken"
 import Head from "next/head"
 import Image from "next/image"
-import style from "../styles/modules/index.module.scss"
+import style from "../styles/modules/homepage.module.scss"
 import Navigation from "../components/Navigation"
 import UploadForm from "../components/UploadForm"
 import UploadMenu from "../components/UploadMenu"
@@ -71,7 +71,7 @@ export default function IndexPage({ config, userAccess }: IndexProps){
 
 	return <>
 		<Head>
-			<title>Flash - {title}</title>
+			<title>{`Flash - ${title}`}</title>
 			<meta name="description" content={description} />
 			<meta property="og:title" content={`Flash - ${title}`} />
 			<meta property="og:description" content={description} />
@@ -80,14 +80,14 @@ export default function IndexPage({ config, userAccess }: IndexProps){
 		<Navigation {...{ userAccess }} />
 
 		<main className={style.main}>
-			<article>
+			<article className={style.content}>
 				<section className={style.title}>Busque com rapidez e facilidade!</section>
 				<section className={style.button}>
 					<UploadForm {...{ setIsUploadMenu, AddFileInfos, SetInputRef, config }} />
 				</section>
 			</article>
 
-			<aside>
+			<aside className={style.image}>
 				<Image src="/images/documents.png" alt="Ilustração de documentos" width={600} height={480} priority={true} quality={80} />
 			</aside>
 		</main>

@@ -76,7 +76,7 @@ const Logo = memo(function Logo(){
 	return (
 		<header>
 			<Link href="/" prefetch={false}>
-				<Image src="/images/logo.svg" alt={locales.siteLogo} loading="eager" width={32} height={32} />
+				<Image src="/icons/logo.svg" alt={locales.siteLogo} loading="eager" width={32} height={32} />
 				<span>Flash</span>
 			</Link>
 		</header>

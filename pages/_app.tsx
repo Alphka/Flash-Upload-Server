@@ -12,20 +12,17 @@ export default function App({ Component, pageProps }: AppProps){
 			<Head>
 				<meta charSet="utf-8" />
 				<meta name="author" content="Kayo Souza" />
-				<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=3.0" />
+				<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=3.0, shrink-to-fit=no" />
+				<meta property="og:author" content="Kayo Souza" />
 				<meta property="og:type" content="website" />
 				<meta property="og:locale" content="pt_BR" />
 				<meta property="og:site_name" content="Flash" />
-				<meta property="og:image" content="/images/apple-touch-icon.png" />
+				<meta property="og:image" content="/icons/apple-touch-icon.png" />
 				<meta property="og:image:width" content="180" />
 				<meta property="og:image:height" content="180" />
-				<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png" />
-				<link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png" />
-				<link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png" />
-				<link rel="icon" type="image/png" sizes="512x512" href="/images/android-chrome-512x512.png" />
-				<link rel="icon" type="image/png" sizes="192x192" href="/images/android-chrome-192x192.png" />
-				<link rel="icon" type="image/svg+xml" sizes="any" href="/images/favicon.svg" />
-				<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#121d46" />
+				<link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
+				<link rel="icon" type="image/svg+xml" href="/icons/favicon.svg" />
+				<link rel="mask-icon" href="/icons/safari-pinned-tab.svg" color="#121d46" />
 				<link rel="manifest" href="/site.webmanifest" />
 				<meta name="application-name" content="Flash" />
 				<meta name="mobile-web-app-capable" content="yes" />

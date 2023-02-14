@@ -1,9 +1,9 @@
 import type { GetServerSideProps } from "next"
 import { memo, useRef, useState, type RefObject } from "react"
+import { useRouter } from "next/router"
 import { toast } from "react-toastify"
 import ConnectDatabase from "../lib/ConnectDatabase"
 import UserToken from "../models/UserToken"
-import Router from "next/router"
 import Image from "next/image"
 import style from "../styles/modules/login.module.scss"
 import Head from "next/head"
@@ -14,7 +14,7 @@ const description = "Entre para obter acesso aos documentos do Flash."
 const Logo = memo(function Logo(){
 	return <>
 		<div className={style.image}>
-			<Image src="/images/logo.svg" alt="Logotipo do site" loading="eager" priority={true} fill />
+			<Image src="/icons/logo.svg" alt="Logotipo do site" loading="eager" priority={true} fill />
 		</div>
 		<span>Flash</span>
 	</>
@@ -24,6 +24,7 @@ const LoginForm = memo(function Form(){
 	const usernameRef = useRef<HTMLInputElement>(null)
 	const passwordRef = useRef<HTMLInputElement>(null)
 	const submitRef = useRef<HTMLButtonElement>(null)
+	const router = useRouter()
 	const [fetching, setFetching] = useState(false)
 
 	return (
@@ -55,7 +56,7 @@ const LoginForm = memo(function Form(){
 
 					if(!data.success) throw data.error ?? data.success
 
-					Router.push("/")
+					router.push("/")
 				}finally{
 					setFetching(false)
 				}
@@ -97,7 +98,7 @@ const LoginForm = memo(function Form(){
 export default function LoginPage(){
 	return <>
 		<Head>
-			<title>Flash - {title}</title>
+			<title>{`Flash - ${title}`}</title>
 			<meta name="description" content={description} />
 			<meta property="og:title" content={`Flash - ${title}`} />
 			<meta property="og:description" content={description} />
@@ -122,7 +123,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
 	if(token){
 		const user = await UserToken.findOne({ token })
 		user?.delete()
-		res.setHeader("set-cookie", "token=; Max-Age=0; Path=/; SameSite=Strict; Secure; HttpOnly")
+		res.setHeader("set-cookie", "token=; Max-Age=0; Path=/; SameSite=Strict")
 	}
 
 	return { props: {} }

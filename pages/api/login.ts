@@ -39,7 +39,7 @@ export default async function Login(request: NextApiRequest, response: NextApiRe
 				expires: date
 			})
 
-			response.setHeader("set-cookie", `token=${token}; Expires=${date.toUTCString()}; Path=/; SameSite=Strict; Secure; HttpOnly`)
+			response.setHeader("set-cookie", `token=${token}; Expires=${date.toUTCString()}; Path=/; SameSite=Strict`)
 			response.status(200).json({ success: true })
 		}catch(error){
 			console.error(error)

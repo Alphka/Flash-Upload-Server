@@ -11,7 +11,7 @@ main.main{
 		flex-direction: column;
 	}
 
-	article{
+	article.content{
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
@@ -94,7 +94,7 @@ main.main{
 		}
 	}
 
-	aside{
+	aside.image{
 		display: flex;
 		flex-direction: row;
 		justify-content: center;
