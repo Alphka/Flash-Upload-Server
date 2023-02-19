@@ -1,0 +1,33 @@
+{
+	"maxFileSize": 20971520,
+	"maxFiles": 20,
+	"types": [
+		{
+			"id": 1,
+			"name": "Ata"
+		},
+		{
+			"id": 2,
+			"name": "Procedimento Operacional Padrão",
+			"reduced": "POP"
+		},
+		{
+			"id": 3,
+			"name": "Inventário"
+		},
+		{
+			"id": 4,
+			"name": "Ordem de Serviço",
+			"reduced": "OS"
+		},
+		{
+			"id": 5,
+			"name": "Nota Fiscal",
+			"reduced": "NF"
+		}
+	],
+	"accessTypes": [
+		"all",
+		"public"
+	]
+}

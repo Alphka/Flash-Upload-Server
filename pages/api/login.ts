@@ -1,4 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next"
+import type { AccessTypes } from "../../models/typings"
 import { randomBytes } from "crypto"
 import { promisify } from "util"
 import ConnectDatabase from "../../lib/ConnectDatabase"
@@ -6,7 +7,7 @@ import HandleAPIError from "../../helpers/HandleAPIError"
 import ValidateSize from "../../helpers/ValidateSize"
 import SendAPIError from "../../helpers/SendAPIError"
 import UserToken from "../../models/UserToken"
-import User, { type AccessTypes } from "../../models/User"
+import User from "../../models/User"
 
 const maxSize = 2**20
 

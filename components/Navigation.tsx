@@ -1,4 +1,4 @@
-import type { AccessTypes } from "../models/User"
+import type { AccessTypes } from "../models/typings"
 import { memo, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"

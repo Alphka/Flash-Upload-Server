@@ -4,6 +4,4 @@
 .env.local
 next-env.d.ts
 node_modules
-
-database/*
-!database/config.copy.json
+tsconfig.tsbuildinfo

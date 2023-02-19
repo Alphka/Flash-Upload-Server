@@ -1,15 +1,5 @@
-import type { AccessTypes } from "./User"
-import type { Model } from "mongoose"
+import type { IUserToken, UserTokenModel } from "./typings"
 import { Schema, model, models } from "mongoose"
-
-interface IUserToken {
-	name: string
-	token: string
-	access: AccessTypes
-	expires: Date | number | string
-}
-
-type UserTokenModel = Model<IUserToken>
 
 const UserTokenSchema = new Schema<IUserToken, UserTokenModel>({
 	name: {

@@ -1,19 +1,5 @@
-import type { Model, Document, Types } from "mongoose"
+import type { IUser, UserModel, IUserMethods } from "./typings"
 import { Schema, model, models } from "mongoose"
-
-export type AccessTypes = "all" | "public"
-
-export interface IUser {
-	name: string
-	password: string
-	access: AccessTypes
-}
-
-interface IUserMethods {
-	ValidatePassword(password: string): string
-}
-
-type UserModel = Model<IUser, {}, IUserMethods>
 
 const UserSchema = new Schema<IUser, UserModel, IUserMethods>({
 	name: {

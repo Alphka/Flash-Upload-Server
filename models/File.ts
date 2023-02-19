@@ -1,17 +1,5 @@
-import type { Model } from "mongoose"
+import type { IFile, FileModel } from "./typings"
 import { Schema, model, models } from "mongoose"
-
-interface IFile {
-	hash: string
-	filename: string
-	hashFilename: string
-	createdAt: Date | number | string
-	uploadedAt: Date | number | string
-	access?: "public" | "all"
-	type: number
-}
-
-type FileModel = Model<IFile>
 
 const FileSchema = new Schema<IFile, FileModel>({
 	hash: {

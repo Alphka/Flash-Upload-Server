@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next"
-import type { AccessTypes, IUser } from "../../models/User"
+import type { AccessTypes, IUser } from "../../models/typings"
 import type { MongoServerError } from "mongodb"
 import type { Config } from "../../typings/database"
 import { GetCachedConfig } from "../../helpers/Config"

@@ -1,5 +1,5 @@
 import type { GetServerSideProps } from "next"
-import type { AccessTypes } from "../models/User"
+import type { AccessTypes } from "../models/typings"
 import type { FileInfo } from "../typings"
 import type { Config } from "../typings/database"
 import { useEffect, type RefObject } from "react"
