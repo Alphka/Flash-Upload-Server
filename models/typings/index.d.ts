@@ -6,13 +6,26 @@ type DateType = Date | number | string
 export type AccessTypes = "all" | "public"
 
 export interface IFile {
+	content: Buffer
 	hash: string
 	filename: string
 	hashFilename: string
 	createdAt: DateType
 	uploadedAt: DateType
 	expiresAt: DateType
-	access?: AccessTypes
+	access: AccessTypes
+	type: number
+}
+
+export interface IFileLean {
+	content: string
+	hash: string
+	filename: string
+	hashFilename: string
+	createdAt: string
+	uploadedAt: string
+	expiresAt: string
+	access: AccessTypes
 	type: number
 }
 

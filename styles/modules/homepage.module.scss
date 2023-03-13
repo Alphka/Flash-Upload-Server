@@ -18,15 +18,13 @@ main.main{
 		align-items: center;
 		flex: 1;
 
-		$width: 400pt;
-
 		section.title{
 			display: inline-block;
 			font-size: 56pt;
 			font-weight: 700;
 			font-family: Alata, var(--font-family);
 			text-align: left;
-			max-width: $width;
+			max-width: clamp(400px, 50vw, 500px);
 			word-break: normal;
 
 			@media screen and (min-width: variables.$mobileSize) and (max-width: #{variables.$largeSize - 1px}){
@@ -37,9 +35,13 @@ main.main{
 				display: flex;
 				width: 100%;
 				max-width: 500px;
-				font-size: clamp(18px, 11vw, 56pt);
+				font-size: 58px;
 				padding: 0 8pt;
 				align-items: center;
+			}
+
+			@media screen and (max-width: 400px){
+				font-size: 42px;
 			}
 		}
 
@@ -54,16 +56,16 @@ main.main{
 			}
 
 			form label{
-				$height: 80pt;
+				$height: 45pt;
 
 				display: flex;
 				justify-content: center;
 				align-items: center;
 				background-color: var(--secondary-color);
 				box-shadow: 5px 5px 0 var(--terciary-color);
-				font-size: 30pt;
+				font-size: 32px;
 				font-weight: 600;
-				width: $width;
+				width: clamp(400px, 50vw, 500px);
 				height: $height;
 				border-radius: $height;
 				cursor: pointer;
@@ -72,12 +74,13 @@ main.main{
 				text-overflow: clip;
 
 				@media screen and (max-width: variables.$mobileSize){
-					$width: calc(100% - 12pt);
-
-					width: $width;
-					font-size: 5vw;
-					height: auto;
 					padding: 8pt 24pt;
+					font-size: 25px;
+				}
+
+				@media screen and (max-width: 400px){
+					font-size: 20px;
+					width: calc(100% - 12pt);
 				}
 
 				input{

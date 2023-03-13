@@ -2,6 +2,10 @@ import type { IFile, FileModel } from "./typings"
 import { Schema, model, models } from "mongoose"
 
 const FileSchema = new Schema<IFile, FileModel>({
+	content: {
+		type: Buffer,
+		required: true
+	},
 	hash: {
 		type: String,
 		required: true,

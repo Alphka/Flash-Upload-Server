@@ -2,7 +2,7 @@
 @use "import/variables.scss";
 
 nav{
-	$height: 32pt;
+	$height: 36pt;
 	$logoWidth: $height - 8pt;
 	$logoFontSize: $logoWidth - 2pt;
 	$iconSize: $height - 6pt;
@@ -13,7 +13,7 @@ nav{
 	justify-content: space-between;
 	align-items: center;
 	height: $height;
-	padding: 0 8pt;
+	padding: 4pt 8pt 0;
 
 	header{
 		flex: 1;
@@ -45,6 +45,16 @@ nav{
 				line-height: $logoFontSize;
 				font-family: var(--logo-font-family);
 				text-transform: uppercase;
+
+				@media screen and (max-width: 400px){
+					font-size: 20pt;
+				}
+			}
+
+			@media screen and (max-width: 400px){
+				justify-content: flex-start;
+				gap: 8pt;
+				padding: 0 8pt;
 			}
 		}
 	}
@@ -62,6 +72,8 @@ nav{
 		&.mobile{
 			display: none;
 			position: relative;
+			align-self: baseline;
+			line-height: $iconSize;
 
 			@media screen and (max-width: variables.$mobileSize){
 				display: block;

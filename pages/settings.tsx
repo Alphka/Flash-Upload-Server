@@ -302,6 +302,35 @@ const PasswordInput = memo(forwardRef<HTMLInputElement, PasswordInputProps>(func
 	}} />
 }))
 
+export const getServerSideProps: GetServerSideProps<SettingsPageProps> = async ({ req, res }) => {
+	try{
+		await ConnectDatabase()
+
+		const { token } = req.cookies
+		const users = await User.find({}, { _id: 0, __v: 0 }).lean() as IUser[]
+		const user = token ? await UserToken.findOne({ token }) : null
+
+		if(user){
+			if(user.access !== "all") return {
+				redirect: {
+					destination: "/?denied",
+					permanent: false
+				}
+			}
+		}else{
+			if(users.length) return Unauthorize(res)
+			else console.log("No users found, access permitted")
+		}
+
+		const config = await GetCachedConfig(true)
+
+		return { props: { users, config, userAccess: user?.access || "all" } }
+	}catch(error){
+		console.error(error)
+		return { notFound: true }
+	}
+}
+
 export default function SettingsPage({ config, userAccess, ...props }: SettingsPageProps){
 	const [users, setUsers] = useState<Map<string, IUser>>(new Map((props.users || []).map(user => [user.name, user])))
 
@@ -350,33 +379,4 @@ export default function SettingsPage({ config, userAccess, ...props }: SettingsP
 			</section>
 		</main>
 	</>
-}
-
-export const getServerSideProps: GetServerSideProps<SettingsPageProps> = async ({ req, res }) => {
-	try{
-		await ConnectDatabase()
-
-		const { token } = req.cookies
-		const users = await User.find({}, { _id: 0, __v: 0 }).lean() as IUser[]
-		const user = token ? await UserToken.findOne({ token }) : null
-
-		if(user){
-			if(user.access !== "all") return {
-				redirect: {
-					destination: "/?denied",
-					permanent: false
-				}
-			}
-		}else{
-			if(users.length) return Unauthorize(res)
-			else console.log("No users found, access permitted")
-		}
-
-		const config = await GetCachedConfig(true)
-
-		return { props: { users, config, userAccess: user?.access || "all" } }
-	}catch(error){
-		console.error(error)
-		return { notFound: true }
-	}
 }

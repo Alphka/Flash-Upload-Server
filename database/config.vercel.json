@@ -1,0 +1,6 @@
+{
+	"isVercel": true,
+	"maxSize": 4194304,
+	"maxFileSize": 4194304,
+	"maxFiles": 5
+}

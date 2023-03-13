@@ -1,4 +1,4 @@
-import type { NextApiRequest, NextApiResponse } from "next"
+import type { NextApiRequest, NextApiResponse, PageConfig } from "next"
 import type { AccessTypes } from "../../models/typings"
 import { randomBytes } from "crypto"
 import { promisify } from "util"
@@ -93,8 +93,9 @@ export default async function Login(request: NextApiRequest, response: NextApiRe
 	}
 }
 
-export const config = {
+export const config: PageConfig = {
 	api: {
-		bodyParser: false
+		bodyParser: false,
+		responseLimit: false
 	}
 }

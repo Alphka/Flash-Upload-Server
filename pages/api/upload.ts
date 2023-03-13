@@ -1,30 +1,40 @@
+import type { NextApiRequest, NextApiResponse, PageConfig } from "next"
 import type { APIUploadResponse, UploadFileError } from "../../typings/api"
-import type { NextApiRequest, NextApiResponse } from "next"
 import type { BusboyStream, FilePart } from "../../typings"
-import type { Readable } from "stream"
-import type { Config } from "../../typings/database"
+import type { AccessTypes } from "../../models/typings"
 import { GetCachedConfig } from "../../helpers/Config"
 import { extname } from "path"
 import ConnectDatabase from "../../lib/ConnectDatabase"
 import HandleAPIError from "../../helpers/HandleAPIError"
 import ValidateSize from "../../helpers/ValidateSize"
 import SendAPIError from "../../helpers/SendAPIError"
-import IsNumber from "../../helpers/IsNumber"
+import GetTypeById from "../../helpers/GetTypeById"
 import Busboy from "busboy"
 import Crypto from "crypto"
 import File from "../../models/File"
-import axios, { AxiosError } from "axios"
 
-if(!process.env.API_URL) throw new Error("API_URL is not defined")
-if(!process.env.API_TOKEN) console.warn("Authentication token is not defined")
+interface FileData {
+	hash: string
+	filename: string
+	createdAt: Date
+	access: AccessTypes
+	typeId: number
+	extension?: string
+}
 
-function GetTypeById(config: Config, value: number | string | undefined){
-	if(!IsNumber(value)) return undefined
+async function UploadFile(file: Buffer, { hash, filename, createdAt, access, typeId, extension }: FileData){
+	extension ??= extname(filename)
 
-	const { types } = config
-	const id = Number(value)
-
-	return types.find(type => type.id === id)
+	await File.create({
+		content: file,
+		hash,
+		access,
+		filename,
+		createdAt: createdAt,
+		uploadedAt: new Date,
+		hashFilename: hash + extension,
+		type: typeId
+	})
 }
 
 export default async function Upload(request: NextApiRequest, response: NextApiResponse<APIUploadResponse>){
@@ -56,7 +66,7 @@ export default async function Upload(request: NextApiRequest, response: NextApiR
 		const parts = new Array<FilePart>
 		const errors = new Array<UploadFileError>
 		const uploaded = new Array<string>
-		const filePromises = new Array as Promise<any>[]
+		const filePromises = new Array<Promise<any>>
 
 		function GetLastPart(){
 			const lastPart = parts.at(-1)
@@ -94,8 +104,8 @@ export default async function Upload(request: NextApiRequest, response: NextApiR
 			part.isFile = true
 
 			filePromises.push((async () => {
+				const date = part.date ? new Date(part.date) : new Date
 				const type = GetTypeById(config, part.typeId)
-				const date = part.date ?? new Date
 				const extension = extname(filename)
 
 				try{
@@ -114,40 +124,20 @@ export default async function Upload(request: NextApiRequest, response: NextApiR
 					})
 
 					const hash = Crypto.createHash("sha256").update(file).digest("hex")
-					const hashFilename = hash + extension
-					const url = new URL(process.env.API_URL!.replace(":file", hashFilename))
-
 					const fileDocument = await File.findOne({ hash })
 
 					if(fileDocument) throw "Este arquivo já foi enviado para o servidor"
 
-					await axios.post<Readable>(url.href, file, {
-						headers: {
-							Authorization: process.env.API_TOKEN,
-							"Content-Type": mimeType
-						},
-						responseType: "stream"
-					}).then(async response => {
-						await File.create({
-							hash,
-							filename,
-							createdAt: date,
-							uploadedAt: new Date,
-							hashFilename,
-							access: part.folder ?? "public",
-							type: type.id
-						})
-
-						uploaded.push(filename)
-						response.data.resume()
-					}).catch((error: AxiosError) => {
-						const { response } = error
-						const message = response ? `Request failed: ${response.status} ${response.statusText}` : error.message
-
-						console.error(message)
-
-						throw message
+					await UploadFile(file, {
+						hash,
+						filename,
+						createdAt: date,
+						access: part.folder as AccessTypes || "public",
+						typeId: type.id,
+						extension
 					})
+
+					uploaded.push(filename)
 				}catch(error: any){
 					if(typeof error === "string"){
 						stream.resume()
@@ -160,15 +150,15 @@ export default async function Upload(request: NextApiRequest, response: NextApiR
 			})())
 		})
 
-		for await (const chunk of request){
-			busboy.write(chunk)
-		}
-
-		busboy.end()
-
-		await new Promise((resolve, reject) => {
+		await new Promise(async (resolve, reject) => {
 			busboy.on("close", resolve)
 			busboy.on("error", reject)
+
+			for await (const chunk of request){
+				busboy.write(chunk)
+			}
+
+			busboy.end()
 		})
 
 		await Promise.all(filePromises)
@@ -192,8 +182,9 @@ export default async function Upload(request: NextApiRequest, response: NextApiR
 	}
 }
 
-export const config = {
+export const config: PageConfig = {
     api: {
-        bodyParser: false
+        bodyParser: false,
+		responseLimit: false
     }
 }

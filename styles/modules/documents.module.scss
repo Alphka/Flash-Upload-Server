@@ -1,0 +1,37 @@
+main.main{
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	margin-top: 40pt;
+}
+
+.folders{
+	display: flex;
+	flex-direction: row;
+	align-items: stretch;
+	justify-content: flex-start;
+	flex-wrap: wrap;
+	gap: 12pt;
+	padding: 0 8pt;
+
+	.folder{
+		background-color: var(--background-dark-light);
+		padding: 12pt 8pt;
+		border-radius: 2pt;
+		flex: 1;
+
+		.header{
+
+
+			.title{
+
+			}
+		}
+
+		.content{
+			background-color: var(--background-dark);
+			border-radius: 4pt;
+			padding: 2pt 8pt;
+		}
+	}
+}

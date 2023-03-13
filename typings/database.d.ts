@@ -5,8 +5,10 @@ export interface DocumentTypeInfo {
 }
 
 export interface Config {
+	isVercel?: true
 	maxFileSize: number
 	maxFiles: number
+	maxSize: number
 	types: DocumentTypeInfo[]
 	accessTypes: LoginAccess[]
 }

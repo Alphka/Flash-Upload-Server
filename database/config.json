@@ -1,5 +1,6 @@
 {
-	"maxFileSize": 20971520,
+	"maxSize": 325058560,
+	"maxFileSize": 16252928,
 	"maxFiles": 20,
 	"types": [
 		{

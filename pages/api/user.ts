@@ -1,4 +1,4 @@
-import type { NextApiRequest, NextApiResponse } from "next"
+import type { NextApiRequest, NextApiResponse, PageConfig } from "next"
 import type { AccessTypes, IUser } from "../../models/typings"
 import type { MongoServerError } from "mongodb"
 import type { Config } from "../../typings/database"
@@ -122,8 +122,9 @@ export default async function UserAPI(request: NextApiRequest, response: NextApi
 	}
 }
 
-export const config = {
+export const config: PageConfig = {
 	api: {
-		bodyParser: false
+		bodyParser: false,
+		responseLimit: false
 	}
 }

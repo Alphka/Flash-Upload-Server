@@ -121,8 +121,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
 	const { token } = req.cookies
 
 	if(token){
-		const user = await UserToken.findOne({ token })
-		user?.delete()
+		await UserToken.findOneAndDelete({ token })
 		res.setHeader("set-cookie", "token=; Max-Age=0; Path=/; SameSite=Strict")
 	}
 

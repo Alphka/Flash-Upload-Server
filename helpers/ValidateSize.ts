@@ -1,20 +1,13 @@
 import type { Config } from "../typings/database"
 import IsNumber from "./IsNumber"
 
-function ValidateSize(length: string | undefined, { maxFileSize, maxFiles }: Config, mandatory?: boolean): boolean
-function ValidateSize(length: string | undefined, maxSize: number, mandatory?: boolean): boolean
-function ValidateSize(length: string | undefined, config: number | Config, mandatory = true){
+function ValidateSize(length: string | number | undefined, { maxFileSize, maxFiles }: Config, mandatory?: boolean): boolean
+function ValidateSize(length: string | number | undefined, maxSize: number, mandatory?: boolean): boolean
+function ValidateSize(length: string | number | undefined, config: number | Config, mandatory = false){
 	if(!IsNumber(length)) return !mandatory
+	if(typeof length !== "number") length = Number(length)
 
-	const _length = Number(length)
-
-	if(typeof config === "number"){
-		return _length <= config
-	}
-
-	const { maxFileSize, maxFiles } = config
-
-	return _length <= maxFileSize * maxFiles + 1048576
+	return typeof config === "number" ? length <= config : length <= config.maxSize
 }
 
 export default ValidateSize

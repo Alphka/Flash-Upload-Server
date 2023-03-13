@@ -4,18 +4,19 @@ import type { FileInfo } from "../typings"
 import type { Config } from "../typings/database"
 import { useEffect, type RefObject } from "react"
 import { useCallback, useState } from "react"
+import { GetCookie, SetCookie } from "../helpers/Cookie"
 import { GetCachedConfig } from "../helpers/Config"
 import { useRouter } from "next/router"
 import { toast } from "react-toastify"
 import ConnectDatabase from "../lib/ConnectDatabase"
 import Unauthorize from "../helpers/Unauthorize"
-import UserToken from "../models/UserToken"
-import Head from "next/head"
-import Image from "next/image"
-import style from "../styles/modules/homepage.module.scss"
 import Navigation from "../components/Navigation"
 import UploadForm from "../components/UploadForm"
 import UploadMenu from "../components/UploadMenu"
+import UserToken from "../models/UserToken"
+import Image from "next/image"
+import style from "../styles/modules/homepage.module.scss"
+import Head from "next/head"
 
 interface IndexProps {
 	config: Config
@@ -63,6 +64,15 @@ export default function IndexPage({ config, userAccess }: IndexProps){
 	}, [])
 
 	useEffect(() => {
+		if(config.isVercel){
+			const vercelCookie = GetCookie("vercel-warn")
+
+			if(!vercelCookie){
+				SetCookie("vercel-warn", "ok", { sameSite: "Strict", maxAge: 31536000 })
+				toast.warn("Esse site está sendo hosteado no Vercel. Isso significa que ele tem algumas limitações.")
+			}
+		}
+
 		if("denied" in router.query){
 			toast.error("Você não tem permissão para acessar essa página")
 			router.push("/", undefined, { shallow: true })
