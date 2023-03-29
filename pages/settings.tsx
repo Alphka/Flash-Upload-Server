@@ -46,13 +46,28 @@ interface AddUserProps {
 	addUser: (user: IUser) => any
 }
 
-function ClickInput<T extends HTMLElement, E extends HTMLElement>(input: RefObject<T>){
-	return (event: KeyboardEvent<E>) => {
-		if(event.key === "Enter") input.current!.click()
-	}
-}
-
 const UserComponent = memo(function User({ username, password, access, removeUser }: UserProps){
+	const [Password, SetPassword] = useState(password)
+	const passwordRef = useRef<HTMLSpanElement>(null)
+
+	const setPassword = useCallback(async (password: string) => {
+		const response = await fetch("/api/set-password", {
+			body: new URLSearchParams({ username, password }),
+			method: "POST",
+			credentials: "include"
+		})
+
+		if(response.ok){
+			const data = await response.json()
+			if(data.success){
+				SetPassword(password)
+				return toast.success("Senha alterada")
+			}
+		}
+
+		toast.error("Houve uma falha ao alterar a senha")
+	}, [Password])
+
 	return (
 		<div className={style.user}>
 			<div className={style.header}>
@@ -83,16 +98,38 @@ const UserComponent = memo(function User({ username, password, access, removeUse
 			<div className={style.controls}>
 				<div>
 					<span className={style.label}>
-						Senha: <span style={{ cursor: "pointer" }} className={style.password}
-							onMouseDown={event => {
-								if(event.detail > 1) event.preventDefault()
+						Senha: <span style={{ cursor: "pointer" }} className={style.password} ref={passwordRef}
+							onMouseDown={event => event.detail > 1 && event.preventDefault()}
+							onClick={event => event.currentTarget.classList.toggle(style.password)}
+							onBlur={event => {
+								const { currentTarget: element } = event
+
+								if(element.hasAttribute("contenteditable")){
+									element.removeAttribute("contenteditable")
+									element.classList.add(style.password)
+									setPassword(element.textContent!.trim())
+								}
 							}}
-							onClick={event => {
-								event.currentTarget.classList.toggle(style.password)
-							}}
+							onKeyPress={event => event.key === "Enter" && event.currentTarget.blur()}
 						>{password}</span>
 					</span>
-					<input type="button" value="Alterar senha" style={{ "--color": "#29299d" } as CSSProperties} />
+					<input type="button" value="Alterar senha" onClick={event => {
+						const element = passwordRef.current!
+						const lastNode = element.childNodes.item(element.childNodes.length - 1)!
+						const range = document.createRange()
+						const selection = window.getSelection()!
+
+						element.classList.remove(style.password)
+						element.contentEditable = "true"
+						element.focus()
+
+						range.setStart(lastNode, lastNode.textContent!.length)
+						range.collapse(true)
+						selection.removeAllRanges()
+						selection.addRange(range)
+
+						event.preventDefault()
+					}} style={{ "--color": "#29299d" } as CSSProperties} />
 				</div>
 				<div>
 					<span className={style.label}>Acesso: {access}</span>
