@@ -7,6 +7,7 @@ import ConnectDatabase from "../lib/ConnectDatabase"
 import GetTypeById from "../helpers/GetTypeById"
 import Navigation from "../components/Navigation"
 import UserToken from "../models/UserToken"
+import useSWR from "swr"
 import style from "../styles/modules/documents.module.scss"
 import Head from "next/head"
 
@@ -79,40 +80,69 @@ function Folder({ name, count, privateCount, userAccess }: FolderData){
 	)
 }
 
+interface Folder {
+	name: string
+	count: number
+	privateCount: number
+}
+
+interface FoldersProps {
+	folders: Folder[]
+	loading: boolean
+	error: any
+	userAccess: DocumentsProps["userAccess"]
+}
+
+function Folders({ folders, loading, error, userAccess }: FoldersProps){
+	if(error) return <p>Algo deu errado</p>
+	if(loading) return <p>Carregando...</p>
+	if(!folders.length) return <p>Não há pastas</p>
+
+	return (
+		<div className={style.folders}>{folders.map(data => (
+			<Folder key={data.name} {...{
+				...data,
+				userAccess
+			}} />
+		))}</div>
+	)
+}
+
 export default function DocumentsPage({ config, userToken, userAccess }: DocumentsProps){
-	const [files, setFiles] = useState<IFileLean[]>()
+	const { data: files, error } = useSWR("/api/files", (url: string) => fetch(url, {
+		headers: {
+			Authorization: userToken
+		}
+	}).then(async response => {
+		const { data } = await response.json()
+		return data as IFileLean[]
+	}))
 
-	useEffect(() => {
-		fetch("/api/files", {
-			headers: {
-				Authorization: userToken
-			}
-		}).then(async response => {
-			const { data } = await response.json()
-			setFiles(data)
-		})
-	}, [])
-
-	const folders = new Map<string, { count: number, privateCount: number }>
+	const foldersMap = new Map<string, { count: number, privateCount: number }>
+	const folders = new Array<Folder>
 
 	files?.forEach(file => {
 		const type = GetTypeById(config, file.type)!
 		const folder = type.name
 
-		if(folders.has(folder)){
-			const object = folders.get(folder)!
+		if(foldersMap.has(folder)){
+			const object = foldersMap.get(folder)!
 
 			if(file.access === "private"){
 				object.privateCount++
 			}
 
 			object.count++
-			folders.set(folder, object)
+			foldersMap.set(folder, object)
 		}else{
 			const object = { count: 1, privateCount: file.access === "private" ? 1 : 0 } as const
-			folders.set(folder, object)
+			foldersMap.set(folder, object)
 		}
 	})
+
+	for(const [name, data] of foldersMap.entries()){
+		folders.push({ name, ...data })
+	}
 
 	return <>
 		<Head>
@@ -125,15 +155,7 @@ export default function DocumentsPage({ config, userToken, userAccess }: Documen
 		<Navigation {...{ userAccess }} />
 
 		<main className={style.main}>
-			{folders.size ? (
-				<div className={style.folders}>{Array.from(folders.entries()).map(([folder, data]) => (
-					<Folder {...{
-						name: folder,
-						userAccess,
-						...data
-					}} />
-				))}</div>
-			) : <p>Não há pastas</p>}
+			<Folders {...{ folders, loading: !files, error, userAccess }} />
 		</main>
 	</>
 }
