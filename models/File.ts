@@ -30,6 +30,10 @@ const FileSchema = new Schema<IFile, FileModel>({
 		type: Date,
 		required: true
 	},
+	expiresAt: {
+		type: Date,
+		required: true
+	},
 	access: {
 		type: String,
 		trim: true,

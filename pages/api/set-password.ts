@@ -17,7 +17,6 @@ interface ISetPassword {
 export default async function SetPasswordAPI(request: NextApiRequest, response: NextApiResponse){
 	const HandleError = HandleAPIError.bind(undefined, response)
 	const SendError = SendAPIError.bind(undefined, response)
-	const config = await GetCachedConfig(true)
 
 	if(!ValidateSize(request.headers["content-length"], maxSize)) return HandleError("length")
 	if(!typeis(request, ["application/x-www-form-urlencoded"])) return HandleError("contentType")

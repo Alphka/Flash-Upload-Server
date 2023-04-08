@@ -7,10 +7,9 @@ import accepts from "accepts"
 
 export default async function Config(request: NextApiRequest, response: NextApiResponse<APIResponse<Config>>){
 	const HandleError = HandleAPIError.bind(undefined, response)
-	const accept = accepts(request)
 
 	if(request.method !== "GET") return HandleError("method")
-	if(!accept.types("json")) return HandleError("accept")
+	if(!accepts(request).types("json")) return HandleError("accept")
 
 	response.status(200)
 

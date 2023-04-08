@@ -25,13 +25,20 @@ interface FileData {
 async function UploadFile(file: Buffer, { hash, filename, createdAt, access, typeId, extension }: FileData){
 	extension ??= extname(filename)
 
+	const uploaded = new Date
+	const expires = new Date(uploaded)
+
+	// TODO: Get year from config, for each document type
+	expires.setFullYear(uploaded.getFullYear() + 5)
+
 	await File.create({
 		content: file,
 		hash,
 		access,
 		filename,
 		createdAt: createdAt,
-		uploadedAt: new Date,
+		uploadedAt: uploaded,
+		expiresAt: expires,
 		hashFilename: hash + extension,
 		type: typeId
 	})
