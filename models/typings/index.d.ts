@@ -3,7 +3,7 @@ import type { Model } from "mongoose"
 
 type DateType = Date | number | string
 
-export type AccessTypes = "all" | "public"
+export type AccessTypes = "private" | "public"
 
 export interface IFile {
 	content: Buffer
@@ -13,18 +13,6 @@ export interface IFile {
 	createdAt: DateType
 	uploadedAt: DateType
 	expiresAt: DateType
-	access: AccessTypes
-	type: number
-}
-
-export interface IFileLean {
-	content: string
-	hash: string
-	filename: string
-	hashFilename: string
-	createdAt: string
-	uploadedAt: string
-	expiresAt: string
 	access: AccessTypes
 	type: number
 }

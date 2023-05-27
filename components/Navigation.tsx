@@ -1,10 +1,10 @@
-import type { AccessTypes } from "../models/typings"
+import type { LoginAccess } from "../typings/database"
 import { memo, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 
 interface GlobalProps {
-	userAccess: AccessTypes
+	userAccess: LoginAccess
 }
 
 interface NavigationProps extends GlobalProps {}
@@ -76,7 +76,7 @@ const Logo = memo(function Logo(){
 	return (
 		<header>
 			<Link href="/" prefetch={false}>
-				<Image src="/icons/logo.svg" alt={locales.siteLogo} loading="eager" width={32} height={32} />
+				<Image src="/icons/logo.svg" alt={locales.siteLogo} loading="eager" width={32} height={32} draggable={false} />
 				<span>Flash</span>
 			</Link>
 		</header>

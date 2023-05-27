@@ -67,6 +67,11 @@ main.main{
 					border-radius: 4pt;
 					transform: scale(0.9);
 					cursor: pointer;
+
+					&:hover{
+						filter: brightness(110%);
+						box-shadow: 1px 1px 3px black;
+					}
 				}
 			}
 
@@ -86,7 +91,7 @@ main.main{
 					.label{
 						min-width: clamp(100px, 150px, 30vw);
 						font-weight: 500;
-						flex: 1;
+						flex: 3;
 
 						.password{
 							-webkit-text-security: disc;
@@ -104,7 +109,7 @@ main.main{
 						background-color: var(--color);
 						padding: 4pt 8pt;
 						border-radius: 2pt;
-						flex: 3;
+						flex: 1;
 
 						&[type=button],
 						&[type=submit]{
@@ -139,7 +144,7 @@ main.main{
 				cursor: pointer;
 
 				&:hover{
-					color: lighten(blue, 20%);
+					color: var(--link-color);
 				}
 			}
 
@@ -150,6 +155,10 @@ main.main{
 					input{
 						background-color: var(--background-dark-light);
 						width: clamp(150px, 200px, 100%);
+					}
+
+					&:has(:global .icon) input{
+						padding-right: calc(24px + 8pt);
 					}
 
 					:global .icon{

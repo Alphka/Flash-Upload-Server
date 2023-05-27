@@ -1,4 +1,4 @@
-import type { InputHTMLAttributes, CSSProperties, MouseEvent, KeyboardEvent, RefObject } from "react"
+import type { InputHTMLAttributes, CSSProperties, MouseEvent, ReactEventHandler, SyntheticEvent } from "react"
 import type { Config, LoginAccess } from "../typings/database"
 import type { AccessTypes, IUser } from "../models/typings"
 import type { GetServerSideProps } from "next"
@@ -31,7 +31,7 @@ interface PasswordInputProps extends InputHTMLAttributes<HTMLInputElement> {
 interface SettingsPageProps {
 	users?: IUser[]
 	config: Config
-	userAccess: AccessTypes
+	userAccess: LoginAccess
 }
 
 interface UserProps {
@@ -51,9 +51,9 @@ const UserComponent = memo(function User({ username, password, access, removeUse
 	const passwordRef = useRef<HTMLSpanElement>(null)
 
 	const setPassword = useCallback(async (password: string) => {
-		const response = await fetch("/api/set-password", {
+		const response = await fetch("/api/user", {
 			body: new URLSearchParams({ username, password }),
-			method: "POST",
+			method: "PUT",
 			credentials: "include"
 		})
 
@@ -106,7 +106,12 @@ const UserComponent = memo(function User({ username, password, access, removeUse
 
 								if(element.hasAttribute("contenteditable")){
 									element.removeAttribute("contenteditable")
-									element.classList.add(style.password)
+
+									if(element.dataset.password){
+										element.classList.add(style.password)
+										delete element.dataset.password
+									}
+
 									setPassword(element.textContent!.trim())
 								}
 							}}
@@ -119,7 +124,11 @@ const UserComponent = memo(function User({ username, password, access, removeUse
 						const range = document.createRange()
 						const selection = window.getSelection()!
 
-						element.classList.remove(style.password)
+						if(element.classList.contains(style.password)){
+							element.dataset.password = "true"
+							element.classList.remove(style.password)
+						}
+
 						element.contentEditable = "true"
 						element.focus()
 
@@ -315,6 +324,7 @@ const Input = memo(forwardRef<HTMLInputElement, InputProps>(function Input({
 }))
 
 const PasswordInput = memo(forwardRef<HTMLInputElement, PasswordInputProps>(function PasswordInput(props, ref){
+	const [showIcon, setShowIcon] = useState(false)
 	const [showPassword, setShowPassword] = useState(false)
 	const [randomPassword, setRandomPassword] = useState("")
 	const toggleVisibility = useCallback(() => setShowPassword(!showPassword), [showPassword])
@@ -323,6 +333,8 @@ const PasswordInput = memo(forwardRef<HTMLInputElement, PasswordInputProps>(func
 	useEffect(() => setRandomPassword(Math.random().toString(32).substring(2)), [])
 
 	function PasswordIcon(){
+		if(!showIcon) return null
+
 		return (
 			<span className="icon material-symbols-outlined" onClick={toggleVisibility}>
 				{showPassword ? "visibility_off" : "visibility"}
@@ -330,13 +342,17 @@ const PasswordInput = memo(forwardRef<HTMLInputElement, PasswordInputProps>(func
 		)
 	}
 
+	const updateIcon = useCallback((event: SyntheticEvent<HTMLInputElement>) => {
+		setShowIcon(Boolean(event.currentTarget.value))
+	}, [showIcon])
+
 	return <Input {...{
 		...props,
 		ref: forwardedRef,
 		type: showPassword ? "text" : "password",
 		placeholder: `Ex: ${randomPassword}`,
-		icon: forwardedRef.current?.value ? <PasswordIcon /> : null
-	}} />
+		icon: <PasswordIcon />
+	}} onChange={updateIcon} />
 }))
 
 export const getServerSideProps: GetServerSideProps<SettingsPageProps> = async ({ req, res }) => {

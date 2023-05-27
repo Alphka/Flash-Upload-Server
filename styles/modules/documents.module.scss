@@ -7,24 +7,34 @@ main.main{
 
 .folders{
 	display: flex;
-	flex-direction: row;
-	align-items: stretch;
+	flex-direction: column;
 	justify-content: flex-start;
-	flex-wrap: wrap;
+	align-items: stretch;
 	gap: 12pt;
 	padding: 0 8pt;
+	width: 100%;
 
 	.folder{
-		background-color: var(--background-dark-light);
+		display: flex;
+		flex-direction: column;
+		align-items: stretch;
 		padding: 12pt 8pt;
-		border-radius: 2pt;
-		flex: 1;
+		gap: 8pt;
 
-		.header{
+		> .header{
+			:global .icon{
+				font-variation-settings: "FILL" 0, "wght" 600, "GRAD" 0, "opsz" 64;
+			}
 
+			> a{
+				display: flex;
+				flex-direction: row;
+				align-items: stretch;
+				gap: 4pt;
 
-			.title{
-
+				.title{
+					font-weight: 600;
+				}
 			}
 		}
 
@@ -32,6 +42,43 @@ main.main{
 			background-color: var(--background-dark);
 			border-radius: 4pt;
 			padding: 2pt 8pt;
+
+			> .header,
+			> .file{
+				display: flex;
+				gap: 4pt;
+
+				> *{
+					flex: 1;
+					overflow-x: hidden;
+					white-space: nowrap;
+					text-overflow: ellipsis;
+
+					&.filename{
+						flex: 2;
+					}
+				}
+			}
+
+			> .header{
+				color: var(--font-secondary-color);
+				text-align: center;
+			}
+
+			> .file > :not(.filename){
+				text-align: center;
+			}
 		}
+	}
+
+	a{
+		text-decoration: none;
+		color: inherit;
+	}
+}
+
+.list{
+	table{
+		border-spacing: 12pt 8pt;
 	}
 }

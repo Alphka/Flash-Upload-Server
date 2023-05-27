@@ -98,7 +98,7 @@ export default function IndexPage({ config, userAccess }: IndexProps){
 			</article>
 
 			<aside className={style.image}>
-				<Image src="/images/documents.png" alt="Ilustração de documentos" width={600} height={480} priority={true} quality={80} />
+				<Image src="/images/documents.png" alt="Ilustração de documentos" width={600} height={480} priority={true} quality={80} draggable={false} />
 			</aside>
 		</main>
 
