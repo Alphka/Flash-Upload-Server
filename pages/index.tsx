@@ -1,7 +1,6 @@
+import type { Config, LoginAccess } from "../typings/database"
 import type { GetServerSideProps } from "next"
-import type { AccessTypes } from "../models/typings"
 import type { FileInfo } from "../typings"
-import type { Config } from "../typings/database"
 import { useEffect, type RefObject } from "react"
 import { useCallback, useState } from "react"
 import { GetCookie, SetCookie } from "../helpers/Cookie"
@@ -20,7 +19,7 @@ import Head from "next/head"
 
 interface IndexProps {
 	config: Config
-	userAccess: AccessTypes
+	userAccess: LoginAccess
 }
 
 const title = "Página inicial"
