@@ -1,0 +1,102 @@
+@use "./import/variables";
+@use "./import/mixins";
+
+.overflow{
+	position: absolute;
+	background-color: rgba(adjust-color(variables.$primaryColor, $lightness: -3%), 95%);
+	top: 0;
+	right: 0;
+	left: 0;
+	bottom: 0;
+	min-height: 100vh;
+	overflow: hidden auto;
+
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+
+	> .close{
+		$size: 25pt;
+		$fontSize: $size - 5pt;
+
+		@include mixins.userSelectNone;
+
+		background-color: black;
+		position: absolute;
+		top: 4pt;
+		right: 4pt;
+		width: $size;
+		height: $size;
+		font-size: $fontSize;
+		line-height: $fontSize;
+		border-radius: 50%;
+		cursor: pointer;
+
+		&:hover{
+			background-color: lighten(black, 20%);
+		}
+
+		@media screen and (max-width: variables.$mobileSize){
+			right: 8pt;
+		}
+	}
+
+	> .content{
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		max-width: 1920px;
+		width: 80%;
+
+		> section{
+			display: flex;
+			flex-direction: column;
+
+			&.header{
+				width: inherit;
+				align-items: center;
+				margin: 4pt 0 12pt;
+
+				.title{
+					display: block;
+					font-size: 30pt;
+					text-align: center;
+
+					@media screen and (max-width: variables.$mobileSize){
+						font-size: 28pt;
+						white-space: nowrap;
+					}
+				}
+			}
+
+			&.submit{
+				width: 100%;
+
+				input,
+				button{
+					position: relative;
+					background-color: var(--secondary-color);
+					box-shadow: 1px 1px 0 var(--terciary-color);
+					display: block;
+					font-family: inherit;
+					font-size: 14px;
+					max-width: 62pt;
+					align-self: center;
+					padding: 4pt 16pt;
+					margin: 20pt 0 8pt;
+					border-radius: 20pt;
+					cursor: pointer;
+
+					&:hover{
+						filter: brightness(90%);
+					}
+				}
+
+				button .spinner{
+					@include mixins.spinner(var(--font-color), calc(1em + 4pt * 2 - 1px * 2), block, 1px);
+				}
+			}
+		}
+	}
+}

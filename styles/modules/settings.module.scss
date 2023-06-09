@@ -32,20 +32,30 @@ main.main{
 		width: 100%;
 		gap: 8pt;
 
+		$headerPadding: 4pt 0;
+
 		@media screen and (max-width: variables.$mobileSize){
 			display: flex;
 			flex-direction: column;
 			grid-template-columns: none;
 		}
 
-		.user{
-			$backroundColor: #262626;
-
-			background-color: $backroundColor;
+		.cell{
+			background-color: var(--background-dark);
 			border-radius: 4pt;
 
-			.header, .controls{
+			.header,
+			.form,
+			.controls{
 				margin: 0 4pt;
+			}
+
+			.form,
+			.controls{
+				display: flex;
+				flex-direction: column;
+				padding: 4pt 0;
+				gap: 4pt;
 			}
 
 			.header{
@@ -54,8 +64,8 @@ main.main{
 				display: flex;
 				align-items: center;
 				justify-content: flex-start;
-				border-bottom: 1px solid #ccc;
-				padding: 2pt 0;
+				border-bottom: 1px solid var(--font-secondary-color);
+				padding: $headerPadding;
 				gap: 4pt;
 
 				.username{
@@ -63,7 +73,7 @@ main.main{
 				}
 
 				.remove{
-					background-color: #9d2929;
+					background-color: var(--remove-button);
 					border-radius: 4pt;
 					transform: scale(0.9);
 					cursor: pointer;
@@ -74,66 +84,40 @@ main.main{
 					}
 				}
 			}
+		}
+
+		.user{
+			position: relative;
 
 			.controls{
-				display: flex;
-				flex-direction: column;
-				gap: 4pt;
-				padding: 4pt 0;
+				height: calc(100% - #{nth($headerPadding, 1) * 2 + 24px}); // 100% - header
+				align-items: start;
 
-				div{
-					display: flex;
-					align-items: center;
-					justify-content: space-between;
-					flex-wrap: wrap;
-					gap: 4pt;
+				.label{
+					.password{
+						cursor: pointer;
 
-					.label{
-						min-width: clamp(100px, 150px, 30vw);
-						font-weight: 500;
-						flex: 3;
-
-						.password{
+						&.disc{
 							-webkit-text-security: disc;
 						}
 					}
+				}
 
-					.error{
-						display: block;
-						position: relative;
-						color: var(--error-color);
-						font-size: 11px;
-					}
+				.edit{
+					background-color: var(--background-dark-light);
+					display: block;
+					width: 120px;
+					border-radius: 8pt;
+					padding: 2pt 0;
+					margin-bottom: 4pt;
+					align-self: center;
+					cursor: pointer;
 
-					input{
-						background-color: var(--color);
-						padding: 4pt 8pt;
-						border-radius: 2pt;
-						flex: 1;
-
-						&[type=button],
-						&[type=submit]{
-							cursor: pointer;
-
-							:hover{
-								filter: brightness(0.9);
-							}
-						}
-
-						&[type=text],
-						&[type=password]{
-							&::placeholder{
-								color: darken(white, 30%);
-							}
-
-							&:focus{
-								box-shadow: inset 0 0 4pt rgba($backroundColor, 0.95);
-
-								&::placeholder{
-									visibility: hidden;
-								}
-							}
-						}
+					&:hover,
+					&:focus{
+						cursor: pointer;
+						filter: brightness(120%);
+						box-shadow: 0 1px 3px black;
 					}
 				}
 			}
@@ -144,64 +128,145 @@ main.main{
 				cursor: pointer;
 
 				&:hover{
-					color: var(--link-color);
-				}
-			}
-
-			.controls{
-				div{
-					position: relative;
-
-					input{
-						background-color: var(--background-dark-light);
-						width: clamp(150px, 200px, 100%);
-					}
-
-					&:has(:global .icon) input{
-						padding-right: calc(24px + 8pt);
-					}
-
-					:global .icon{
-						@include mixins.userSelectNone;
-
-						position: absolute;
-						right: 4pt;
-
-						&:hover{
-							filter: brightness(0.8);
-							cursor: pointer;
-						}
-					}
-
-					&.submit{
-						justify-content: center;
-
-						button{
-							$height: 28px;
-
-							background-color: #284e28;
-							border-radius: 2pt;
-							margin: 4pt 0;
-							height: $height;
-							width: 60px;
-							text-align: center;
-
-							&:hover{
-								cursor: pointer;
-								filter: brightness(0.9);
-								box-shadow: 0 1px 3px black;
-							}
-
-							.spinner{
-								@include mixins.spinner(var(--font-color), calc(#{$height} - 6pt), block, 1px);
-
-								display: inline-block;
-								vertical-align: middle;
-							}
-						}
-					}
+					filter: brightness(80%);
 				}
 			}
 		}
 	}
+}
+
+.user_management .form,
+.overflow .form{
+	div,
+	label{
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		flex-wrap: wrap;
+		gap: 4pt;
+	}
+
+	div{
+		width: 100%;
+		position: relative;
+		flex-direction: column;
+
+		&.submit{
+			justify-content: center;
+
+			button{
+				$height: 28px;
+
+				background-color: #284e28;
+				border-radius: 2pt;
+				margin: 4pt 0;
+				height: $height;
+				width: 60px;
+				text-align: center;
+
+				&:hover,
+				&:focus{
+					cursor: pointer;
+					filter: brightness(0.9);
+					box-shadow: 0 1px 3px black;
+				}
+
+				.spinner{
+					@include mixins.spinner(var(--font-color), calc(#{$height} - 6pt), block, 1px);
+
+					display: inline-block;
+					vertical-align: middle;
+				}
+			}
+		}
+	}
+
+	label{
+		flex-direction: row;
+		width: inherit;
+
+		span{
+			flex: 1;
+		}
+
+		input{
+			background-color: var(--background-dark-light);
+			border-radius: 2pt;
+			padding: 4pt 8pt;
+			flex: 2;
+
+			&[type=button],
+			&[type=submit]{
+				cursor: pointer;
+
+				:hover{
+					filter: brightness(0.9);
+				}
+			}
+
+			&[type=text],
+			&[type=password]{
+				&::placeholder{
+					color: var(--font-secondary-color);
+					text-transform: initial;
+				}
+
+				&:focus{
+					box-shadow: inset 0 0 4pt var(--background-dark);
+
+					&::placeholder{
+						visibility: hidden;
+					}
+				}
+			}
+
+			&[name=access]{
+				text-transform: lowercase;
+			}
+		}
+
+		&:has(:global .icon) input{
+			padding-right: calc(24px + 8pt);
+		}
+	}
+
+	:global .icon{
+		@include mixins.userSelectNone;
+
+		position: absolute;
+		top: 2pt;
+		right: 4pt;
+		bottom: 2pt;
+
+		&:hover{
+			filter: brightness(0.8);
+			cursor: pointer;
+		}
+	}
+}
+
+.overflow{
+	.content{
+		.form{
+			display: flex;
+			width: 100%;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			border-top: 1px solid white;
+			padding: 8pt 4pt;
+			gap: 4pt;
+
+			div{
+				width: clamp(100pt, 100%, 300pt);
+			}
+		}
+	}
+}
+
+.error{
+	display: block;
+	position: relative;
+	color: var(--error-color);
+	font-size: 11px;
 }

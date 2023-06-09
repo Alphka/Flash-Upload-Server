@@ -1,7 +1,7 @@
 import type { FileInfo, FileObject, FilesMap } from "../../typings"
 import type { DocumentTypeInfo } from "../../typings/database"
 import { memo, useCallback, useRef, useState } from "react"
-import overflowStyle from "../../styles/modules/overflow.module.scss"
+import style from "../../styles/modules/upload-menu.module.scss"
 
 interface FileContainerProps {
 	info: FileInfo
@@ -36,23 +36,23 @@ const FileContainer = memo(({ info, setFile, deleteFile, types }: FileContainerP
 	})
 
 	return (
-		<section ref={container} className={overflowStyle.file}>
-			<button className={`icon ${overflowStyle.delete} material-symbols-outlined`} onClick={() => deleteFile(info.name, true)}>delete</button>
+		<section ref={container} className={style.file}>
+			<button className={`icon ${style.delete} material-symbols-outlined`} onClick={() => deleteFile(info.name, true)}>delete</button>
 			<p className="name">
-				<span className={overflowStyle.label}>Nome</span>
-				<span className={overflowStyle.content}>{info.name}</span>
+				<span className={style.label}>Nome</span>
+				<span className={style.content}>{info.name}</span>
 			</p>
 			<p className="mime">
-				<span className={overflowStyle.label}>Tipo de arquivo</span>
-				<span className={overflowStyle.content}>{info.type}</span>
+				<span className={style.label}>Tipo de arquivo</span>
+				<span className={style.content}>{info.type}</span>
 			</p>
-			<p className={overflowStyle.date}>
-				<span className={overflowStyle.label}>Data de criação</span>
+			<p className={style.date}>
+				<span className={style.label}>Data de criação</span>
 				<input type="date" defaultValue={GetInputDate(info.date)} ref={dateInput} />
 			</p>
-			<p className={overflowStyle.type}>
-				<span className={overflowStyle.label}>Tipo de documento</span>
-				<select className={overflowStyle.content} defaultValue={0} ref={typeSelect}>
+			<p className={style.type}>
+				<span className={style.label}>Tipo de documento</span>
+				<select className={style.content} defaultValue={0} ref={typeSelect}>
 					<option disabled hidden value={0}>Selecione um tipo</option>
 					{types && types.map(({ id, name }) => (
 						<option value={id} key={`documentType-${id}`}>{name}</option>
@@ -60,13 +60,13 @@ const FileContainer = memo(({ info, setFile, deleteFile, types }: FileContainerP
 				</select>
 			</p>
 			{/* TODO: Only render this if user's access is all */}
-			<p className={overflowStyle.checkbox}>
+			<p className={style.checkbox}>
 				<label>
 					<input type="checkbox" ref={checkboxInput} />
-					<span className={overflowStyle.label}>Arquivo privado</span>
+					<span className={style.label}>Arquivo privado</span>
 				</label>
 			</p>
-			{errorMessage && <p className={overflowStyle.error}>{errorMessage}</p>}
+			{errorMessage && <p className={style.error}>{errorMessage}</p>}
 		</section>
 	)
 })

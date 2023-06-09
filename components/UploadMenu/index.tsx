@@ -1,12 +1,13 @@
-import type { APIResponseError, APIUploadResponse } from "../../typings/api"
 import type { FileInfo, FileObject, FilesMap } from "../../typings"
+import type { APIUploadResponse } from "../../typings/api"
 import type { DocumentTypeInfo } from "../../typings/database"
 import type { CSSProperties } from "react"
 import { useState, useEffect } from "react"
 import { toast } from "react-toastify"
+import HandleRequestError from "../../helpers/HandleRequestError"
 import FileContainer from "./FileContainer"
-import overflowStyle from "../../styles/modules/overflow.module.scss"
-import axios, { type AxiosError } from "axios"
+import axios from "axios"
+import style from "../../styles/modules/upload-menu.module.scss"
 
 interface UploadMenuProps {
 	types: DocumentTypeInfo[]
@@ -16,20 +17,11 @@ interface UploadMenuProps {
 	ClearInput: () => any
 }
 
-function HandleRequestError(error: any){
-	if(error.isAxiosError){
-		const { code, response } = error as AxiosError<APIResponseError>
-		toast.error(code === "ERR_NETWORK" ? "Conexão com a internet indisponível" : response?.data.error ?? "Algo deu errado")
-	}
-
-	console.error(error)
-}
-
 export default function UploadMenu({ types, inputFiles, isUploadMenu, setIsUploadMenu, ClearInput }: UploadMenuProps){
 	const [uploadPercentage, setUploadPercentage] = useState(0)
 	const [isProgressBar, setIsProgressBar] = useState(false)
-	const [files, setFiles] = useState<FilesMap>(new Map)
 	const [submitBusy, setSubmitBusy] = useState(false)
+	const [files, setFiles] = useState<FilesMap>(new Map)
 
 	function CloseMenu(){
 		if(submitBusy) return
@@ -91,21 +83,21 @@ export default function UploadMenu({ types, inputFiles, isUploadMenu, setIsUploa
 	if(!isUploadMenu) return null
 
 	return (
-		<div className={overflowStyle.overflow}>
-			<button className={`icon ${overflowStyle.close} material-symbols-outlined`} onClick={CloseMenu}>close</button>
+		<div className={`overflow ${style.overflow}`}>
+			<button className="icon close material-symbols-outlined" onClick={CloseMenu}>close</button>
 
-			<article>
-				<section className={overflowStyle.header}>
-					<h1 className={overflowStyle.title}>Enviar arquivos</h1>
+			<article className={`content ${style.content}`}>
+				<section className="header">
+					<h1 className="title">Enviar arquivos</h1>
 				</section>
 
-				<section className={overflowStyle.files}>
+				<section className={style.files}>
 					{inputFiles.map(info => (
 						<FileContainer key={info.name} {...{ info, setFile, deleteFile, types }} />
 					))}
 				</section>
 
-				<section className={overflowStyle.submit}>
+				<section className={`submit ${style.submit}`}>
 					<input type="button" value="Enviar" onClick={async () => {
 						if(submitBusy) return
 
@@ -194,9 +186,9 @@ export default function UploadMenu({ types, inputFiles, isUploadMenu, setIsUploa
 					}} />
 
 					{isProgressBar && (
-						<div className={overflowStyle.progress}>
-							<div className={overflowStyle.bar} style={{ "--width": uploadPercentage + "%" } as CSSProperties}></div>
-							<span className={overflowStyle.percentage}>{uploadPercentage}%</span>
+						<div className={style.progress}>
+							<div className={style.bar} style={{ "--width": uploadPercentage + "%" } as CSSProperties}></div>
+							<span className={style.percentage}>{uploadPercentage}%</span>
 						</div>
 					)}
 				</section>

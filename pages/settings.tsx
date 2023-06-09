@@ -1,155 +1,98 @@
-import type { InputHTMLAttributes, CSSProperties, MouseEvent, ReactEventHandler, SyntheticEvent } from "react"
+import type { InputHTMLAttributes, MouseEvent, SyntheticEvent } from "react"
 import type { Config, LoginAccess } from "../typings/database"
 import type { AccessTypes, IUser } from "../models/typings"
 import type { GetServerSideProps } from "next"
 import type { APIResponse } from "../typings/api"
 import { memo, forwardRef, useRef, useState, useCallback, useEffect } from "react"
 import { GetCachedConfig } from "../helpers/Config"
+import { IUpdateUser } from "./api/user"
 import { toast } from "react-toastify"
+import HandleRequestError from "../helpers/HandleRequestError"
 import useForwardedRef from "../helpers/useForwardedRef"
 import ConnectDatabase from "../lib/ConnectDatabase"
 import Unauthorize from "../helpers/Unauthorize"
 import Navigation from "../components/Navigation"
 import UserToken from "../models/UserToken"
+import UserDb from "../models/User"
 import style from "../styles/modules/settings.module.scss"
 import Head from "next/head"
-import User from "../models/User"
 
 const title = "Configurações"
 const description = "Página de configuração do site."
 
-interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
-	label: string
-	error: string | undefined
-	icon?: JSX.Element | null
-}
-interface PasswordInputProps extends InputHTMLAttributes<HTMLInputElement> {
-	label: string
-	error: string | undefined
-}
-
-interface SettingsPageProps {
-	users?: IUser[]
-	config: Config
-	userAccess: LoginAccess
-}
-
 interface UserProps {
 	username: string
 	password: string
-	access: string
+	access: LoginAccess
+	clearErrors: () => void
+	setData: (state: OverflowData) => any
 	removeUser: (username: string) => any
+	setIsOverflow: (state: boolean) => any
 }
 
-interface AddUserProps {
-	config: Config
-	addUser: (user: IUser) => any
-}
-
-const UserComponent = memo(function User({ username, password, access, removeUser }: UserProps){
-	const [Password, SetPassword] = useState(password)
+const User = memo(function User({ username, password, access, removeUser, clearErrors, setData, setIsOverflow }: UserProps){
 	const passwordRef = useRef<HTMLSpanElement>(null)
 
-	const setPassword = useCallback(async (password: string) => {
-		const response = await fetch("/api/user", {
-			body: new URLSearchParams({ username, password }),
-			method: "PUT",
-			credentials: "include"
-		})
-
-		if(response.ok){
-			const data = await response.json()
-			if(data.success){
-				SetPassword(password)
-				return toast.success("Senha alterada")
-			}
-		}
-
-		toast.error("Houve uma falha ao alterar a senha")
-	}, [Password])
-
 	return (
-		<div className={style.user}>
+		<div className={`${style.user} ${style.cell}`}>
 			<div className={style.header}>
 				<span className="icon material-symbols-outlined">person</span>
 				<span className={style.username}>{username}</span>
 				<span className={`icon ${style.remove} material-symbols-outlined`} title="Remover usuário" onClick={async event =>{
 					event.preventDefault()
 
-					const response = await fetch("/api/user", {
-						body: new URLSearchParams({ username }),
-						method: "DELETE",
-						credentials: "include"
-					})
+					try{
+						const response = await fetch("/api/user", {
+							body: new URLSearchParams({ username }),
+							method: "DELETE",
+							credentials: "include"
+						})
 
-					const data = await response.json() as APIResponse
+						const data = await response.json() as APIResponse
 
-					if(data.success){
+						if(!data.success) throw data.error
+
 						const { message } = data
 
 						removeUser(username)
 						toast.success("Usuário removido com sucesso")
 
 						if(message) toast.error(message)
-					}else toast.error(data.error)
+					}catch(error){
+						HandleRequestError(error)
+					}
 				}}>close</span>
 			</div>
 
 			<div className={style.controls}>
-				<div>
-					<span className={style.label}>
-						Senha: <span style={{ cursor: "pointer" }} className={style.password} ref={passwordRef}
-							onMouseDown={event => event.detail > 1 && event.preventDefault()}
-							onClick={event => event.currentTarget.classList.toggle(style.password)}
-							onBlur={event => {
-								const { currentTarget: element } = event
-
-								if(element.hasAttribute("contenteditable")){
-									element.removeAttribute("contenteditable")
-
-									if(element.dataset.password){
-										element.classList.add(style.password)
-										delete element.dataset.password
-									}
-
-									setPassword(element.textContent!.trim())
-								}
-							}}
-							onKeyPress={event => event.key === "Enter" && event.currentTarget.blur()}
-						>{password}</span>
-					</span>
-					<input type="button" value="Alterar senha" onClick={event => {
-						const element = passwordRef.current!
-						const lastNode = element.childNodes.item(element.childNodes.length - 1)!
-						const range = document.createRange()
-						const selection = window.getSelection()!
-
-						if(element.classList.contains(style.password)){
-							element.dataset.password = "true"
-							element.classList.remove(style.password)
-						}
-
-						element.contentEditable = "true"
-						element.focus()
-
-						range.setStart(lastNode, lastNode.textContent!.length)
-						range.collapse(true)
-						selection.removeAllRanges()
-						selection.addRange(range)
-
-						event.preventDefault()
-					}} style={{ "--color": "#29299d" } as CSSProperties} />
-				</div>
-				<div>
-					<span className={style.label}>Acesso: {access}</span>
-					<input type="button" value="Alterar acesso" style={{ "--color": "#005aff" } as CSSProperties} />
-				</div>
+				<span className={style.label}>
+					Senha: <span
+						className={`${style.password} ${style.disc}`}
+						onMouseDown={event => event.detail > 1 && event.preventDefault()}
+						onClick={event => event.currentTarget.classList.toggle(style.disc)}
+						onKeyPress={event => event.key === "Enter" && event.currentTarget.blur()}
+						ref={passwordRef}
+					>{password}</span>
+				</span>
+				<span className={style.label}>Acesso: {access}</span>
+				<button className={`no-outline ${style.edit}`} onClick={event => {
+					event.currentTarget.blur()
+					setData({ username, password, access })
+					clearErrors()
+					setIsOverflow(true)
+				}}>Editar</button>
 			</div>
 		</div>
 	)
 })
 
-const AddUser = memo(function AddUser({ config, addUser }: AddUserProps){
+interface AddUserProps {
+	config: Config
+	addUser: (user: IUser) => any
+	setClearErrors: (clearErrors: () => void) => any
+}
+
+const AddUser = memo(function AddUser({ config, addUser, setClearErrors }: AddUserProps){
 	const usernameRef = useRef<HTMLInputElement>(null)
 	const passwordRef = useRef<HTMLInputElement>(null)
 	const accessRef = useRef<HTMLInputElement>(null)
@@ -159,7 +102,285 @@ const AddUser = memo(function AddUser({ config, addUser }: AddUserProps){
 	const [accessError, setAccessError] = useState<string>()
 	const [fetching, setFetching] = useState(false)
 
+	useEffect(() => {
+		setClearErrors(() => () => {
+			setUsernameError(undefined)
+			setPasswordError(undefined)
+			setAccessError(undefined)
+		})
+	}, [])
+
 	function CreateUser(event: MouseEvent){
+		event.preventDefault()
+
+		if(fetching) return
+
+		const usernameInput = usernameRef.current
+		const passwordInput = passwordRef.current
+		const accessInput = accessRef.current
+
+		try{
+			if(!usernameInput) throw "O elemento do usuário não foi encontrado"
+			if(!passwordInput) throw "O elemento da senha não foi encontrado"
+			if(!accessInput) throw "O elemento do acesso não foi encontrado"
+
+			const username = usernameInput.value?.trim()
+			const password = passwordInput.value?.trim()
+			const access = accessInput.value?.trim() as AccessTypes | "" | undefined
+
+			let errored = false
+
+			if(usernameInput.checkValidity()) setUsernameError(undefined)
+			else setUsernameError(username ? "Campo de usuário inválido." : "O campo de usuário não pode estar vazio."), errored = true
+
+			if(passwordInput.checkValidity()) setPasswordError(undefined)
+			else setPasswordError(password ? "Campo de senha inválido." : "O campo de senha não pode estar vazio."), errored = true
+
+			if(accessInput.checkValidity()) setAccessError(undefined)
+			else{
+				if(access){
+					accessInput.reportValidity()
+					setAccessError(accessInput.validationMessage)
+				}else setAccessError("O campo de acesso não pode estar vazio.")
+
+				errored = true
+			}
+
+			// Type checking
+			if(errored || !access) return
+
+			return (async function Fetch(){
+				setFetching(true)
+
+				try{
+					const response = await fetch("/api/user", {
+						body: new URLSearchParams({ username, password, access }),
+						method: "POST",
+						credentials: "include"
+					})
+
+					const data: APIResponse = await response.json()
+
+					if(!data.success) throw data.error
+
+					addUser({ name: username, password, access })
+
+					usernameInput.value = passwordInput.value = accessInput.value = ""
+					passwordInput.dispatchEvent(new Event("input", { bubbles: true }))
+
+					toast.success("Usuário criado com sucesso")
+				}catch(error: any){
+					HandleRequestError(error)
+				}finally{
+					setFetching(false)
+				}
+			})()
+		}catch(error){
+			if(typeof error === "string") return toast.error(error)
+
+			console.error(error)
+			toast.error("Não foi possível criar o usuário")
+		}
+	}
+
+	return (
+		<div className={`${style.add} ${style.cell}`}>
+			<div className={style.header} onClick={() => usernameRef.current!.focus()}>
+				<span className="icon material-symbols-outlined">add</span>
+				<span className={style.username}>Adicionar usuário</span>
+			</div>
+
+			<div className={style.form}>
+				<Input label="Usuário:"
+					name="user"
+					autoComplete="username"
+					placeholder="Ex: admin"
+					className="no-outline"
+					onKeyPress={event => {
+						const input = event.target as HTMLInputElement
+
+						if(usernameError && input.value.trim()) setUsernameError(undefined)
+						if(event.key === "Enter") event.preventDefault(), passwordRef.current!.focus()
+					}}
+					error={usernameError}
+					ref={usernameRef}
+					required
+				/>
+
+				<PasswordInput label="Senha:"
+					name="password"
+					autoComplete="new-password"
+					className="no-outline"
+					onKeyPress={event => {
+						const input = event.target as HTMLInputElement
+
+						if(passwordError && input.value.trim()) setPasswordError(undefined)
+						if(event.key === "Enter") event.preventDefault(), accessRef.current!.focus()
+					}}
+					error={passwordError}
+					ref={passwordRef}
+					required
+				/>
+
+				<Input label="Acesso:"
+					name="access"
+					list="access-types"
+					className="no-outline"
+					title={`Tipo de acesso (${config.accessTypes.join(", ")})`}
+					pattern={config.accessTypes.join("|")}
+					placeholder={`Ex: ${config.accessTypes.slice(0, 3).join(", ")}`}
+					onKeyPress={event => {
+						const input = event.target as HTMLInputElement
+						const value = input.value = input.value.trim()
+
+						if(accessError && value && config.accessTypes.includes(value.toLowerCase() as LoginAccess)){
+							setAccessError(undefined)
+						}
+
+						if(event.key === "Enter"){
+							event.preventDefault()
+							submitRef.current!.click()
+						}
+					}}
+					error={accessError}
+					ref={accessRef}
+					required
+				/>
+
+				<div className={style.submit}>
+					<button className="no-outline" type="submit" ref={submitRef} onClick={CreateUser}>
+						{fetching ? <div className={style.spinner}></div> : "Enviar"}
+					</button>
+				</div>
+			</div>
+		</div>
+	)
+})
+
+interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
+	label: string
+	error: string | undefined
+	icon?: JSX.Element | null
+}
+
+const Input = memo(forwardRef<HTMLInputElement, InputProps>(function Input({
+	label,
+	error,
+	type = "text",
+	icon,
+	...rest
+}, ref){
+	const props = {
+		...rest,
+		type,
+		ref
+	}
+
+	return (
+		<div>
+			<label>
+				<span className={style.label}>{label}</span>
+				<input {...props} />
+			</label>
+			{error && <span className={style.error}>{error}</span>}
+			{icon}
+		</div>
+	)
+}))
+
+interface PasswordInputProps extends InputHTMLAttributes<HTMLInputElement> {
+	label: string
+	error: string | undefined
+}
+
+const PasswordInput = memo(forwardRef<HTMLInputElement, PasswordInputProps>(function PasswordInput(props, ref){
+	const [showIcon, setShowIcon] = useState(Boolean(props.defaultValue || props.value))
+	const [showPassword, setShowPassword] = useState(false)
+	const [randomPassword, setRandomPassword] = useState("")
+	const toggleVisibility = useCallback(() => setShowPassword(!showPassword), [showPassword])
+	const forwardedRef = useForwardedRef(ref)
+
+	useEffect(() => setRandomPassword(Math.random().toString(32).substring(2)), [])
+
+	function PasswordIcon(){
+		if(!showIcon) return null
+
+		return (
+			<span className="icon material-symbols-outlined" onClick={toggleVisibility}>
+				{showPassword ? "visibility_off" : "visibility"}
+			</span>
+		)
+	}
+
+	const updateIcon = useCallback((event: SyntheticEvent<HTMLInputElement>) => {
+		setShowIcon(Boolean(event.currentTarget.value))
+	}, [showIcon])
+
+	return <Input
+		type={showPassword ? "text" : "password"}
+		placeholder={`Ex: ${randomPassword}`}
+		onInput={updateIcon}
+		icon={<PasswordIcon />}
+		ref={forwardedRef}
+		{...props}
+	/>
+}))
+
+interface OverflowProps {
+	config: Config
+	data: OverflowData
+	isOverflow: boolean
+	editUser: (username: string, data: IUpdateUser["data"]) => any
+	setData: (state: OverflowData | undefined) => any
+	setIsOverflow: (state: boolean) => any
+}
+
+const Overflow = memo(function Overflow({ config, data: userData, setData, editUser, isOverflow, setIsOverflow }: OverflowProps){
+	const usernameRef = useRef<HTMLInputElement>(null)
+	const passwordRef = useRef<HTMLInputElement>(null)
+	const accessRef = useRef<HTMLInputElement>(null)
+	const submitRef = useRef<HTMLButtonElement>(null)
+	const [usernameError, setUsernameError] = useState<string>()
+	const [passwordError, setPasswordError] = useState<string>()
+	const [accessError, setAccessError] = useState<string>()
+	const [fetching, setFetching] = useState(false)
+
+	function EscListener(event: KeyboardEvent){
+		if(!isOverflow || event.key !== "Escape" || event.shiftKey || event.ctrlKey) return
+
+		event.preventDefault()
+		closeMenu()
+	}
+
+	function closeMenu(){
+		if(fetching) return
+
+		if(document.body.dataset.overflow){
+			delete document.body.dataset.overflow
+			document.body.style.removeProperty("overflow")
+			window.removeEventListener("keydown", EscListener)
+		}
+
+		setData(undefined)
+		setIsOverflow(false)
+		clearErrors()
+	}
+
+	function clearErrors(){
+		setUsernameError(undefined)
+		setPasswordError(undefined)
+		setAccessError(undefined)
+	}
+
+	useEffect(() => {
+		if(isOverflow && !document.body.dataset.overflow){
+			document.body.dataset.overflow = "true"
+			document.body.style.setProperty("overflow", "hidden")
+			window.addEventListener("keydown", EscListener)
+		}
+	})
+
+	function EditUser(event: MouseEvent){
 		event.preventDefault()
 
 		if(fetching) return
@@ -198,23 +419,50 @@ const AddUser = memo(function AddUser({ config, addUser }: AddUserProps){
 			// Type checking
 			if(errored || !access) return
 
+			const userObject: IUpdateUser = {
+				username: userData.username,
+				data: { username, password, access }
+			}
+
+			const conditions = [
+				username === userData.username,
+				password === userData.password,
+				access === userData.access
+			] as const
+
+			if(conditions.every(Boolean)){
+				toast.error("Nenhuma informação foi alterada")
+				return
+			}
+
+			if(conditions[0]) delete userObject.data.username
+			if(conditions[1]) delete userObject.data.password
+			if(conditions[2]) delete userObject.data.access
+
 			return (async function Fetch(){
 				setFetching(true)
 
 				try{
 					const response = await fetch("/api/user", {
-						body: new URLSearchParams({ username, password, access }),
-						method: "POST",
+						headers: {
+							Accept: "application/json,*/*",
+							"Content-Type": "application/json"
+						},
+						body: JSON.stringify(userObject),
+						method: "PUT",
 						credentials: "include"
 					})
 
 					const data: APIResponse = await response.json()
 
-					if(data.success){
-						addUser({ name: username, password, access })
-						toast.success("Usuário criado com sucesso")
-						usernameRef.current!.value = passwordRef.current!.value = accessRef.current!.value = ""
-					}else toast.error(data.error)
+					if(!data.success) throw data.error
+
+					editUser(userData.username, userObject.data)
+					closeMenu()
+
+					toast.success("Usuário editado com sucesso")
+				}catch(error: any){
+					HandleRequestError(error)
 				}finally{
 					setFetching(false)
 				}
@@ -227,140 +475,100 @@ const AddUser = memo(function AddUser({ config, addUser }: AddUserProps){
 		}
 	}
 
+	if(!isOverflow) return null
+
 	return (
-		<div className={`${style.add} ${style.user}`}>
-			<div className={style.header} onClick={() => usernameRef.current!.focus()}>
-				<span className="icon material-symbols-outlined">add</span>
-				<span className={style.username}>Adicionar usuário</span>
-			</div>
+		<div className={`overflow ${style.overflow}`}>
+			<button className="icon close material-symbols-outlined" onClick={closeMenu}>close</button>
 
-			<div className={style.controls}>
-				<Input {...{
-					label: "Usuário:",
-					required: true,
-					autoComplete: "username",
-					placeholder: "Ex: admin",
-					className: "no-outline",
-					ref: usernameRef,
-					onKeyPress: event => {
-						const input = event.target as HTMLInputElement
-						if(event.key === "Enter") event.preventDefault(), passwordRef.current!.focus()
-						if(usernameError && input.value) setUsernameError(undefined)
-					},
-					error: usernameError
-				}} />
+			<article className={`content ${style.content}`}>
+				<section className="header">
+					<h1 className="title">Editar usuário</h1>
+				</section>
 
-				<PasswordInput {...{
-					label: "Senha:",
-					autoComplete: "new-password",
-					required: true,
-					className: "no-outline",
-					onKeyPress: event => {
-						const input = event.target as HTMLInputElement
-						if(event.key === "Enter") event.preventDefault(), accessRef.current!.focus()
-						if(passwordError && input.value) setUsernameError(undefined)
-					},
-					error: passwordError,
-					ref: passwordRef
-				}} />
+				<section className={style.form}>
+					<Input label="Usuário:"
+						name="user"
+						type="text"
+						className="no-outline"
+						defaultValue={userData?.username}
+						placeholder="Ex: admin"
+						onKeyPress={event => {
+							const input = event.target as HTMLInputElement
 
-				<Input {...{
-					label: "Acesso:",
-					className: "no-outline",
-					pattern: config.accessTypes.join("|"),
-					placeholder: `Ex: ${config.accessTypes.slice(0, 3).join(", ")}`,
-					title: `Tipo de acesso (${config.accessTypes.join(", ")})`,
-					list: "access-types",
-					required: true,
-					ref: accessRef,
-					onKeyPress: event => {
-						const input = event.target as HTMLInputElement
-						if(event.key === "Enter") event.preventDefault(), submitRef.current!.click()
-						if(accessError){
-							input.value = input.value.trim()
-							if(input.value && config.accessTypes.includes(input.value.toLowerCase() as LoginAccess)) setUsernameError(undefined)
-						}
-					},
-					error: accessError
-				}} />
+							if(usernameError && input.value.trim()) setUsernameError(undefined)
+							if(event.key === "Enter") event.preventDefault(), passwordRef.current!.focus()
+						}}
+						error={usernameError}
+						ref={usernameRef}
+						required
+					/>
+					<PasswordInput label="Senha:"
+						name="password"
+						className="no-outline"
+						defaultValue={userData?.password}
+						autoComplete="new-password"
+						onKeyPress={event => {
+							const input = event.target as HTMLInputElement
 
-				<datalist id="access-types">
-					{config.accessTypes.map((type, index) => (
-						<option key={`access-type-${index}`} value={type} />
-					))}
-				</datalist>
+							if(passwordError && input.value.trim()) setPasswordError(undefined)
+							if(event.key === "Enter") event.preventDefault(), accessRef.current!.focus()
+						}}
+						error={passwordError}
+						ref={passwordRef}
+						required
+					/>
+					<Input label="Acesso:"
+						name="access"
+						type="text"
+						list="access-types"
+						className="no-outline"
+						defaultValue={userData?.access}
+						pattern={config.accessTypes.join("|")}
+						placeholder={`Ex: ${config.accessTypes.slice(0, 3).join(", ")}`}
+						onKeyPress={event => {
+							const input = event.target as HTMLInputElement
+							const value = input.value = input.value.trim()
 
-				<div className={style.submit}>
-					<button className={`no-outline ${style.submit}`} type="submit" ref={submitRef} onClick={CreateUser}>
-						{fetching ? <div className={style.spinner}></div> : "Enviar"}
+							if(accessError && value && config.accessTypes.includes(value.toLowerCase() as LoginAccess)){
+								setAccessError(undefined)
+							}
+
+							if(event.key === "Enter"){
+								event.preventDefault()
+								submitRef.current!.click()
+							}
+						}}
+						onChange={event => {
+							const input = event.target as HTMLInputElement
+							const value = input.value = input.value.trim()
+
+							if(accessError && value && config.accessTypes.includes(value.toLowerCase() as LoginAccess)){
+								setAccessError(undefined)
+							}
+						}}
+						error={accessError}
+						ref={accessRef}
+						required
+					/>
+				</section>
+
+				<section className="submit">
+					<button className="no-outline" type="submit" onClick={EditUser} ref={submitRef}>
+						{fetching ? <div className="spinner"></div> : "Enviar"}
 					</button>
-				</div>
-			</div>
+				</section>
+			</article>
 		</div>
 	)
 })
-
-const Input = memo(forwardRef<HTMLInputElement, InputProps>(function Input({
-	label,
-	error,
-	type = "text",
-	icon,
-	...rest
-}, ref){
-	const props = {
-		...rest,
-		type,
-		ref
-	}
-
-	return (
-		<div>
-			<span className={style.label}>{label}</span>
-			<input {...props} />
-			{error && <span className={style.error}>{error}</span>}
-			{icon}
-		</div>
-	)
-}))
-
-const PasswordInput = memo(forwardRef<HTMLInputElement, PasswordInputProps>(function PasswordInput(props, ref){
-	const [showIcon, setShowIcon] = useState(false)
-	const [showPassword, setShowPassword] = useState(false)
-	const [randomPassword, setRandomPassword] = useState("")
-	const toggleVisibility = useCallback(() => setShowPassword(!showPassword), [showPassword])
-	const forwardedRef = useForwardedRef(ref)
-
-	useEffect(() => setRandomPassword(Math.random().toString(32).substring(2)), [])
-
-	function PasswordIcon(){
-		if(!showIcon) return null
-
-		return (
-			<span className="icon material-symbols-outlined" onClick={toggleVisibility}>
-				{showPassword ? "visibility_off" : "visibility"}
-			</span>
-		)
-	}
-
-	const updateIcon = useCallback((event: SyntheticEvent<HTMLInputElement>) => {
-		setShowIcon(Boolean(event.currentTarget.value))
-	}, [showIcon])
-
-	return <Input {...{
-		...props,
-		ref: forwardedRef,
-		type: showPassword ? "text" : "password",
-		placeholder: `Ex: ${randomPassword}`,
-		icon: <PasswordIcon />
-	}} onChange={updateIcon} />
-}))
 
 export const getServerSideProps: GetServerSideProps<SettingsPageProps> = async ({ req, res }) => {
 	try{
 		await ConnectDatabase()
 
 		const { token } = req.cookies
-		const users = await User.find({}, { _id: 0, __v: 0 }).lean() as IUser[]
+		const users = await UserDb.find({}, { _id: 0, __v: 0 }).lean() as IUser[]
 		const user = token ? await UserToken.findOne({ token }) : null
 
 		if(user){
@@ -384,10 +592,23 @@ export const getServerSideProps: GetServerSideProps<SettingsPageProps> = async (
 	}
 }
 
-export default function SettingsPage({ config, userAccess, ...props }: SettingsPageProps){
-	const [users, setUsers] = useState<Map<string, IUser>>(new Map((props.users || []).map(user => [user.name, user])))
+interface SettingsPageProps {
+	users?: IUser[]
+	config: Config
+	userAccess: LoginAccess
+}
 
-	delete props.users
+interface OverflowData {
+	username: string
+	password: string
+	access: LoginAccess
+}
+
+export default function SettingsPage({ config, userAccess, ...props }: SettingsPageProps){
+	const [clearErrors, setClearErrors] = useState(() => () => {})
+	const [isOverflow, setIsOverflow] = useState(false)
+	const [users, setUsers] = useState<Map<string, IUser>>(new Map((props.users || []).map(user => [user.name, user])))
+	const [data, setData] = useState<OverflowData | undefined>()
 
 	const addUser = useCallback((user: IUser) => {
 		const map = new Map(users)
@@ -396,8 +617,26 @@ export default function SettingsPage({ config, userAccess, ...props }: SettingsP
 	}, [users])
 
 	const removeUser = useCallback((username: string) => {
+		if(!users.has(username)) console.error(`User not found: ${username}`)
+
 		const map = new Map(users)
 		map.delete(username)
+		setUsers(map)
+	}, [users])
+
+	const editUser = useCallback((username: string, data: IUpdateUser["data"]) => {
+		if(!users.has(username)) throw new Error(`User not found: ${username}`)
+
+		const map = new Map(users)
+		const user = users.get(username)!
+
+		if(data.username) user.name = data.username
+		if(data.password) user.password = data.password
+		if(data.access) user.access = data.access
+
+		map.delete(username)
+		map.set(user.name, user)
+
 		setUsers(map)
 	}, [users])
 
@@ -414,22 +653,35 @@ export default function SettingsPage({ config, userAccess, ...props }: SettingsP
 		<main className={style.main}>
 			<section className={style.user_management}>
 				<header>
-					<h2 className={style.title}><span className="icon material-symbols-outlined">manage_accounts</span>Gerenciamento de Usuários</h2>
+					<h2 className={style.title}>
+						<span className="icon material-symbols-outlined">manage_accounts</span>
+						Gerenciamento de Usuários
+					</h2>
 				</header>
 
 				<article className={style.users}>
-					<AddUser {...{ config, addUser }} />
+					<AddUser {...{ config, addUser, setClearErrors }} />
 
 					{Array.from(users.values()).map(({ name, password, access }, index) => (
-						<UserComponent {...{
+						<User {...{
 							username: name,
 							password,
 							access,
-							removeUser
-						}} key={`user-${index}`} />
+							setData,
+							removeUser,
+							clearErrors,
+							setIsOverflow,
+							key: `user-${index}`
+						}} />
 					))}
 				</article>
 			</section>
 		</main>
+
+		{data && <Overflow {...{ config, data, setData, editUser, isOverflow, setIsOverflow }} />}
+
+		<datalist id="access-types">
+			{config.accessTypes.map((type, index) => <option key={`access-type-${index}`} value={type} />)}
+		</datalist>
 	</>
 }

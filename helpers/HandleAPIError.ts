@@ -20,7 +20,7 @@ export default function HandleAPIError(response: NextApiResponse, error: number 
 				case "accept": return SendError(406)
 				case "origin":
 				case "userAgent": return SendError(403)
-				case "contentType": return SendError(400)
+				case "contentType": return SendError(400, "Invalid content type")
 			}
 		break
 		case "number": return SendError(error)

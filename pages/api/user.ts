@@ -19,11 +19,6 @@ interface IAddUser {
 	access: LoginAccess
 }
 
-interface IUpdateUser {
-	username: string
-	password: string
-}
-
 export default async function UserAPI(request: NextApiRequest, response: NextApiResponse){
 	const contentType = request.headers["content-type"]
 	const HandleError = HandleAPIError.bind(undefined, response)
@@ -31,7 +26,7 @@ export default async function UserAPI(request: NextApiRequest, response: NextApi
 	const config = await GetCachedConfig(true)
 
 	if(!ValidateSize(request.headers["content-length"], maxSize)) return HandleError("length")
-	if(!contentType || !typeis.is(contentType, "application/x-www-form-urlencoded")) return HandleError("contentType")
+	if(!contentType) return HandleError("contentType")
 	if(!request.headers.origin) return HandleError("origin")
 	if(!request.headers["user-agent"]) return HandleError("userAgent")
 
@@ -50,19 +45,28 @@ export default async function UserAPI(request: NextApiRequest, response: NextApi
 
 		switch(request.method){
 			case "POST": {
+				if(!typeis.is(contentType, "application/x-www-form-urlencoded")) return HandleError("contentType")
+
 				const body = (await ParseBody()).toString()
 				const data = Object.fromEntries(new URLSearchParams(body)) as unknown as IAddUser
+
 				return await AddUser(data, config, request, response)
 			}
 			case "DELETE": {
+				if(!typeis.is(contentType, "application/x-www-form-urlencoded")) return HandleError("contentType")
+
 				const body = (await ParseBody()).toString()
 				const { username } = Object.fromEntries(new URLSearchParams(body)) as { username?: string }
+
 				return await DeleteUser(username, request, response)
 			}
 			case "PUT": {
+				if(!typeis.is(contentType, "application/json")) return HandleError("contentType")
+
 				const body = (await ParseBody()).toString()
-				const data = Object.fromEntries(new URLSearchParams(body)) as unknown as IUpdateUser
-				return await UpdateUser(data, request, response)
+				const data = JSON.parse(body) as IUpdateUser
+
+				return await UpdateUser(data, config, request, response)
 			}
 			default: return HandleError("method")
 		}
@@ -109,16 +113,16 @@ async function DeleteUser(username: string | undefined, request: NextApiRequest,
 		const user = await User.findOneAndDelete({ name: username })
 
 		if(user){
-			let message: string | undefined
+			let error: string | undefined
 
 			try{
 				await UserToken.deleteMany({ name: username })
 			}catch(error){
 				console.error(error)
-				message = "Falha ao deletar os tokens"
+				error = "Falha ao deletar os tokens"
 			}
 
-			return response.status(200).json({ success: true, message })
+			return response.status(200).json({ success: true, error })
 		}
 
 		return SendError(404, "Este usuário não existe")
@@ -134,27 +138,40 @@ async function DeleteUser(username: string | undefined, request: NextApiRequest,
 	}
 }
 
-async function UpdateUser({ username, password }: IUpdateUser, request: NextApiRequest, response: NextApiResponse){
+export interface IUpdateUser {
+	username: string
+	data: {
+		username?: string
+		password?: string
+		access?: string
+	}
+}
+
+async function UpdateUser({ username, data }: IUpdateUser, { accessTypes }: Config, request: NextApiRequest, response: NextApiResponse){
 	const SendError = SendAPIError.bind(undefined, response)
 
 	try{
 		if(!username || !(username = username.trim())) throw "Usuário inválido"
-		if(!password || !(password = password.trim())) throw "Senha inválida"
+		if(!data) throw "Não foram providas informações a serem atualizadas"
+		if(typeof data.username === "string" && !data.username) throw "O novo usuário está inválido"
+		if(typeof data.password === "string" && !data.password) throw "A nova senha está inválida"
+		if(data.access && !accessTypes.includes(data.access = data.access.trim().toLowerCase() as LoginAccess)) throw "O novo acesso está inválido"
 
 		const user = await User.findOne({ name: username })
 
-		if(user){
-			try{
-				await user.updateOne({ $set: { password } })
-				response.status(200).json({ success: true })
-			}catch{
-				response.status(500).json({ success: false, message: "Erro ao atualizar informações do usuário" })
-			}
+		if(!user) return response.status(404).json({ success: false, error: "Usuário não encontrado" })
 
-			return
+		const { username: name, password, access } = data
+		const sameUser = await User.findOne({ name })
+
+		if(sameUser) return response.status(409).json({ success: false, error: "Este nome de usuário já está em uso" })
+
+		try{
+			await user.updateOne({ $set: { name, password, access } })
+			response.status(200).json({ success: true })
+		}catch{
+			response.status(500).json({ success: false, error: "Erro ao atualizar informações do usuário" })
 		}
-
-		response.status(404).json({ success: false, message: "Usuário não encontrado" })
 	}catch(error){
 		if(typeof error === "string") return SendError(400, error)
 
