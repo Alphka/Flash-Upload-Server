@@ -1,4 +1,4 @@
-import type { Config, LoginAccess } from "../typings/database"
+import type { Config, AccessTypes } from "../typings/database"
 import type { GetServerSideProps } from "next"
 import type { FileInfo } from "../typings"
 import { useEffect, type RefObject } from "react"
@@ -25,7 +25,7 @@ const alata = Alata({
 
 interface IndexProps {
 	config: Config
-	userAccess: LoginAccess
+	userAccess: AccessTypes
 }
 
 const title = "Página inicial"

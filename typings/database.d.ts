@@ -10,17 +10,15 @@ export interface Config {
 	maxFiles: number
 	maxSize: number
 	types: DocumentTypeInfo[]
-	accessTypes: LoginAccess[]
+	accessTypes: AccessTypes[]
 }
 
-export type LoginAccess =
-	| "all"
-	| "public"
+export type AccessTypes = "all" | "public"
 
 export interface Login {
 	username: string
 	password: string
-	access: LoginAccess
+	access: AccessTypes
 }
 
 export type LoginDatabase = Login[]

@@ -1,7 +1,6 @@
 import type { NextApiRequest, NextApiResponse, PageConfig } from "next"
-import type { AccessTypes } from "../../models/typings"
+import type { AccessTypes } from "../../typings/database"
 import { randomBytes } from "crypto"
-import { promisify } from "util"
 import ConnectDatabase from "../../lib/ConnectDatabase"
 import HandleAPIError from "../../helpers/HandleAPIError"
 import ValidateSize from "../../helpers/ValidateSize"
@@ -9,11 +8,13 @@ import SendAPIError from "../../helpers/SendAPIError"
 import UserToken from "../../models/UserToken"
 import User from "../../models/User"
 
-const maxSize = 2**20
+const maxSize = 1048576
 
-async function CreateToken(){
-	const buffer = await promisify(randomBytes)(48)
-	return buffer.toString("hex")
+function CreateToken(){
+	return new Promise<string>((resolve, reject) => randomBytes(48, (error, buffer) => {
+		if(error) return reject(error)
+		resolve(buffer.toString("hex"))
+	}))
 }
 
 export default async function Login(request: NextApiRequest, response: NextApiResponse){

@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse, PageConfig } from "next"
-import type { Config, LoginAccess } from "../../typings/database"
+import type { Config, AccessTypes } from "../../typings/database"
 import type { MongoServerError } from "mongodb"
 import type { IUser } from "../../models/typings"
 import { GetCachedConfig } from "../../helpers/Config"
@@ -16,7 +16,7 @@ const maxSize = 1048576
 interface IAddUser {
 	username: string
 	password: string
-	access: LoginAccess
+	access: AccessTypes
 }
 
 export default async function UserAPI(request: NextApiRequest, response: NextApiResponse){
@@ -82,7 +82,7 @@ async function AddUser({ username, password, access }: IAddUser, { accessTypes }
 	try{
 		if(!username || !(username = username.trim())) throw "Usuário inválido"
 		if(!password || !(password = password.trim())) throw "Senha inválida"
-		if(!access || !(access = access.trim() as LoginAccess) || !accessTypes.includes(access)) throw "Tipo de acesso inválido"
+		if(!access || !(access = access.trim() as AccessTypes) || !accessTypes.includes(access)) throw "Tipo de acesso inválido"
 
 		const userObject: IUser = { name: username, password, access }
 
@@ -143,7 +143,7 @@ export interface IUpdateUser {
 	data: {
 		username?: string
 		password?: string
-		access?: string
+		access?: AccessTypes
 	}
 }
 
@@ -155,7 +155,7 @@ async function UpdateUser({ username, data }: IUpdateUser, { accessTypes }: Conf
 		if(!data) throw "Não foram providas informações a serem atualizadas"
 		if(typeof data.username === "string" && !data.username) throw "O novo usuário está inválido"
 		if(typeof data.password === "string" && !data.password) throw "A nova senha está inválida"
-		if(data.access && !accessTypes.includes(data.access = data.access.trim().toLowerCase() as LoginAccess)) throw "O novo acesso está inválido"
+		if(data.access && !accessTypes.includes(data.access = data.access.trim().toLowerCase() as AccessTypes)) throw "O novo acesso está inválido"
 
 		const user = await User.findOne({ name: username })
 

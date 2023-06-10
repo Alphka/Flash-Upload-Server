@@ -1,7 +1,6 @@
-import type { RefObject } from "react"
 import type { FileInfo } from "../typings"
 import type { Config } from "../typings/database"
-import { memo, useRef } from "react"
+import { memo, useRef, type RefObject } from "react"
 import { toast } from "react-toastify"
 
 interface UploadFormProps {
@@ -62,7 +61,7 @@ const UploadForm = memo(function UploadForm({ config, setIsUploadMenu, AddFileIn
 					const filesArray = Array.from(files)
 
 					if(filesArray.some(file => file.size > maxFileSize)){
-						const sizeMB = maxFileSize / 2**20
+						const sizeMB = maxFileSize / 1048576
 						const sizeString = `${sizeMB % 1 === 0 ? sizeMB : sizeMB.toFixed(2)} MB`
 
 						setIsUploadMenu(false)

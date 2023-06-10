@@ -1,8 +1,8 @@
 import type { InputHTMLAttributes, MouseEvent, SyntheticEvent } from "react"
-import type { Config, LoginAccess } from "../typings/database"
-import type { AccessTypes, IUser } from "../models/typings"
+import type { Config, AccessTypes } from "../typings/database"
 import type { GetServerSideProps } from "next"
 import type { APIResponse } from "../typings/api"
+import type { IUser } from "../models/typings"
 import { memo, forwardRef, useRef, useState, useCallback, useEffect } from "react"
 import { GetCachedConfig } from "../helpers/Config"
 import { IUpdateUser } from "./api/user"
@@ -23,7 +23,7 @@ const description = "Página de configuração do site."
 interface UserProps {
 	username: string
 	password: string
-	access: LoginAccess
+	access: AccessTypes
 	clearErrors: () => void
 	setData: (state: OverflowData) => any
 	removeUser: (username: string) => any
@@ -233,7 +233,7 @@ const AddUser = memo(function AddUser({ config, addUser, setClearErrors }: AddUs
 						const input = event.target as HTMLInputElement
 						const value = input.value = input.value.trim()
 
-						if(accessError && value && config.accessTypes.includes(value.toLowerCase() as LoginAccess)){
+						if(accessError && value && config.accessTypes.includes(value.toLowerCase() as AccessTypes)){
 							setAccessError(undefined)
 						}
 
@@ -530,7 +530,7 @@ const Overflow = memo(function Overflow({ config, data: userData, setData, editU
 							const input = event.target as HTMLInputElement
 							const value = input.value = input.value.trim()
 
-							if(accessError && value && config.accessTypes.includes(value.toLowerCase() as LoginAccess)){
+							if(accessError && value && config.accessTypes.includes(value.toLowerCase() as AccessTypes)){
 								setAccessError(undefined)
 							}
 
@@ -543,7 +543,7 @@ const Overflow = memo(function Overflow({ config, data: userData, setData, editU
 							const input = event.target as HTMLInputElement
 							const value = input.value = input.value.trim()
 
-							if(accessError && value && config.accessTypes.includes(value.toLowerCase() as LoginAccess)){
+							if(accessError && value && config.accessTypes.includes(value.toLowerCase() as AccessTypes)){
 								setAccessError(undefined)
 							}
 						}}
@@ -595,13 +595,13 @@ export const getServerSideProps: GetServerSideProps<SettingsPageProps> = async (
 interface SettingsPageProps {
 	users?: IUser[]
 	config: Config
-	userAccess: LoginAccess
+	userAccess: AccessTypes
 }
 
 interface OverflowData {
 	username: string
 	password: string
-	access: LoginAccess
+	access: AccessTypes
 }
 
 export default function SettingsPage({ config, userAccess, ...props }: SettingsPageProps){

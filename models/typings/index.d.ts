@@ -1,9 +1,9 @@
-import type { AccessTypes } from "../User"
+import type { AccessTypes } from "../../typings/database"
 import type { Model } from "mongoose"
 
 type DateType = Date | number | string
 
-export type AccessTypes = "private" | "public"
+export type FileAccess = "private" | "public"
 
 export interface IFile {
 	content: Buffer
@@ -13,7 +13,7 @@ export interface IFile {
 	createdAt: DateType
 	uploadedAt: DateType
 	expiresAt: DateType
-	access: AccessTypes
+	access: FileAccess
 	type: number
 }
 

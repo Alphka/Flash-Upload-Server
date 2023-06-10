@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse, PageConfig } from "next"
 import type { APIUploadResponse, UploadFileError } from "../../typings/api"
 import type { BusboyStream, FilePart } from "../../typings"
-import type { AccessTypes } from "../../models/typings"
+import type { FileAccess } from "../../models/typings"
 import { GetCachedConfig } from "../../helpers/Config"
 import { extname } from "path"
 import ConnectDatabase from "../../lib/ConnectDatabase"
@@ -17,7 +17,7 @@ interface FileData {
 	hash: string
 	filename: string
 	createdAt: Date
-	access: AccessTypes
+	access: FileAccess
 	typeId: number
 	extension?: string
 }
@@ -138,7 +138,7 @@ export default async function Upload(request: NextApiRequest, response: NextApiR
 						hash,
 						filename,
 						createdAt: date,
-						access: part.folder as AccessTypes || "public",
+						access: part.folder as FileAccess || "public",
 						typeId: type.id,
 						extension
 					})

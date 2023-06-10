@@ -1,4 +1,4 @@
-import type { Config, LoginAccess } from "../../typings/database"
+import type { Config, AccessTypes } from "../../typings/database"
 import type { GetServerSideProps } from "next"
 import type { APIFileObject } from "../api/files"
 import type { APIResponse } from "../../typings/api"
@@ -19,7 +19,7 @@ const description = "Página de acesso para os documentos do Flash."
 
 export interface DocumentsProps {
 	config: Config
-	userAccess: LoginAccess
+	userAccess: AccessTypes
 }
 
 export const getServerSideProps: GetServerSideProps<DocumentsProps> = async ({ req }) => {

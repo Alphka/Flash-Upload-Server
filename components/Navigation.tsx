@@ -1,10 +1,10 @@
-import type { LoginAccess } from "../typings/database"
+import type { AccessTypes } from "../typings/database"
 import { memo, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 
 interface GlobalProps {
-	userAccess: LoginAccess
+	userAccess: AccessTypes
 }
 
 interface NavigationProps extends GlobalProps {}
