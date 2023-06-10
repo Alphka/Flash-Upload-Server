@@ -1,4 +1,5 @@
 import type { AppProps } from "next/app"
+import { Poppins, Michroma } from "next/font/google"
 import { ToastContainer } from "react-toastify"
 import Head from "next/head"
 
@@ -6,6 +7,18 @@ import "../styles/global.scss"
 import "../styles/nav.scss"
 import "../styles/overflow.scss"
 import "react-toastify/dist/ReactToastify.css"
+
+const poppins = Poppins({
+	weight: ["400", "500", "600"],
+	subsets: ["latin"],
+	display: "swap"
+})
+
+const michroma = Michroma({
+	weight: "400",
+	subsets: ["latin"],
+	display: "swap"
+})
 
 export default function App({ Component, pageProps }: AppProps){
 	return (
@@ -35,9 +48,14 @@ export default function App({ Component, pageProps }: AppProps){
 				<meta name="color-scheme" content="dark" />
 				<link rel="preconnect" href="https://fonts.googleapis.com" />
 				<link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-				<link rel="preload" href="https://fonts.googleapis.com/css2?family=Alata&family=Michroma&family=Poppins:wght@400;500;600;700&display=swap" as="style" />
 				<link rel="preload" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" as="style" />
 			</Head>
+			<style jsx global>{`
+				:root{
+					--font-family: ${poppins.style.fontFamily}, -apple-system, BlinkMacSystemFont, Segoe UI, Verdana, Arial, sans-serif;
+					--logo-font-family: ${michroma.style.fontFamily}, Verdana, Segoe UI, Arial, sans-serif;
+				}
+			`}</style>
 			<Component {...pageProps} />
 			<ToastContainer autoClose={2000} theme="dark" pauseOnHover={false} pauseOnFocusLoss={false} />
 		</>

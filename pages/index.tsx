@@ -6,6 +6,7 @@ import { useCallback, useState } from "react"
 import { GetCookie, SetCookie } from "../helpers/Cookie"
 import { GetCachedConfig } from "../helpers/Config"
 import { useRouter } from "next/router"
+import { Alata } from "next/font/google"
 import { toast } from "react-toastify"
 import ConnectDatabase from "../lib/ConnectDatabase"
 import Unauthorize from "../helpers/Unauthorize"
@@ -16,6 +17,11 @@ import UserToken from "../models/UserToken"
 import Image from "next/image"
 import style from "../styles/modules/homepage.module.scss"
 import Head from "next/head"
+
+const alata = Alata({
+	weight: "400",
+	subsets: ["latin"]
+})
 
 interface IndexProps {
 	config: Config
@@ -90,7 +96,7 @@ export default function IndexPage({ config, userAccess }: IndexProps){
 
 		<main className={style.main}>
 			<article className={style.content}>
-				<section className={style.title}>Busque com rapidez e facilidade!</section>
+				<section className={`${style.title} ${alata.className}`}>Busque com rapidez e facilidade!</section>
 				<section className={style.button}>
 					<UploadForm {...{ setIsUploadMenu, AddFileInfos, SetInputRef, config }} />
 				</section>
