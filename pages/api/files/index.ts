@@ -54,13 +54,13 @@ export default async function FilesAPI(request: NextApiRequest, response: NextAp
 	const HandleError = HandleAPIError.bind(undefined, response)
 	const { query: { folder } } = request
 
-	await ConnectDatabase()
-
-	const user = await UserToken.findOne({ token })
-
-	if(!user) return HandleError(403)
-
 	try{
+		await ConnectDatabase()
+
+		const user = await UserToken.findOne({ token })
+
+		if(!user) return HandleError(401)
+
 		response.status(200)
 
 		if(!folder) return response.json({

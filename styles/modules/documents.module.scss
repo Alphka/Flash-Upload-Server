@@ -1,3 +1,5 @@
+@use "../import/variables";
+
 main.main{
 	display: flex;
 	flex-direction: column;
@@ -16,8 +18,10 @@ main.main{
 
 	.folder{
 		display: flex;
+		background-color: lighten(variables.$secondaryColor, 1.2);
 		flex-direction: column;
 		align-items: stretch;
+		border-radius: 4pt;
 		padding: 12pt 8pt;
 		gap: 8pt;
 
@@ -39,7 +43,7 @@ main.main{
 		}
 
 		.content{
-			background-color: var(--background-dark);
+			background-color: darken(variables.$secondaryColor, 4);
 			border-radius: 4pt;
 			padding: 2pt 8pt;
 
@@ -67,6 +71,10 @@ main.main{
 
 			> .file > :not(.filename){
 				text-align: center;
+			}
+
+			> .file.private{
+				color: var(--font-secondary-color);
 			}
 		}
 	}

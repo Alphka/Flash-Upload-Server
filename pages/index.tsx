@@ -63,7 +63,7 @@ export default function IndexPage({ config, userAccess }: IndexProps){
 	const SetInputRef = useCallback((ref: typeof fileInputRef) => fileInputRef = ref, [])
 	const AddFileInfos = useCallback((infos: FileInfo[]) => files.push(...infos), [])
 
-	const ClearInput = useCallback(() => {
+	const clearInput = useCallback(() => {
 		const input = fileInputRef.current
 		if(input?.files!.length) input.files = new DataTransfer().files
 	}, [])
@@ -107,6 +107,12 @@ export default function IndexPage({ config, userAccess }: IndexProps){
 			</aside>
 		</main>
 
-		<UploadMenu {...{ inputFiles: files, isUploadMenu, setIsUploadMenu, ClearInput, types: config.types }} />
+		<UploadMenu {...{
+			userAccess,
+			inputFiles: files,
+			isUploadMenu,
+			setIsUploadMenu,
+			clearInput,
+			types: config.types }} />
 	</>
 }

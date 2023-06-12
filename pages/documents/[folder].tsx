@@ -99,14 +99,18 @@ export default function DocumentFolder({ config, type, files, userAccess }: Docu
 					</tr>
 				</thead>
 				<tbody>
-					{files.map(({ hash, filename, expiresAt, createdAt, uploadedAt }) => (
-						<tr key={hash}>
-							<td><Link href={`/api/files/${hash}`} target="_blank">{filename}</Link></td>
-							<td>{new Date(createdAt).toLocaleDateString("pt-BR")}</td>
-							<td>{new Date(uploadedAt).toLocaleDateString("pt-BR")}</td>
-							<td>{new Date(expiresAt).toLocaleDateString("pt-BR")}</td>
-						</tr>
-					))}
+					{files.map(({ hash, filename, expiresAt, createdAt, uploadedAt, access }) => {
+						const hasAccess = access !== "private" || userAccess === "all"
+
+						return (
+							<tr key={hash}>
+								<td>{hasAccess ? <Link href={`/api/files/${hash}`} target="_blank">{filename}</Link> : filename}</td>
+								<td>{new Date(createdAt).toLocaleDateString("pt-BR")}</td>
+								<td>{new Date(uploadedAt).toLocaleDateString("pt-BR")}</td>
+								<td>{new Date(expiresAt).toLocaleDateString("pt-BR")}</td>
+							</tr>
+						)
+					})}
 				</tbody>
 			</table>
 		</main>

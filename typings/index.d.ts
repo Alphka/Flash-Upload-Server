@@ -1,4 +1,5 @@
-import type { Dispatch, SetStateAction } from "react"
+import type { Dispatch, RefObject, SetStateAction } from "react"
+import type { FileAccess } from "../models/typings"
 import type internal from "stream"
 
 export type Optional<T> = {
@@ -52,10 +53,8 @@ export interface FileObject {
 	getErrorMessage: () => string | null
 }
 
-export type FilesMap = Map<string, FileObject>
-
 export interface FilePart {
-	folder?: string
+	folder?: FileAccess
 	typeId?: string
 	date?: string
 	isFile?: boolean

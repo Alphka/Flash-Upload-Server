@@ -1,9 +1,10 @@
-import type { FileInfo, FileObject, FilesMap } from "../../typings"
-import type { DocumentTypeInfo } from "../../typings/database"
+import type { AccessTypes, DocumentTypeInfo } from "../../typings/database"
+import type { FileInfo, FileObject } from "../../typings"
 import { memo, useCallback, useRef, useState } from "react"
 import style from "../../styles/modules/upload-menu.module.scss"
 
 interface FileContainerProps {
+	userAccess: AccessTypes
 	info: FileInfo
 	types: DocumentTypeInfo[] | null
 	setFile: (filename: string, data: FileObject) => any
@@ -14,7 +15,7 @@ function GetInputDate(date: string | number | Date){
 	return new Date(date).toJSON().slice(0, 10)
 }
 
-const FileContainer = memo(({ info, setFile, deleteFile, types }: FileContainerProps) => {
+const FileContainer = memo(({ userAccess, info, setFile, deleteFile, types }: FileContainerProps) => {
 	const container = useRef<HTMLElement>(null)
 	const dateInput = useRef<HTMLInputElement>(null)
 	const typeSelect = useRef<HTMLSelectElement>(null)
@@ -59,14 +60,17 @@ const FileContainer = memo(({ info, setFile, deleteFile, types }: FileContainerP
 					))}
 				</select>
 			</p>
-			{/* TODO: Only render this if user's access is all */}
-			<p className={style.checkbox}>
-				<label>
-					<input type="checkbox" ref={checkboxInput} />
-					<span className={style.label}>Arquivo privado</span>
-				</label>
-			</p>
-			{errorMessage && <p className={style.error}>{errorMessage}</p>}
+			{userAccess === "all" && (
+				<p className={style.checkbox}>
+					<label>
+						<input type="checkbox" ref={checkboxInput} />
+						<span className={style.label}>Arquivo privado</span>
+					</label>
+				</p>
+			)}
+			{errorMessage && (
+				<p className={style.error}>{errorMessage}</p>
+			)}
 		</section>
 	)
 })

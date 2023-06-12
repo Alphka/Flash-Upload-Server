@@ -1,34 +1,51 @@
 import type { NextApiRequest, NextApiResponse, PageConfig } from "next"
 import type { APIResponse } from "../../../typings/api"
+import ConnectDatabase from "../../../lib/ConnectDatabase"
+import UserToken from "../../../models/UserToken"
 import File from "../../../models/File"
 import mime from "mime"
 
 export default async function FileAPI(request: NextApiRequest, response: NextApiResponse<APIResponse>){
-	const { method, query: { hash } } = request
+	const token = request.cookies.token || request.headers.authorization
+	const { method } = request
+	const { hash } = request.query
 
-	response.setHeader("Access-Control-Allow-Methods", "GET, HEAD")
+	try{
+		await ConnectDatabase()
 
-	if(method !== "GET" && method !== "HEAD") return response.status(405).end()
+		const user = await UserToken.findOne({ token })
 
-	const file = await File.findOne({ hash })
+		if(!user) return response.status(401).end()
 
-	if(!file) return response.status(404).end()
+		response.setHeader("Access-Control-Allow-Methods", "GET, HEAD")
 
-	const { content, filename } = file
-	let type = mime.getType(filename)
+		if(method !== "GET" && method !== "HEAD") return response.status(405).end()
 
-	if(type){
-		if(/^text\/[^; ]+$/.test(type)) type += "; charset=utf-8"
-	}else type = "application/octet-stream"
+		const file = await File.findOne({ hash })
 
-	response.status(200)
-	response.setHeader("Content-Type", type)
-	response.setHeader("Content-Length", content.byteLength)
-	response.setHeader("Content-Disposition", `inline; filename="${encodeURIComponent(filename)}"`)
+		if(!file) return response.status(404).end()
 
-	if(method === "GET") response.write(content)
+		if(file.access === "private" && user.access !== "all") return response.status(403).end()
 
-	response.end()
+		const { content, filename } = file
+		let type = mime.getType(filename)
+
+		if(type){
+			if(/^text\/[^; ]+$/.test(type)) type += "; charset=utf-8"
+		}else type = "application/octet-stream"
+
+		response.status(200)
+		response.setHeader("Content-Type", type)
+		response.setHeader("Content-Length", content.byteLength)
+		response.setHeader("Content-Disposition", `inline; filename="${encodeURIComponent(filename)}"`)
+
+		if(method === "GET") response.write(content)
+
+		response.end()
+	}catch(error){
+		console.error(error)
+		response.status(500).end()
+	}
 }
 
 export const config: PageConfig = {

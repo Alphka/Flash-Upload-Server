@@ -9,6 +9,7 @@ import HandleAPIError from "../../helpers/HandleAPIError"
 import ValidateSize from "../../helpers/ValidateSize"
 import SendAPIError from "../../helpers/SendAPIError"
 import GetTypeById from "../../helpers/GetTypeById"
+import UserToken from "../../models/UserToken"
 import Busboy from "busboy"
 import Crypto from "crypto"
 import File from "../../models/File"
@@ -46,6 +47,7 @@ async function UploadFile(file: Buffer, { hash, filename, createdAt, access, typ
 export default async function Upload(request: NextApiRequest, response: NextApiResponse<APIUploadResponse>){
 	const HandleError = HandleAPIError.bind(undefined, response)
 	const SendError = SendAPIError.bind(undefined, response)
+	const token = request.cookies.token || request.headers.authorization
 	const config = await GetCachedConfig(true)
 
 	if(request.method !== "POST") return HandleError("method")
@@ -56,6 +58,10 @@ export default async function Upload(request: NextApiRequest, response: NextApiR
 
 	try{
 		await ConnectDatabase()
+
+		const user = await UserToken.findOne({ token })
+
+		if(!user) return HandleError(401)
 
 		const { maxFileSize, maxFiles } = config
 
@@ -133,6 +139,7 @@ export default async function Upload(request: NextApiRequest, response: NextApiR
 					const fileDocument = await File.findOne({ hash })
 
 					if(fileDocument) throw "Este arquivo já foi enviado para o servidor"
+					if(part.folder === "private" && user.access !== "all") throw "Você não tem permissão para enviar um arquivo privado"
 
 					await UploadFile(file, {
 						hash,

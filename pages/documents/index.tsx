@@ -2,7 +2,7 @@ import type { Config, AccessTypes } from "../../typings/database"
 import type { GetServerSideProps } from "next"
 import type { APIFileObject } from "../api/files"
 import type { APIResponse } from "../../typings/api"
-import { useCallback, useEffect, useRef, useState } from "react"
+import { memo, useCallback, useEffect, useRef, useState } from "react"
 import { GetCachedConfig } from "../../helpers/Config"
 import TruncateFilename from "../../helpers/TruncateFilename"
 import ConnectDatabase from "../../lib/ConnectDatabase"
@@ -75,7 +75,7 @@ interface Folder {
 	privateCount: number
 }
 
-function Folders({ folders, userAccess, loading, error }: FoldersProps){
+const Folders = memo<FoldersProps>(function Folders({ folders, userAccess, loading, error }){
 	const [nameLength, setNameLength] = useState<number | undefined>(undefined)
 	const filenameRef = useRef<HTMLSpanElement>(null)
 
@@ -102,7 +102,7 @@ function Folders({ folders, userAccess, loading, error }: FoldersProps){
 
 	return (
 		<div className={style.folders}>
-			{Array.from(folders.entries()).map(([name, { files, count, privateCount, reduced }]) => {
+			{Array.from(folders.entries()).map(([name, { files, count, privateCount, reduced }], index) => {
 				reduced = reduced.toLowerCase()
 
 				return (
@@ -123,28 +123,26 @@ function Folders({ folders, userAccess, loading, error }: FoldersProps){
 							</div>
 
 							{files.map(({ filename, createdAt, uploadedAt, expiresAt, hash, access }) => {
+								const hasAccess = access !== "private" || userAccess === "all"
+
 								const children = [
-									<span>{new Date(createdAt).toLocaleDateString("pt-BR")}</span>,
-									<span>{new Date(uploadedAt).toLocaleDateString("pt-BR")}</span>,
-									<span>{new Date(expiresAt).toLocaleDateString("pt-BR")}</span>
+									<span key={1}>{new Date(createdAt).toLocaleDateString("pt-BR")}</span>,
+									<span key={2}>{new Date(uploadedAt).toLocaleDateString("pt-BR")}</span>,
+									<span key={3}>{new Date(expiresAt).toLocaleDateString("pt-BR")}</span>
 								] as const
 
-								if(access === "private" && userAccess !== "all"){
-									return (
-										<div className={`${style.file} ${style.private}`} key={hash}>
-											<span className={style.filename}>{filename}</span>
-											{children}
-										</div>
-									)
-								}
-
-								if(filename === "Arquivo privado") console.log(access, userAccess)
-
-								return (
+								if(hasAccess) return (
 									<Link className={style.file} href={`/api/files/${hash}`} target="_blank" key={hash}>
-										<span className={style.filename}>{TruncateFilename(filename, nameLength)}</span>
+										<span key={0} className={style.filename}>{TruncateFilename(filename, nameLength)}</span>
 										{children}
 									</Link>
+								)
+
+								return (
+									<div className={`${style.file} ${style.private}`} key={hash}>
+										<span key={0} className={style.filename}>{filename}</span>
+										{children}
+									</div>
 								)
 							})}
 						</div>
@@ -153,7 +151,7 @@ function Folders({ folders, userAccess, loading, error }: FoldersProps){
 			})}
 		</div>
 	)
-}
+})
 
 export default function DocumentsPage({ config, userAccess }: DocumentsProps){
 	const { data: files, error } = useSWR("/api/files", async (url: string) => {
@@ -205,7 +203,12 @@ export default function DocumentsPage({ config, userAccess }: DocumentsProps){
 		<Navigation {...{ userAccess }} />
 
 		<main className={style.main}>
-			<Folders {...{ folders, loading: !files, error, userAccess }} />
+			<Folders {...{
+				userAccess,
+				loading: !files,
+				folders,
+				error
+			}} />
 		</main>
 	</>
 }

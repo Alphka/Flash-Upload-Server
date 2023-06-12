@@ -1,8 +1,7 @@
-import type { FileInfo, FileObject, FilesMap } from "../../typings"
+import type { AccessTypes, DocumentTypeInfo } from "../../typings/database"
+import type { FileInfo, FileObject } from "../../typings"
 import type { APIUploadResponse } from "../../typings/api"
-import type { DocumentTypeInfo } from "../../typings/database"
-import type { CSSProperties } from "react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, type CSSProperties } from "react"
 import { toast } from "react-toastify"
 import HandleRequestError from "../../helpers/HandleRequestError"
 import FileContainer from "./FileContainer"
@@ -10,20 +9,21 @@ import axios from "axios"
 import style from "../../styles/modules/upload-menu.module.scss"
 
 interface UploadMenuProps {
+	userAccess: AccessTypes
 	types: DocumentTypeInfo[]
 	inputFiles: FileInfo[]
-	setIsUploadMenu: (state: boolean) => any
 	isUploadMenu: boolean
-	ClearInput: () => any
+	setIsUploadMenu: (state: boolean) => any
+	clearInput: () => any
 }
 
-export default function UploadMenu({ types, inputFiles, isUploadMenu, setIsUploadMenu, ClearInput }: UploadMenuProps){
+export default function UploadMenu({ userAccess, types, inputFiles, isUploadMenu, setIsUploadMenu, clearInput }: UploadMenuProps){
 	const [uploadPercentage, setUploadPercentage] = useState(0)
 	const [isProgressBar, setIsProgressBar] = useState(false)
 	const [submitBusy, setSubmitBusy] = useState(false)
-	const [files, setFiles] = useState<FilesMap>(new Map)
+	const [files, setFiles] = useState<Map<string, FileObject>>(new Map)
 
-	function CloseMenu(){
+	function closeMenu(){
 		if(submitBusy) return
 
 		inputFiles.splice(0, inputFiles.length)
@@ -35,7 +35,7 @@ export default function UploadMenu({ types, inputFiles, isUploadMenu, setIsUploa
 			window.removeEventListener("keydown", EscListener)
 		}
 
-		ClearInput()
+		clearInput()
 		setIsUploadMenu(false)
 	}
 
@@ -51,7 +51,7 @@ export default function UploadMenu({ types, inputFiles, isUploadMenu, setIsUploa
 		if(allowedTags.includes(tagName.toLowerCase())) return
 
 		event.preventDefault()
-		CloseMenu()
+		closeMenu()
 	}
 
 	useEffect(() => {
@@ -75,8 +75,8 @@ export default function UploadMenu({ types, inputFiles, isUploadMenu, setIsUploa
 		setFiles(new Map(files))
 
 		if(deleteContainer && !files.size){
-			CloseMenu()
-			ClearInput()
+			closeMenu()
+			clearInput()
 		}
 	}
 
@@ -84,7 +84,7 @@ export default function UploadMenu({ types, inputFiles, isUploadMenu, setIsUploa
 
 	return (
 		<div className={`overflow ${style.overflow}`}>
-			<button className="icon close material-symbols-outlined" onClick={CloseMenu}>close</button>
+			<button className="icon close material-symbols-outlined" onClick={closeMenu}>close</button>
 
 			<article className={`content ${style.content}`}>
 				<section className="header">
@@ -93,7 +93,14 @@ export default function UploadMenu({ types, inputFiles, isUploadMenu, setIsUploa
 
 				<section className={style.files}>
 					{inputFiles.map(info => (
-						<FileContainer key={info.name} {...{ info, setFile, deleteFile, types }} />
+						<FileContainer {...{
+							userAccess,
+							info,
+							types,
+							setFile,
+							deleteFile,
+							key: info.name
+						}} />
 					))}
 				</section>
 
@@ -101,7 +108,8 @@ export default function UploadMenu({ types, inputFiles, isUploadMenu, setIsUploa
 					<input type="button" value="Enviar" onClick={async () => {
 						if(submitBusy) return
 
-						const gmt = new Date().toTimeString().match(/GMT[-+]\d{4}/)![0]
+						const offset = new Date().getTimezoneOffset(), absOffset = Math.abs(offset)
+						const gmt = "GMT" + (offset < 0 ? "+" : "-") + ("00" + Math.floor(absOffset / 60)).slice(-2) + ":" + ("00" + (absOffset % 60)).slice(-2)
 						const formData = new FormData()
 
 						for(const file of files.values()){
@@ -116,10 +124,10 @@ export default function UploadMenu({ types, inputFiles, isUploadMenu, setIsUploa
 								continue
 							}
 
-							formData.append("date", new Date(`${dateInput.current!.value} ${gmt}`).toISOString())
-							formData.append("type", typeId)
-							formData.append("isPrivate", String(checkboxInput.current!.checked))
-							formData.append("image", fileBlob, name)
+							formData.set("date", new Date(`${dateInput.current!.value} ${gmt}`).toISOString())
+							formData.set("type", typeId)
+							formData.set("isPrivate", userAccess === "all" && checkboxInput.current ? String(checkboxInput.current.checked) : "false")
+							formData.set("image", fileBlob, name)
 
 							if(getErrorMessage() !== null) setErrorMessage(null)
 						}
