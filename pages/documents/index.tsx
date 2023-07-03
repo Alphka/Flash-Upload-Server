@@ -1,10 +1,9 @@
+import type { APIFileObject, APIFilesDocumentsResponse } from "../api/files"
 import type { Config, AccessTypes } from "../../typings/database"
 import type { GetServerSideProps } from "next"
-import type { APIFileObject } from "../api/files"
-import type { APIResponse } from "../../typings/api"
+import type { APIResponseError } from "../../typings/api"
 import { memo, useCallback, useEffect, useRef, useState } from "react"
 import { GetCachedConfig } from "../../helpers/Config"
-import TruncateFilename from "../../helpers/TruncateFilename"
 import ConnectDatabase from "../../lib/ConnectDatabase"
 import GetTypeById from "../../helpers/GetTypeById"
 import Navigation from "../../components/Navigation"
@@ -72,10 +71,9 @@ interface Folder {
 	name: string
 	count: number
 	reduced: string
-	privateCount: number
 }
 
-const Folders = memo<FoldersProps>(function Folders({ folders, userAccess, loading, error }){
+const Folders = memo<FoldersProps>(function Folders({ folders, loading, error }){
 	const [nameLength, setNameLength] = useState<number | undefined>(undefined)
 	const filenameRef = useRef<HTMLSpanElement>(null)
 
@@ -100,10 +98,30 @@ const Folders = memo<FoldersProps>(function Folders({ folders, userAccess, loadi
 	if(loading) return <div className={style.loading}>Carregando…</div>
 	if(error) return <div className={style.error}>Algo deu errado</div>
 
+	interface MoreDocumentsProps {
+		href: string
+		count: number
+	}
+
+	const MoreDocuments = memo(function MoreDocuments({ href, count }: MoreDocumentsProps){
+		if(!count) return null
+
+		const message = `mais ${count} ${count === 1 ? "arquivo" : "arquivos"}`
+
+		return (
+			<Link className={style.more} href={href}>
+				<span className="icon material-symbols-outlined">expand_more</span>
+				<span>{message}</span>
+			</Link>
+		)
+	})
+
 	return (
 		<div className={style.folders}>
-			{Array.from(folders.entries()).map(([name, { files, count, privateCount, reduced }], index) => {
+			{Array.from(folders.entries()).map(([name, { files, reduced, count }]) => {
 				reduced = reduced.toLowerCase()
+
+				files.sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime())
 
 				return (
 					<div className={style.folder} key={`folder-${reduced}`}>
@@ -115,36 +133,11 @@ const Folders = memo<FoldersProps>(function Folders({ folders, userAccess, loadi
 						</div>
 
 						<div className={style.content}>
-							<div className={style.header}>
-								<span className={style.filename} ref={filenameRef}>Nome do arquivo</span>
-								<span>Criação</span>
-								<span>Envio</span>
-								<span>Expiração</span>
-							</div>
+							{files.map(({ filename, hash }) => (
+								<span key={hash} className={style.file}>{filename}</span>
+							))}
 
-							{files.map(({ filename, createdAt, uploadedAt, expiresAt, hash, access }) => {
-								const hasAccess = access !== "private" || userAccess === "all"
-
-								const children = [
-									<span key={1}>{new Date(createdAt).toLocaleDateString("pt-BR")}</span>,
-									<span key={2}>{new Date(uploadedAt).toLocaleDateString("pt-BR")}</span>,
-									<span key={3}>{new Date(expiresAt).toLocaleDateString("pt-BR")}</span>
-								] as const
-
-								if(hasAccess) return (
-									<Link className={style.file} href={`/api/files/${hash}`} target="_blank" key={hash}>
-										<span key={0} className={style.filename}>{TruncateFilename(filename, nameLength)}</span>
-										{children}
-									</Link>
-								)
-
-								return (
-									<div className={`${style.file} ${style.private}`} key={hash}>
-										<span key={0} className={style.filename}>{filename}</span>
-										{children}
-									</div>
-								)
-							})}
+							<MoreDocuments href={`/documents/${reduced}`} count={count - files.length} />
 						</div>
 					</div>
 				)
@@ -154,43 +147,29 @@ const Folders = memo<FoldersProps>(function Folders({ folders, userAccess, loadi
 })
 
 export default function DocumentsPage({ config, userAccess }: DocumentsProps){
-	const { data: files, error } = useSWR("/api/files", async (url: string) => {
+	const { data, error } = useSWR("/api/files?documents", async (url: string) => {
 		const response = await fetch(url, { cache: "no-cache" })
-		const data = await response.json() as APIResponse<APIFileObject[]>
+		const json = await response.json() as APIFilesDocumentsResponse | APIResponseError
 
-		if(!data.success) throw new Error(data.error || "Algo deu errado")
+		if(!json.success) throw new Error(json.error || "Algo deu errado")
 
-		const { data: files } = data
-
-		return files!
+		return json.data
 	})
 
 	const folders: FoldersMap = new Map
 
-	files?.forEach(file => {
-		const type = GetTypeById(config, file.type)!
-		const { name: folder, reduced } = type
+	if(data){
+		for(const [type, { files, length }] of Object.entries(data)){
+			const documentType = GetTypeById(config, type)!
+			const { name: folder, reduced } = documentType
 
-		if(folders.has(folder)){
-			const object = folders.get(folder)!
-
-			object.files.push(file)
-			object.count++
-
-			if(file.access === "private") object.privateCount++
-
-			folders.set(folder, object)
-		}else{
-			const object = {
-				files: [file],
-				reduced: reduced || folder,
-				count: 1,
-				privateCount: file.access === "private" ? 1 : 0
-			}
-
-			folders.set(folder, object)
+			folders.set(folder, {
+				files,
+				count: length,
+				reduced: reduced || folder
+			})
 		}
-	})
+	}
 
 	return <>
 		<Head>
@@ -205,7 +184,7 @@ export default function DocumentsPage({ config, userAccess }: DocumentsProps){
 		<main className={style.main}>
 			<Folders {...{
 				userAccess,
-				loading: !files,
+				loading: !data,
 				folders,
 				error
 			}} />

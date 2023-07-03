@@ -41,6 +41,7 @@ export interface FileInfo {
 
 interface FileReferences {
 	container: RefObject<HTMLElement>
+	nameInput: RefObject<HTMLInputElement>
 	dateInput: RefObject<HTMLInputElement>
 	typeSelect: RefObject<HTMLSelectElement>
 	checkboxInput: RefObject<HTMLInputElement>

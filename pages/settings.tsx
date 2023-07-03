@@ -6,7 +6,7 @@ import type { IUser } from "../models/typings"
 import { memo, forwardRef, useRef, useState, useCallback, useEffect } from "react"
 import { GetCachedConfig } from "../helpers/Config"
 import { IUpdateUser } from "./api/user"
-import { toast } from "react-toastify"
+import { toast, ToastOptions } from "react-toastify"
 import HandleRequestError from "../helpers/HandleRequestError"
 import useForwardedRef from "../helpers/useForwardedRef"
 import ConnectDatabase from "../lib/ConnectDatabase"
@@ -28,9 +28,10 @@ interface UserProps {
 	setData: (state: OverflowData) => any
 	removeUser: (username: string) => any
 	setIsOverflow: (state: boolean) => any
+	toastConfig: ToastOptions
 }
 
-const User = memo(function User({ username, password, access, removeUser, clearErrors, setData, setIsOverflow }: UserProps){
+const User = memo(function User({ username, password, access, removeUser, clearErrors, setData, setIsOverflow, toastConfig }: UserProps){
 	const passwordRef = useRef<HTMLSpanElement>(null)
 
 	return (
@@ -55,9 +56,9 @@ const User = memo(function User({ username, password, access, removeUser, clearE
 						const { message } = data
 
 						removeUser(username)
-						toast.success("Usuário removido com sucesso")
+						toast.success("Usuário removido com sucesso", toastConfig)
 
-						if(message) toast.error(message)
+						if(message) toast.error(message, toastConfig)
 					}catch(error){
 						HandleRequestError(error)
 					}
@@ -90,9 +91,10 @@ interface AddUserProps {
 	config: Config
 	addUser: (user: IUser) => any
 	setClearErrors: (clearErrors: () => void) => any
+	toastConfig: ToastOptions
 }
 
-const AddUser = memo(function AddUser({ config, addUser, setClearErrors }: AddUserProps){
+const AddUser = memo(function AddUser({ config, addUser, setClearErrors, toastConfig }: AddUserProps){
 	const usernameRef = useRef<HTMLInputElement>(null)
 	const passwordRef = useRef<HTMLInputElement>(null)
 	const accessRef = useRef<HTMLInputElement>(null)
@@ -168,7 +170,7 @@ const AddUser = memo(function AddUser({ config, addUser, setClearErrors }: AddUs
 					usernameInput.value = passwordInput.value = accessInput.value = ""
 					passwordInput.dispatchEvent(new Event("input", { bubbles: true }))
 
-					toast.success("Usuário criado com sucesso")
+					toast.success("Usuário criado com sucesso", toastConfig)
 				}catch(error: any){
 					HandleRequestError(error)
 				}finally{
@@ -176,10 +178,10 @@ const AddUser = memo(function AddUser({ config, addUser, setClearErrors }: AddUs
 				}
 			})()
 		}catch(error){
-			if(typeof error === "string") return toast.error(error)
+			if(typeof error === "string") return toast.error(error, toastConfig)
 
 			console.error(error)
-			toast.error("Não foi possível criar o usuário")
+			toast.error("Não foi possível criar o usuário", toastConfig)
 		}
 	}
 
@@ -333,9 +335,10 @@ interface OverflowProps {
 	editUser: (username: string, data: IUpdateUser["data"]) => any
 	setData: (state: OverflowData | undefined) => any
 	setIsOverflow: (state: boolean) => any
+	toastConfig: ToastOptions
 }
 
-const Overflow = memo(function Overflow({ config, data: userData, setData, editUser, isOverflow, setIsOverflow }: OverflowProps){
+const Overflow = memo(function Overflow({ config, data: userData, setData, editUser, isOverflow, setIsOverflow, toastConfig }: OverflowProps){
 	const usernameRef = useRef<HTMLInputElement>(null)
 	const passwordRef = useRef<HTMLInputElement>(null)
 	const accessRef = useRef<HTMLInputElement>(null)
@@ -349,10 +352,10 @@ const Overflow = memo(function Overflow({ config, data: userData, setData, editU
 		if(!isOverflow || event.key !== "Escape" || event.shiftKey || event.ctrlKey) return
 
 		event.preventDefault()
-		closeMenu()
+		CloseMenu()
 	}
 
-	function closeMenu(){
+	function CloseMenu(){
 		if(fetching) return
 
 		if(document.body.dataset.overflow){
@@ -376,6 +379,7 @@ const Overflow = memo(function Overflow({ config, data: userData, setData, editU
 		if(isOverflow && !document.body.dataset.overflow){
 			document.body.dataset.overflow = "true"
 			document.body.style.setProperty("overflow", "hidden")
+			window.scrollTo(0, 0)
 			window.addEventListener("keydown", EscListener)
 		}
 	})
@@ -431,7 +435,7 @@ const Overflow = memo(function Overflow({ config, data: userData, setData, editU
 			] as const
 
 			if(conditions.every(Boolean)){
-				toast.error("Nenhuma informação foi alterada")
+				toast.error("Nenhuma informação foi alterada", toastConfig)
 				return
 			}
 
@@ -458,8 +462,9 @@ const Overflow = memo(function Overflow({ config, data: userData, setData, editU
 					if(!data.success) throw data.error
 
 					editUser(userData.username, userObject.data)
-					closeMenu()
+					CloseMenu()
 
+					// Use toastConfig if another setting other than position is used
 					toast.success("Usuário editado com sucesso")
 				}catch(error: any){
 					HandleRequestError(error)
@@ -468,22 +473,22 @@ const Overflow = memo(function Overflow({ config, data: userData, setData, editU
 				}
 			})()
 		}catch(error){
-			if(typeof error === "string") return toast.error(error)
+			if(typeof error === "string") return toast.error(error, toastConfig)
 
 			console.error(error)
-			toast.error("Não foi possível criar o usuário")
+			toast.error("Não foi possível criar o usuário", toastConfig)
 		}
 	}
 
 	if(!isOverflow) return null
 
 	return (
-		<div className={`overflow ${style.overflow}`}>
-			<button className="icon close material-symbols-outlined" onClick={closeMenu}>close</button>
+		<div className={style.overflow}>
+			<button className={`icon material-symbols-outlined ${style.close}`} onClick={CloseMenu}>close</button>
 
-			<article className={`content ${style.content}`}>
-				<section className="header">
-					<h1 className="title">Editar usuário</h1>
+			<article className={style.content}>
+				<section className={style.header}>
+					<h1 className={style.title}>Editar usuário</h1>
 				</section>
 
 				<section className={style.form}>
@@ -553,9 +558,9 @@ const Overflow = memo(function Overflow({ config, data: userData, setData, editU
 					/>
 				</section>
 
-				<section className="submit">
+				<section className={style.submit}>
 					<button className="no-outline" type="submit" onClick={EditUser} ref={submitRef}>
-						{fetching ? <div className="spinner"></div> : "Enviar"}
+						{fetching ? <div className={style.spinner}></div> : "Enviar"}
 					</button>
 				</section>
 			</article>
@@ -605,6 +610,7 @@ interface OverflowData {
 }
 
 export default function SettingsPage({ config, userAccess, ...props }: SettingsPageProps){
+	const [toastConfig, setToastConfig] = useState<ToastOptions>({})
 	const [clearErrors, setClearErrors] = useState(() => () => {})
 	const [isOverflow, setIsOverflow] = useState(false)
 	const [users, setUsers] = useState<Map<string, IUser>>(new Map((props.users || []).map(user => [user.name, user])))
@@ -640,6 +646,10 @@ export default function SettingsPage({ config, userAccess, ...props }: SettingsP
 		setUsers(map)
 	}, [users])
 
+	useEffect(() => {
+		setToastConfig(isOverflow ? { position: "bottom-right" } : {})
+	}, [isOverflow])
+
 	return <>
 		<Head>
 			<title>{`Flash - ${title}`}</title>
@@ -660,7 +670,12 @@ export default function SettingsPage({ config, userAccess, ...props }: SettingsP
 				</header>
 
 				<article className={style.users}>
-					<AddUser {...{ config, addUser, setClearErrors }} />
+					<AddUser {...{
+						config,
+						addUser,
+						setClearErrors,
+						toastConfig
+					}} />
 
 					{Array.from(users.values()).map(({ name, password, access }, index) => (
 						<User {...{
@@ -671,14 +686,22 @@ export default function SettingsPage({ config, userAccess, ...props }: SettingsP
 							removeUser,
 							clearErrors,
 							setIsOverflow,
-							key: `user-${index}`
-						}} />
+							toastConfig
+						}} key={`user-${index}`} />
 					))}
 				</article>
 			</section>
 		</main>
 
-		{data && <Overflow {...{ config, data, setData, editUser, isOverflow, setIsOverflow }} />}
+		{data && <Overflow {...{
+			config,
+			data,
+			setData,
+			editUser,
+			isOverflow,
+			setIsOverflow,
+			toastConfig
+		}} />}
 
 		<datalist id="access-types">
 			{config.accessTypes.map((type, index) => <option key={`access-type-${index}`} value={type} />)}

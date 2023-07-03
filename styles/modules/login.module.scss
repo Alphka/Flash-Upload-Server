@@ -9,16 +9,14 @@ main.main{
 	width: 100vw;
 	height: 100vh;
 
-	@media screen and (max-width: variables.$mobileSize){
-		flex-direction: column;
-		// height: auto;
-		// min-height: 100vh;
-		justify-content: flex-start;
-		gap: 20pt;
+	@media screen and (max-width: 700px){
+		justify-content: space-evenly;
 	}
 
-	@media screen and (min-width: #{variables.$mobileSize + 1px}) and (max-width: 700px){
-		justify-content: space-around;
+	@media screen and (max-width: variables.$mediumSize){
+		flex-direction: column;
+		justify-content: flex-start;
+		gap: 24pt;
 	}
 
 	section:nth-of-type(1){
@@ -48,7 +46,6 @@ main.main{
 
 	section:nth-of-type(2){
 		form{
-			$secondaryColor: #356efb;
 			$inputFontFamily: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 			$inputFontSize: 14px;
 
@@ -58,7 +55,7 @@ main.main{
 			justify-content: center;
 			align-items: center;
 			border-radius: 12pt;
-			box-shadow: 0 0 5px 1px black;
+			box-shadow: 0 0 8px 2pt #{darken(variables.$secondaryConstrastColor, 54)};
 			padding: 16pt 8pt;
 
 			fieldset{
@@ -80,7 +77,7 @@ main.main{
 						background-color: transparent;
 						display: block;
 						padding: 4pt;
-						width: 250px;
+						width: 400px;
 						border-bottom: 2px solid white;
 						border-radius: 2pt;
 						font-family: $inputFontFamily;
@@ -89,16 +86,11 @@ main.main{
 						transition: ease-out .3s width, ease-in .1s border;
 
 						&:focus{
-							border-bottom-color: $secondaryColor;
+							border-bottom-color: variables.$secondaryConstrastColor;
 						}
 
-						@media screen and (max-width: variables.$mobileSize){
-							min-width: auto;
-							width: 80vw;
-						}
-
-						@media screen and (min-width: variables.$largeSize){
-							width: 300px;
+						@media screen and (max-width: variables.$mediumSize){
+							width: clamp(400px, 80vw, 500px);
 						}
 					}
 				}
@@ -108,7 +100,7 @@ main.main{
 				$color: white;
 				$height: 24pt;
 
-				background-color: $secondaryColor;
+				background-color: variables.$secondaryConstrastColor;
 				display: flex;
 				align-items: center;
 				flex-direction: column;
@@ -124,7 +116,7 @@ main.main{
 				cursor: pointer;
 
 				&:hover{
-					background-color: darken($secondaryColor, 5%);
+					background-color: darken(variables.$secondaryConstrastColor, 5%);
 				}
 
 				&:focus{

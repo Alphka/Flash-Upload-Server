@@ -1,7 +1,6 @@
-@use "./import/variables";
-@use "./import/mixins";
+@import "../import/mixins";
 
-.overflow{
+&{
 	position: absolute;
 	background-color: rgba(adjust-color(variables.$primaryColor, $lightness: -3%), 95%);
 	top: 0;
@@ -21,7 +20,7 @@
 
 		@include mixins.userSelectNone;
 
-		background-color: black;
+		background-color: var(--secondary-constrast-color);
 		position: absolute;
 		top: 4pt;
 		right: 4pt;
@@ -29,11 +28,11 @@
 		height: $size;
 		font-size: $fontSize;
 		line-height: $fontSize;
-		border-radius: 50%;
+		border-radius: 2pt;
 		cursor: pointer;
 
 		&:hover{
-			background-color: lighten(black, 20%);
+			filter: brightness(80%);
 		}
 
 		@media screen and (max-width: variables.$mobileSize){
@@ -70,6 +69,19 @@
 				}
 			}
 
+			&.form{
+				@include mixins.formLayout;
+
+				display: flex;
+				width: 100%;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+				border-top: 1px solid var(--font-color);
+				padding: 8pt 4pt;
+				gap: 4pt;
+			}
+
 			&.submit{
 				width: 100%;
 
@@ -100,3 +112,4 @@
 		}
 	}
 }
+

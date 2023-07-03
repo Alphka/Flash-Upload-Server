@@ -135,98 +135,19 @@ main.main{
 	}
 }
 
+.overflow{
+	@import "../import/overflow.module.scss";
+}
+
 .user_management .form,
 .overflow .form{
-	div,
 	label{
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		flex-wrap: wrap;
-		gap: 4pt;
-	}
-
-	div{
-		width: 100%;
-		position: relative;
-		flex-direction: column;
-
-		&.submit{
-			justify-content: center;
-
-			button{
-				$height: 28px;
-
-				background-color: #284e28;
-				border-radius: 2pt;
-				margin: 4pt 0;
-				height: $height;
-				width: 60px;
-				text-align: center;
-
-				&:hover,
-				&:focus{
-					cursor: pointer;
-					filter: brightness(0.9);
-					box-shadow: 0 1px 3px black;
-				}
-
-				.spinner{
-					@include mixins.spinner(var(--font-color), calc(#{$height} - 6pt), block, 1px);
-
-					display: inline-block;
-					vertical-align: middle;
-				}
-			}
-		}
-	}
-
-	label{
-		flex-direction: row;
-		width: inherit;
-
-		span{
-			flex: 1;
-		}
-
-		input{
-			background-color: var(--background-dark-light);
-			border-radius: 2pt;
-			padding: 4pt 8pt;
-			flex: 2;
-
-			&[type=button],
-			&[type=submit]{
-				cursor: pointer;
-
-				:hover{
-					filter: brightness(0.9);
-				}
-			}
-
-			&[type=text],
-			&[type=password]{
-				&::placeholder{
-					color: var(--font-secondary-color);
-					text-transform: initial;
-				}
-
-				&:focus{
-					box-shadow: inset 0 0 4pt var(--background-dark);
-
-					&::placeholder{
-						visibility: hidden;
-					}
-				}
-			}
-
-			&[name=access]{
-				text-transform: lowercase;
-			}
-		}
-
 		&:has(:global .icon) input{
 			padding-right: calc(24px + 8pt);
+		}
+
+		input[name=access]{
+			text-transform: lowercase;
 		}
 	}
 
@@ -245,20 +166,45 @@ main.main{
 	}
 }
 
-.overflow{
-	.content{
-		.form{
-			display: flex;
-			width: 100%;
-			flex-direction: column;
-			align-items: center;
-			justify-content: center;
-			border-top: 1px solid white;
-			padding: 8pt 4pt;
-			gap: 4pt;
+.user_management .form{
+	@include mixins.formLayout;
 
-			div{
-				width: clamp(100pt, 100%, 300pt);
+	label{
+		span{
+			flex: 75px 0;
+		}
+
+		input{
+			max-width: none;
+			flex: 1;
+		}
+	}
+
+	.submit{
+		justify-content: center;
+
+		button{
+			$height: 28px;
+
+			background-color: #284e28;
+			border-radius: 2pt;
+			margin: 4pt 0;
+			height: $height;
+			width: 60px;
+			text-align: center;
+
+			&:hover,
+			&:focus{
+				cursor: pointer;
+				filter: brightness(0.9);
+				box-shadow: 0 1px 3px black;
+			}
+
+			.spinner{
+				@include mixins.spinner(var(--font-color), calc(#{$height} - 6pt), block, 1px);
+
+				display: inline-block;
+				vertical-align: middle;
 			}
 		}
 	}

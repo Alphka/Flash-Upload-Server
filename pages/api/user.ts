@@ -7,6 +7,7 @@ import ConnectDatabase from "../../lib/ConnectDatabase"
 import HandleAPIError from "../../helpers/HandleAPIError"
 import ValidateSize from "../../helpers/ValidateSize"
 import SendAPIError from "../../helpers/SendAPIError"
+import ParseBody from "../../helpers/ParseBody"
 import UserToken from "../../models/UserToken"
 import typeis from "type-is"
 import User from "../../models/User"
@@ -30,16 +31,6 @@ export default async function UserAPI(request: NextApiRequest, response: NextApi
 	if(!request.headers.origin) return HandleError("origin")
 	if(!request.headers["user-agent"]) return HandleError("userAgent")
 
-	function ParseBody(){
-		let chunks = Buffer.alloc(0)
-
-		return new Promise<Buffer>((resolve, reject) => {
-			request.on("data", (chunk: Buffer) => chunks = Buffer.concat([chunks, chunk]))
-			request.on("end", () => resolve(chunks))
-			request.on("error", reject)
-		})
-	}
-
 	try{
 		await ConnectDatabase()
 
@@ -47,7 +38,7 @@ export default async function UserAPI(request: NextApiRequest, response: NextApi
 			case "POST": {
 				if(!typeis.is(contentType, "application/x-www-form-urlencoded")) return HandleError("contentType")
 
-				const body = (await ParseBody()).toString()
+				const body = (await ParseBody(request)).toString()
 				const data = Object.fromEntries(new URLSearchParams(body)) as unknown as IAddUser
 
 				return await AddUser(data, config, request, response)
@@ -55,7 +46,7 @@ export default async function UserAPI(request: NextApiRequest, response: NextApi
 			case "DELETE": {
 				if(!typeis.is(contentType, "application/x-www-form-urlencoded")) return HandleError("contentType")
 
-				const body = (await ParseBody()).toString()
+				const body = (await ParseBody(request)).toString()
 				const { username } = Object.fromEntries(new URLSearchParams(body)) as { username?: string }
 
 				return await DeleteUser(username, request, response)
@@ -63,7 +54,7 @@ export default async function UserAPI(request: NextApiRequest, response: NextApi
 			case "PUT": {
 				if(!typeis.is(contentType, "application/json")) return HandleError("contentType")
 
-				const body = (await ParseBody()).toString()
+				const body = (await ParseBody(request)).toString()
 				const data = JSON.parse(body) as IUpdateUser
 
 				return await UpdateUser(data, config, request, response)

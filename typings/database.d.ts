@@ -1,3 +1,5 @@
+import type { FileAccess } from "../models/typings"
+
 export interface DocumentTypeInfo {
 	id: number
 	name: string
@@ -11,6 +13,7 @@ export interface Config {
 	maxSize: number
 	types: DocumentTypeInfo[]
 	accessTypes: AccessTypes[]
+	accessFiles: FileAccess[]
 }
 
 export type AccessTypes = "all" | "public"

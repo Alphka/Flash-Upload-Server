@@ -11,8 +11,11 @@
 	--background-dark-light: #484848;
 	--secondary-color: #{variables.$secondaryColor};
 	--terciary-color: #{variables.$terciaryColor};
+	--secondary-constrast-color: #{variables.$secondaryConstrastColor};
 	--font-color: white;
 	--font-secondary-color: #{darken(white, 30%)};
+	--font-terciary-color: #{darken(white, 60%)};
+	--link-color: #849df5;
 	--error-color: #ff4646;
 	--remove-button: #9d2929;
 }

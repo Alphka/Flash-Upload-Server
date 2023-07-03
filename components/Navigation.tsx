@@ -1,14 +1,18 @@
+import type { MouseEvent as ReactMouseEvent } from "react"
 import type { AccessTypes } from "../typings/database"
-import { memo, useState } from "react"
+import { memo, useRef, useState, useCallback } from "react"
+import { useRouter } from "next/router"
 import Image from "next/image"
 import Link from "next/link"
 
 interface GlobalProps {
 	userAccess: AccessTypes
+	search?: string
 }
 
 interface NavigationProps extends GlobalProps {}
 interface MobileProps extends GlobalProps {}
+interface SearchFormProps extends GlobalProps { icon?: boolean }
 
 const notifications = {
 	unread: false
@@ -20,37 +24,66 @@ const locales = {
 	documents: "Documentos",
 	settings: "Configurações",
 	logout: "Sair da conta",
-	menu: "Menu"
+	menu: "Menu",
+	search: "Pesquisar"
 }
 
 const iconClass = "icon material-symbols-outlined"
 const fillIconClass = "icon fill material-symbols-outlined"
 
 function MobileMenu({ userAccess }: MobileProps){
+	const [searchBarCollapsed, setSearchBarCollapsed] = useState(true)
 	const [contentHidden, setContentHidden] = useState(true)
+	const refMenu = useRef<HTMLDivElement>(null)
+	const refMenuIcon = useRef<HTMLSpanElement>(null)
+	const refSearchBar = useRef<HTMLDivElement>(null)
+	const refSearchIcon = useRef<HTMLSpanElement>(null)
 
-	return (
-		<div className="icons mobile" onClick={event => {
+	const handleEventHide = (callback: typeof setSearchBarCollapsed | typeof setContentHidden, value: boolean, ref: typeof refMenuIcon | typeof refSearchBar) => {
+		return (event: ReactMouseEvent<HTMLDivElement>) => {
 			event.nativeEvent.stopImmediatePropagation()
 			event.preventDefault()
 
 			function CloseHandler(event: MouseEvent){
+				if(ref.current && event.target instanceof HTMLElement){
+					if(event.target === ref.current || ref.current.contains(event.target)) return
+				}
+
+				callback(true)
 				event.preventDefault()
-				setContentHidden(true)
 				window.removeEventListener("click", CloseHandler)
 			}
 
-			if(contentHidden){
-				setContentHidden(false)
+			if(value){
+				callback(false)
 				window.addEventListener("click", CloseHandler)
 			}else{
-				setContentHidden(true)
+				callback(true)
 				window.removeEventListener("click", CloseHandler)
 			}
-		}}>
-			<span className={iconClass} aria-label={locales.menu}>menu</span>
+		}
+	}
 
-			<div className={contentHidden ? "content hidden" : "content"} aria-hidden={contentHidden}>
+	const handleContentHide = useCallback((event: ReactMouseEvent<HTMLDivElement>) => {
+		if(contentHidden && !searchBarCollapsed) setSearchBarCollapsed(true)
+		return handleEventHide(setContentHidden, contentHidden, refMenuIcon)(event)
+	}, [contentHidden, searchBarCollapsed])
+
+	const handleSearchBarHide = useCallback((event: ReactMouseEvent<HTMLDivElement>) => {
+		if(searchBarCollapsed && !contentHidden) setContentHidden(true)
+		return handleEventHide(setSearchBarCollapsed, searchBarCollapsed, refSearchBar)(event)
+	}, [contentHidden, searchBarCollapsed])
+
+	return (
+		<div className="icons mobile">
+			<span className={iconClass} aria-label={locales.search} onClick={handleSearchBarHide} ref={refSearchIcon}>search</span>
+			<span className={iconClass} aria-label={locales.menu} onClick={handleContentHide} ref={refMenuIcon}>menu</span>
+
+			<div className={searchBarCollapsed ? "search collapsed" : "search"} aria-hidden={searchBarCollapsed} ref={refSearchBar}>
+				<SearchForm {...{ userAccess }} />
+			</div>
+
+			<div className={contentHidden ? "content hidden" : "content"} aria-hidden={contentHidden} ref={refMenu}>
 				<Link href="/documents" prefetch={false} aria-label={locales.documents}>
 					<span className={iconClass}>description</span>
 					{locales.documents}
@@ -63,7 +96,7 @@ function MobileMenu({ userAccess }: MobileProps){
 					</Link>
 				)}
 
-				<Link href="/login" prefetch={false} aria-label={locales.logout}>
+				<Link href="/login?logout" prefetch={false} aria-label={locales.logout}>
 					<span className={iconClass}>logout</span>
 					{locales.logout}
 				</Link>
@@ -107,12 +140,41 @@ const Notifications = memo(function Notifications(){
 	)
 })
 
-const Navigation = memo(function Navigation({ userAccess }: NavigationProps){
+const SearchForm = memo<SearchFormProps>(function SearchForm({ icon, search }){
+	const router = useRouter()
+
+	return (
+		<div id="search">
+			<input type="search" placeholder="Faça uma pesquisa..." defaultValue={search} onKeyPress={event => {
+				const input: HTMLInputElement = event.currentTarget
+
+				if(event.key === "Enter"){
+					event.preventDefault()
+
+					const value = input.value.trim()
+
+					if(!value) return
+
+					router.push("/search?q=" + encodeURIComponent(value))
+				}
+			}} autoComplete="off" />
+			{icon && <span className={iconClass}>search</span>}
+		</div>
+	)
+})
+
+const Navigation = memo(function Navigation({ userAccess, search }: NavigationProps){
 	return (
 		<nav>
 			<Logo />
 
 			<div className="icons">
+				<SearchForm {...{
+					userAccess,
+					search,
+					icon: true
+				}} />
+
 				<Notifications />
 
 				<Link href="/documents" aria-label={locales.documents}>
@@ -125,7 +187,7 @@ const Navigation = memo(function Navigation({ userAccess }: NavigationProps){
 					</Link>
 				)}
 
-				<Link href="/login" prefetch={false} aria-label={locales.logout}>
+				<Link href="/login?logout" prefetch={false} aria-label={locales.logout}>
 					<span className={iconClass}>logout</span>
 				</Link>
 			</div>

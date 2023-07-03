@@ -1,10 +1,79 @@
 @use "../import/variables";
+@use "../import/mixins";
 
-main.main{
+main.main,
+main.list{
 	display: flex;
 	flex-direction: column;
 	align-items: flex-start;
 	margin-top: 40pt;
+}
+
+main.list{
+	padding: 0 8pt 12pt;
+
+	header{
+		width: 100%;
+		display: flex;
+		flex-direction: row;
+		justify-content: center;
+		align-items: center;
+		margin-bottom: 12pt;
+		padding: 0 8pt;
+		gap: 4pt;
+
+		h1{
+			font-size: 30pt;
+			font-weight: 600;
+		}
+
+		h2{
+			color: var(--font-secondary-color);
+			font-size: 14pt;
+			font-weight: 500;
+			line-height: 30pt;
+			text-transform: uppercase;
+			align-self: end;
+		}
+	}
+
+	table{
+		@include mixins.gradientBackground;
+
+		width: 100%;
+		border-radius: 4pt;
+		border-spacing: 12pt 8pt;
+
+		@media screen and (max-width: variables.$mobileSize){
+			border-spacing: 8pt 4pt;
+			font-size: small;
+		}
+
+		thead tr td,
+		tbody tr td:not(.filename){
+			text-align: center;
+		}
+
+		tbody tr td{
+			&.edit :global .icon{
+				font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 48;
+				font-size: 14pt;
+				cursor: pointer;
+
+				&:hover{
+					filter: brightness(80%);
+				}
+			}
+
+			&.filename{
+				word-break: break-all;
+
+				a{
+					color: var(--link-color);
+				}
+			}
+		}
+	}
 }
 
 .folders{
@@ -12,13 +81,14 @@ main.main{
 	flex-direction: column;
 	justify-content: flex-start;
 	align-items: stretch;
-	gap: 12pt;
-	padding: 0 8pt;
+	padding: 0 8pt 12pt;
 	width: 100%;
+	gap: 12pt;
 
 	.folder{
+		@include mixins.gradientBackground;
+
 		display: flex;
-		background-color: lighten(variables.$secondaryColor, 1.2);
 		flex-direction: column;
 		align-items: stretch;
 		border-radius: 4pt;
@@ -43,38 +113,29 @@ main.main{
 		}
 
 		.content{
-			background-color: darken(variables.$secondaryColor, 4);
-			border-radius: 4pt;
 			padding: 2pt 8pt;
-
-			> .header,
-			> .file{
-				display: flex;
-				gap: 4pt;
-
-				> *{
-					flex: 1;
-					overflow-x: hidden;
-					white-space: nowrap;
-					text-overflow: ellipsis;
-
-					&.filename{
-						flex: 2;
-					}
-				}
-			}
 
 			> .header{
 				color: var(--font-secondary-color);
 				text-align: center;
 			}
 
-			> .file > :not(.filename){
-				text-align: center;
+			> .file{
+				@include mixins.textEllipsis;
+
+				display: block;
+				color: var(--font-secondary-color);
 			}
 
-			> .file.private{
-				color: var(--font-secondary-color);
+			> .more{
+				display: flex;
+				align-items: center;
+				flex-direction: row;
+				gap: 4pt;
+
+				:global .icon{
+					font-size: inherit;
+				}
 			}
 		}
 	}
@@ -85,8 +146,6 @@ main.main{
 	}
 }
 
-.list{
-	table{
-		border-spacing: 12pt 8pt;
-	}
+.overflow{
+	@import "../import/overflow.module.scss";
 }

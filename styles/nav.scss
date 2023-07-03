@@ -1,13 +1,12 @@
 @use "import/variables";
 @use "import/mixins";
 
-nav{
-	$height: 36pt;
-	$logoWidth: $height - 8pt;
-	$logoFontSize: $logoWidth - 2pt;
-	$iconSize: $height - 6pt;
-	$menuWidth: 260pt;
+$height: 36pt;
+$logoWidth: $height - 8pt;
+$logoFontSize: $logoWidth - 2pt;
+$menuWidth: 260pt;
 
+nav{
 	display: flex;
 	flex-direction: row;
 	justify-content: space-between;
@@ -65,58 +64,8 @@ nav{
 		justify-content: space-between;
 		gap: 12pt;
 
-		@media screen and (max-width: variables.$mobileSize){
+		@media screen and (max-width: #{variables.$smallSize - 1px}){
 			display: none;
-		}
-
-		&.mobile{
-			display: none;
-			position: relative;
-			align-self: baseline;
-			line-height: $iconSize;
-
-			@media screen and (max-width: variables.$mobileSize){
-				display: block;
-			}
-
-			> .icon{
-				cursor: pointer;
-			}
-
-			.content{
-				display: flex;
-				flex-direction: column;
-				gap: 8pt;
-
-				background-color: var(--background-dark);
-				box-shadow: 1px 1px 3px black;
-				color: var(--font-color);
-				position: absolute;
-				top: 100%;
-				right: 4pt;
-				padding: 8pt;
-				border-radius: 4pt;
-				width: 50vw;
-				z-index: 1;
-
-				&.hidden{
-					display: none;
-				}
-
-				a{
-					display: flex;
-					flex-direction: row;
-					align-items: center;
-					justify-content: flex-start;
-					text-decoration: none;
-					gap: 8pt;
-					cursor: pointer;
-
-					.icon{
-						font-size: 22pt;
-					}
-				}
-			}
 		}
 
 		a{
@@ -128,8 +77,9 @@ nav{
 
 			$weight: 400;
 
+			vertical-align: middle;
 			font-variation-settings: "FILL" 0, "wght" $weight, "GRAD" 0, "opsz" 48;
-			font-size: $iconSize;
+			font-size: $logoFontSize;
 			cursor: pointer;
 
 			&.fill{
@@ -144,7 +94,7 @@ nav{
 				background-color: var(--background-dark);
 				color: var(--font-color);
 				position: absolute;
-				top: 100%;
+				top: calc(100% + 8pt);
 				right: 0;
 				width: $menuWidth;
 				border-radius: 4pt;
@@ -166,5 +116,140 @@ nav{
 				}
 			}
 		}
+	}
+
+	.icons.mobile{
+		display: flex;
+		position: relative;
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-around;
+		gap: 4pt;
+
+		@media screen and (min-width: variables.$smallSize){
+			display: none;
+		}
+
+		> .icon{
+			cursor: pointer;
+		}
+
+		.search{
+			position: absolute;
+			top: calc(100% + 8pt);
+			right: 0;
+			transition: width .2s cubic-bezier(0.075, 0.82, 0.165, 1);
+
+			&.collapsed{
+				&,
+				#search input{
+					width: 0;
+				}
+
+				#search input{
+					padding: 0;
+				}
+			}
+
+			#search input::-webkit-search-cancel-button{
+				display: initial;
+				color: black;
+			}
+		}
+
+		.content{
+			display: flex;
+			flex-direction: column;
+			gap: 8pt;
+
+			background-color: var(--background-dark);
+			box-shadow: 1px 1px 3px black;
+			color: var(--font-color);
+			position: absolute;
+			top: calc(100% + 4pt);
+			right: 4pt;
+			padding: 8pt;
+			border-radius: 4pt;
+			width: 50vw;
+			z-index: 1;
+
+			&.hidden{
+				display: none;
+			}
+
+			a, div{
+				@include mixins.userSelectNone;
+
+				display: flex;
+				flex-direction: row;
+				align-items: center;
+				justify-content: flex-start;
+				text-decoration: none;
+				gap: 8pt;
+				cursor: pointer;
+
+				.icon{
+					font-size: 22pt;
+				}
+			}
+		}
+	}
+}
+
+#search{
+	$searchIconSize: $logoFontSize - 4pt;
+	$searchIconSpacing: 2pt;
+
+	height: 100%;
+	position: relative;
+	align-self: center;
+
+	input{
+		$background: white;
+		$color: black;
+
+		width: clamp(200px, 60vw, 400px);
+		height: 100%;
+		background-color: $background;
+		display: block;
+		font: inherit;
+		color: $color;
+		border-radius: 4pt;
+		padding: 4pt calc(4pt + $searchIconSpacing + $searchIconSize) 4pt 8pt;
+
+		@media screen and (min-width: variables.$smallSize) and (max-width: variables.$mediumSize){
+			width: min(400px, 40vw);
+		}
+
+		@media screen and (min-width: variables.$mediumSize){
+			width: 40vw;
+		}
+
+		&::-webkit-search-cancel-button{
+			display: none;
+		}
+
+		&:-webkit-autofill{
+			-webkit-background-clip: text;
+			-webkit-box-shadow: 0 0 0 30px $background inset;
+			-webkit-text-fill-color: $color;
+
+			&,
+			&:hover,
+			&:focus,
+			&:active,
+			&::first-line{
+				font: var(--font-family);
+			}
+		}
+	}
+
+	.icon{
+		position: absolute;
+		top: $searchIconSpacing;
+		right: $searchIconSpacing;
+		color: black;
+		cursor: pointer;
+		font-size: $searchIconSize;
 	}
 }

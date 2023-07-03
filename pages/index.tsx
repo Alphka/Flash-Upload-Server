@@ -113,6 +113,7 @@ export default function IndexPage({ config, userAccess }: IndexProps){
 			isUploadMenu,
 			setIsUploadMenu,
 			clearInput,
-			types: config.types }} />
+			types: config.types }}
+		/>
 	</>
 }

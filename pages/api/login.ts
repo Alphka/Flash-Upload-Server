@@ -28,6 +28,16 @@ export default async function Login(request: NextApiRequest, response: NextApiRe
 	if(!ValidateSize(request.headers["content-length"], maxSize)) return HandleError("length")
 
 	async function Register(name: string, access: AccessTypes){
+		const oldToken = request.cookies.token
+
+		if(oldToken){
+			try{
+				await UserToken.findOneAndDelete({ token: oldToken })
+			}catch(error){
+				console.error(error)
+			}
+		}
+
 		const token = await CreateToken()
 		const date = new Date
 

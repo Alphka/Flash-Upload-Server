@@ -115,14 +115,23 @@ export default function LoginPage(){
 	</>
 }
 
-export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
-	await ConnectDatabase()
+export const getServerSideProps: GetServerSideProps = async ({ req, res, query }) => {
+	if(typeof query.logout === "string"){
+		await ConnectDatabase()
 
-	const { token } = req.cookies
+		const { token } = req.cookies
 
-	if(token){
-		await UserToken.findOneAndDelete({ token })
-		res.setHeader("set-cookie", "token=; Max-Age=0; Path=/; SameSite=Strict")
+		if(token){
+			await UserToken.findOneAndDelete({ token })
+			res.setHeader("set-cookie", "token=; Max-Age=0; Path=/; SameSite=Strict")
+		}
+
+		return {
+			redirect: {
+				permanent: true,
+				destination: "/login"
+			}
+		}
 	}
 
 	return { props: {} }

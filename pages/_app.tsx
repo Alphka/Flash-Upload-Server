@@ -5,7 +5,6 @@ import Head from "next/head"
 
 import "../styles/global.scss"
 import "../styles/nav.scss"
-import "../styles/overflow.scss"
 import "react-toastify/dist/ReactToastify.css"
 
 const poppins = Poppins({

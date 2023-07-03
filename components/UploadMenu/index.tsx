@@ -4,6 +4,7 @@ import type { APIUploadResponse } from "../../typings/api"
 import { useState, useEffect, type CSSProperties } from "react"
 import { toast } from "react-toastify"
 import HandleRequestError from "../../helpers/HandleRequestError"
+import ValidateFilename from "../../helpers/ValidateFilename"
 import FileContainer from "./FileContainer"
 import axios from "axios"
 import style from "../../styles/modules/upload-menu.module.scss"
@@ -58,6 +59,7 @@ export default function UploadMenu({ userAccess, types, inputFiles, isUploadMenu
 		if(isUploadMenu && !document.body.dataset.overflow){
 			document.body.dataset.overflow = "true"
 			document.body.style.setProperty("overflow", "hidden")
+			window.scrollTo(0, 0)
 			window.addEventListener("keydown", EscListener)
 		}
 
@@ -83,12 +85,12 @@ export default function UploadMenu({ userAccess, types, inputFiles, isUploadMenu
 	if(!isUploadMenu) return null
 
 	return (
-		<div className={`overflow ${style.overflow}`}>
-			<button className="icon close material-symbols-outlined" onClick={closeMenu}>close</button>
+		<div className={style.overflow}>
+			<button className={`icon material-symbols-outlined ${style.close}`} onClick={closeMenu}>close</button>
 
-			<article className={`content ${style.content}`}>
-				<section className="header">
-					<h1 className="title">Enviar arquivos</h1>
+			<article className={style.content}>
+				<section className={style.header}>
+					<h1 className={style.title}>Enviar arquivos</h1>
 				</section>
 
 				<section className={style.files}>
@@ -104,7 +106,7 @@ export default function UploadMenu({ userAccess, types, inputFiles, isUploadMenu
 					))}
 				</section>
 
-				<section className={`submit ${style.submit}`}>
+				<section className={style.submit}>
 					<input type="button" value="Enviar" onClick={async () => {
 						if(submitBusy) return
 
@@ -113,11 +115,16 @@ export default function UploadMenu({ userAccess, types, inputFiles, isUploadMenu
 						const formData = new FormData()
 
 						for(const file of files.values()){
-							const { info, references, getErrorMessage, setErrorMessage } = file
-							const { dateInput, typeSelect, checkboxInput } = references
-							const { name, file: fileBlob } = info
+							const { info: { name, file: blob }, references, getErrorMessage, setErrorMessage } = file
+							const { nameInput, dateInput, typeSelect, checkboxInput } = references
 
+							const filename = nameInput.current!.value
 							const typeId = typeSelect.current!.value
+
+							if(!filename || !ValidateFilename(filename)){
+								setErrorMessage("Nome do arquivo inválido")
+								continue
+							}
 
 							if(typeId === "0"){
 								setErrorMessage("Tipo de documento inválido")
@@ -127,7 +134,7 @@ export default function UploadMenu({ userAccess, types, inputFiles, isUploadMenu
 							formData.set("date", new Date(`${dateInput.current!.value} ${gmt}`).toISOString())
 							formData.set("type", typeId)
 							formData.set("isPrivate", userAccess === "all" && checkboxInput.current ? String(checkboxInput.current.checked) : "false")
-							formData.set("image", fileBlob, name)
+							formData.set("image", blob, filename + "." + name.substring(name.lastIndexOf(".") + 1))
 
 							if(getErrorMessage() !== null) setErrorMessage(null)
 						}
@@ -165,6 +172,7 @@ export default function UploadMenu({ userAccess, types, inputFiles, isUploadMenu
 									continue
 								}
 
+								// TODO: If filename changes, this doesn't work
 								const file = files.get(filename)
 								const container = file?.references.container
 
