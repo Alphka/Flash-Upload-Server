@@ -5,7 +5,7 @@ import type { IUpdateDocument } from "../api/files/[hash]"
 import type { DocumentsProps } from "."
 import type { FileAccess } from "../../models/typings"
 import type { Config } from "../../typings/database"
-import { memo, useCallback, useEffect, useRef, useState, type MouseEvent } from "react"
+import { memo, useCallback, useEffect, useRef, useState, type MouseEvent as ReactMouseEvent } from "react"
 import { toast, type ToastOptions } from "react-toastify"
 import { GetCachedConfig } from "../../helpers/Config"
 import HandleRequestError from "../../helpers/HandleRequestError"
@@ -98,10 +98,10 @@ interface OverflowProps {
 	data: OverflowData
 	isOverflow: boolean
 	toastConfig: ToastOptions
-	UpdateDocument: (hash: string, data: IUpdateDocument) => any
-	setData: (state: OverflowData | undefined) => any
-	setIsOverflow: (state: boolean) => any
-	setClearErrors: (clearErrors: () => void) => any
+	UpdateDocument: (hash: string, data?: IUpdateDocument) => void
+	setData: (state: OverflowData | undefined) => void
+	setIsOverflow: (state: boolean) => void
+	setClearErrors: (clearErrors: () => void) => void
 }
 
 const Overflow = memo(function Overflow({ config, setIsOverflow, isOverflow, data, setData, UpdateDocument, toastConfig, setClearErrors }: OverflowProps){
@@ -114,6 +114,7 @@ const Overflow = memo(function Overflow({ config, setIsOverflow, isOverflow, dat
 	const [expireError, setExpireError] = useState<string>()
 	const [nameError, setNameError] = useState<string>()
 	const [fetching, setFetching] = useState(false)
+	const [removing, setRemoving] = useState(false)
 
 	function EscListener(event: KeyboardEvent){
 		if(!isOverflow || event.key !== "Escape" || event.shiftKey || event.ctrlKey) return
@@ -153,7 +154,36 @@ const Overflow = memo(function Overflow({ config, setIsOverflow, isOverflow, dat
 
 	useEffect(() => setClearErrors(() => ClearErrors), [])
 
-	function EditDocument(event: MouseEvent){
+	async function FetchAPI(method: "GET" | "PUT" | "DELETE", messageSuccess?: string, documentData?: IUpdateDocument){
+		try{
+			const options: RequestInit = {
+				headers: {
+					Accept: "application/json,*/*",
+				},
+				method,
+				credentials: "include"
+			}
+
+			if(documentData){
+				Object.assign(options.headers!, { "Content-Type": "application/json" })
+				options.body = JSON.stringify(documentData)
+			}
+
+			const response = await fetch(`/api/files/${data.hash}`, options)
+			const json: APIResponse = await response.json()
+
+			if(!json.success) throw json.error
+
+			UpdateDocument(data.hash, documentData)
+			CloseMenu()
+
+			if(messageSuccess) toast.success(messageSuccess)
+		}catch(error: any){
+			HandleRequestError(error)
+		}
+	}
+
+	async function EditDocument(event: ReactMouseEvent){
 		event.preventDefault()
 
 		if(fetching) return
@@ -212,41 +242,27 @@ const Overflow = memo(function Overflow({ config, setIsOverflow, isOverflow, dat
 			if(conditions[2]) delete documentData.createdDate
 			if(conditions[3]) delete documentData.expireDate
 
-			return (async function Fetch(){
-				setFetching(true)
+			setFetching(true)
 
-				try{
-					const response = await fetch(`/api/files/${data.hash}`, {
-						headers: {
-							Accept: "application/json,*/*",
-							"Content-Type": "application/json"
-						},
-						body: JSON.stringify(documentData),
-						method: "PUT",
-						credentials: "include"
-					})
+			await FetchAPI("PUT", "Documento editado com sucesso", documentData)
 
-					const json: APIResponse = await response.json()
-
-					if(!json.success) throw json.error
-
-					UpdateDocument(data.hash, documentData)
-					CloseMenu()
-
-					// Use toastConfig if another setting other than position is used
-					toast.success("Documento editado com sucesso")
-				}catch(error: any){
-					HandleRequestError(error)
-				}finally{
-					setFetching(false)
-				}
-			})()
+			setFetching(false)
 		}catch(error){
 			if(typeof error === "string") return toast.error(error, toastConfig)
 
 			console.error(error)
 			toast.error("Não foi possível editar o documento", toastConfig)
 		}
+	}
+
+	async function RemoveDocument(event: ReactMouseEvent){
+		event.preventDefault()
+
+		setRemoving(true)
+
+		await FetchAPI("DELETE", "Documento removido com sucesso")
+
+		setRemoving(false)
 	}
 
 	if(!isOverflow) return null
@@ -313,8 +329,12 @@ const Overflow = memo(function Overflow({ config, setIsOverflow, isOverflow, dat
 				</section>
 
 				<section className={style.submit}>
-					<button className="no-outline" type="submit" onClick={EditDocument} ref={submitRef}>
+					<button className="no-outline" type="submit" onClick={EditDocument} ref={submitRef} disabled={fetching}>
 						{fetching ? <div className={style.spinner}></div> : "Enviar"}
+					</button>
+
+					<button className={`no-outline ${style.remove}`} onClick={RemoveDocument} disabled={fetching}>
+						{removing ? <div className={style.spinner}></div> : "Remover"}
 					</button>
 				</section>
 			</article>
@@ -332,10 +352,18 @@ export default function DocumentFolder({ config, type, userAccess, ...props }: D
 	const hasAccess = userAccess === "all"
 	const title = documentType?.name
 
-	const UpdateDocument = useCallback((hash: string, { filename, access, createdDate, expireDate }: IUpdateDocument) => {
+	const UpdateDocument = useCallback((hash: string, data?: IUpdateDocument) => {
 		const file = files.find(file => file.hash === hash)
 
 		if(!file) return
+
+		// Remove document
+		if(!data){
+			const index = files.indexOf(file)
+			return setFiles([...files.slice(0, index), ...files.slice(index + 1)])
+		}
+
+		const { filename, access, createdDate, expireDate } = data
 
 		if(filename) file.filename = filename
 		if(access) file.access = access

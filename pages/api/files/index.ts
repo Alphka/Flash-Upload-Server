@@ -84,7 +84,7 @@ async function SendFolder(response: NextApiResponse<APIFilesFolderResponse>, fol
 	})
 }
 
-async function SendFiles(response: NextApiResponse<APIFilesResponse | APIFilesDocumentsResponse>, hasAccess: boolean, documents = false){
+async function SendFiles(response: NextApiResponse<APIFilesResponse | APIFilesDocumentsResponse>, hasAccess: boolean, isDocumentsPage = false){
 	const SendError = SendAPIError.bind(undefined, response)
 	const files = await GetFiles({}, hasAccess)
 
@@ -94,11 +94,13 @@ async function SendFiles(response: NextApiResponse<APIFilesResponse | APIFilesDo
 
 	response.status(200)
 
-	if(documents){
+	if(isDocumentsPage){
 		const filesMap = new Map<number, {
 			files: typeof filesObjects
 			length: number
 		}>
+
+		filesObjects.sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime())
 
 		for(const file of filesObjects){
 			const { type } = file

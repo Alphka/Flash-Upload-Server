@@ -83,25 +83,34 @@
 			}
 
 			&.submit{
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				padding: 20pt 0 12pt;
 				width: 100%;
+				gap: 12pt;
 
 				input,
 				button{
-					position: relative;
-					background-color: var(--secondary-color);
-					box-shadow: 1px 1px 0 var(--terciary-color);
 					display: block;
+					position: relative;
 					font-family: inherit;
 					font-size: 14px;
-					max-width: 62pt;
-					align-self: center;
-					padding: 4pt 16pt;
-					margin: 20pt 0 8pt;
 					border-radius: 20pt;
+					padding: 4pt 16pt;
 					cursor: pointer;
 
 					&:hover{
 						filter: brightness(90%);
+					}
+
+					&[type=submit]{
+						background-color: var(--secondary-color);
+						box-shadow: 1px 1px 0 var(--terciary-color);
+					}
+
+					&.remove{
+						background-color: var(--remove-button);
 					}
 				}
 

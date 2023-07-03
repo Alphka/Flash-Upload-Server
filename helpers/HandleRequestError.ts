@@ -17,6 +17,7 @@ export default function HandleRequestError(error: any, toastConfig?: ToastOption
 		case "boolean":
 		case "undefined":
 			console.error(error)
+			toast.error("Algo deu errado")
 		break
 	}
 }

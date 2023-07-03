@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse, PageConfig } from "next"
+import type { FileAccess, IFile, IUserToken } from "../../../models/typings"
+import type { Document, Types } from "mongoose"
 import type { APIResponse } from "../../../typings/api"
-import type { FileAccess } from "../../../models/typings"
 import type { IFileData } from "."
 import type { Config } from "../../../typings/database"
 import { GetCachedConfig } from "../../../helpers/Config"
@@ -15,6 +16,9 @@ import UserToken from "../../../models/UserToken"
 import typeis from "type-is"
 import File from "../../../models/File"
 import mime from "mime"
+
+type UserDocument = Document<unknown, {}, IUserToken> & Omit<IUserToken & { _id: Types.ObjectId }, never>
+type FileDocument = Document<unknown, {}, IFile> & Omit<IFile & { _id: Types.ObjectId }, never>
 
 export interface IUpdateDocument {
 	filename?: string
@@ -34,13 +38,18 @@ export default async function FileAPI(request: NextApiRequest, response: NextApi
 
 		const user = await UserToken.findOne({ token })
 
-		if(!user) return response.status(401).end()
+		if(!user) return SendError(401)
 
-		response.setHeader("Access-Control-Allow-Methods", "GET, HEAD, PUT")
+		response.setHeader("Access-Control-Allow-Methods", "GET, HEAD, PUT, DELETE")
+
+		const file = await File.findOne({ hash })
+
+		if(!file) return SendError(404, "O documento não foi encontrado")
+		if(user.access !== "all" && file.access === "private") return SendError(403)
 
 		switch(request.method){
 			case "GET":
-			case "HEAD": break
+			case "HEAD": return SendFile(file, request.method, response)
 			case "PUT": {
 				const contentType = request.headers["content-type"]
 				const config = await GetCachedConfig(true)
@@ -50,39 +59,38 @@ export default async function FileAPI(request: NextApiRequest, response: NextApi
 				const body = (await ParseBody(request)).toString()
 				const data = JSON.parse(body) as IUpdateDocument
 
-				return UpdateDocument(hash, data, config, response)
+				return UpdateDocument(file, data, config, response)
 			}
+			case "DELETE": return DeleteDocument(file, response)
 			default: return SendError(405)
 		}
-
-		const file = await File.findOne({ hash })
-
-		if(!file) return SendError(404)
-
-		if(file.access === "private" && user.access !== "all") return SendError(403)
-
-		const { content, filename } = file
-		let type = mime.getType(filename)
-
-		if(type){
-			if(/^text\/[^; ]+$/.test(type)) type += "; charset=utf-8"
-		}else type = "application/octet-stream"
-
-		response.status(200)
-		response.setHeader("Content-Type", type)
-		response.setHeader("Content-Length", content.byteLength)
-		response.setHeader("Content-Disposition", `inline; filename="${encodeURIComponent(filename)}"`)
-
-		if(request.method === "GET") response.write(content)
-
-		response.end()
 	}catch(error){
 		console.error(error)
-		return SendError(500)
+		SendError(500)
 	}
 }
 
-async function UpdateDocument(hash: string, { filename, access, expireDate, createdDate }: IUpdateDocument, { accessFiles }: Config, response: NextApiResponse){
+async function SendFile(file: FileDocument, method: "GET" | "HEAD", response: NextApiResponse){
+	const { content, filename } = file
+	let mimeType = mime.getType(filename)
+
+	if(mimeType){
+		if(/^text\/[^; ]+$/.test(mimeType)){
+			mimeType += "; charset=utf-8"
+		}
+	}else mimeType = "application/octet-stream"
+
+	response.status(200)
+	response.setHeader("Content-Type", mimeType)
+	response.setHeader("Content-Length", content.byteLength)
+	response.setHeader("Content-Disposition", `inline; filename="${encodeURIComponent(filename)}"`)
+
+	if(method === "GET") response.write(content)
+
+	response.end()
+}
+
+async function UpdateDocument(file: FileDocument, { filename, access, expireDate, createdDate }: IUpdateDocument, { accessFiles }: Config, response: NextApiResponse<APIResponse>){
 	const SendError = SendAPIError.bind(undefined, response)
 	const data = {} as IFileData
 
@@ -107,17 +115,25 @@ async function UpdateDocument(hash: string, { filename, access, expireDate, crea
 			data.createdAt = createdDate
 		}
 
-		const file = await File.findOne({ hash })
-
-		if(!file) return SendError(404, "O documento não foi encontrado")
-
 		await file.updateOne({ $set: data })
 
-		return response.status(200).json({ success: true })
+		response.status(200).json({ success: true })
 	}catch(error){
-		if(typeof error === "string") return SendError(400, error)
-		if(error instanceof Error) error.stack = "Falha ao editar informações do documento"
+		if(typeof error === "string") SendError(400, error)
+		else if(error instanceof Error) error.stack = "Falha ao editar informações do documento"
+
 		throw error
+	}
+}
+
+async function DeleteDocument(file: FileDocument, response: NextApiResponse<APIResponse>){
+	const SendError = SendAPIError.bind(undefined, response)
+
+	try{
+		await file.deleteOne()
+		response.status(200).json({ success: true })
+	}catch(error){
+		SendError(500, "Falha ao remover o documento")
 	}
 }
 
