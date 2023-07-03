@@ -2,7 +2,8 @@ import type { AccessTypes, DocumentTypeInfo } from "../../typings/database"
 import type { FileInfo, FileObject } from "../../typings"
 import type { APIUploadResponse } from "../../typings/api"
 import { useState, useEffect, useCallback, type CSSProperties } from "react"
-import { toast } from "react-toastify"
+import { toast, type ToastOptions } from "react-toastify"
+import { useRouter } from "next/router"
 import HandleRequestError from "../../helpers/HandleRequestError"
 import ValidateFilename from "../../helpers/ValidateFilename"
 import LocalInputDate from "../../helpers/LocalInputDate"
@@ -11,19 +12,21 @@ import axios from "axios"
 import style from "../../styles/modules/upload-menu.module.scss"
 
 interface UploadMenuProps {
+	toastConfig: ToastOptions
 	userAccess: AccessTypes
-	types: DocumentTypeInfo[]
 	inputFiles: FileInfo[]
 	isUploadMenu: boolean
+	types: DocumentTypeInfo[]
 	setIsUploadMenu: (state: boolean) => any
 	clearInput: () => any
 }
 
-export default function UploadMenu({ userAccess, types, inputFiles, isUploadMenu, setIsUploadMenu, clearInput }: UploadMenuProps){
+export default function UploadMenu({ userAccess, types, inputFiles, toastConfig, isUploadMenu, setIsUploadMenu, clearInput }: UploadMenuProps){
 	const [uploadPercentage, setUploadPercentage] = useState(0)
 	const [isProgressBar, setIsProgressBar] = useState(false)
 	const [submitBusy, setSubmitBusy] = useState(false)
 	const [files, setFiles] = useState<Map<number, FileObject>>(new Map)
+	const router = useRouter()
 
 	const closeMenu = useCallback(() => {
 		if(submitBusy) return
@@ -70,14 +73,18 @@ export default function UploadMenu({ userAccess, types, inputFiles, isUploadMenu
 	const setFile = useCallback((id: number, data: FileObject) => files.set(id, data), [files])
 
 	const deleteFile = useCallback((id: number, deleteContainer?: boolean) => {
-		if(!files.has(id)) return
+		if(!files.has(id)) return !files.size
 
 		inputFiles[id].show = false
 		files.delete(id)
 
-		if(deleteContainer && !files.size) closeMenu()
+		const shouldClose = !files.size
+
+		if(deleteContainer && shouldClose) closeMenu()
 
 		setFiles(new Map(files))
+
+		return shouldClose
 	}, [inputFiles, files])
 
 	if(!isUploadMenu) return null
@@ -92,11 +99,11 @@ export default function UploadMenu({ userAccess, types, inputFiles, isUploadMenu
 				</section>
 
 				<section className={style.files}>
-					{inputFiles.map((info, index) => {
+					{inputFiles.map((info, id) => {
 						if(!info.show) return null
 
 						return <FileContainer {...{
-							id: index,
+							id,
 							userAccess,
 							info,
 							types,
@@ -165,10 +172,12 @@ export default function UploadMenu({ userAccess, types, inputFiles, isUploadMenu
 							// Type assertion
 							if(!response.data.success) throw "Upload failed"
 
+							const { errors, message, uploaded } = response.data
+
 							// Handle each error
-							for(const { id, message } of response.data.errors){
+							for(const { id, message } of errors){
 								if(!id && id !== 0){
-									if(message) toast.error(`Erro: ${message}`)
+									if(message) toast.error(`Erro: ${message}`, toastConfig)
 									else console.error("Unknown API Error")
 									continue
 								}
@@ -179,19 +188,25 @@ export default function UploadMenu({ userAccess, types, inputFiles, isUploadMenu
 								if(file && container) file.setErrorMessage(message)
 							}
 
+							let shouldClose = false
+
 							// Remove uploaded files
-							for(const index of response.data.uploaded){
-								const file = files.get(index)
+							for(const id of uploaded){
+								const file = files.get(id)
 
 								if(!file) continue
 								if(file.getErrorMessage() !== null) file.setErrorMessage(null)
 
-								deleteFile(index, true)
+								shouldClose = deleteFile(id, true)
 							}
 
-							if(response.data.message){
-								toast[response.data.uploaded.length ? "success" : "error"](response.data.message)
+							if(shouldClose && !errors.length){
+								router.push("/documents")
+								toast.success(message)
+								return
 							}
+
+							if(message) toast[uploaded.length ? "success" : "error"](message, toastConfig)
 						}catch(error){
 							HandleRequestError(error)
 						}finally{

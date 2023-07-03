@@ -9,8 +9,8 @@ interface FileContainerProps {
 	userAccess: AccessTypes
 	info: FileInfo
 	types: DocumentTypeInfo[] | null
-	setFile: (index: number, data: FileObject) => any
-	deleteFile: (index: number, deleteContainer?: boolean) => any
+	setFile: (id: number, data: FileObject) => any
+	deleteFile: (id: number, deleteContainer?: boolean) => any
 }
 
 const FileContainer = memo(({ id, userAccess, info, setFile, deleteFile, types }: FileContainerProps) => {

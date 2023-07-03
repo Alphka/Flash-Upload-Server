@@ -7,7 +7,7 @@ import { GetCookie, SetCookie } from "../helpers/Cookie"
 import { GetCachedConfig } from "../helpers/Config"
 import { useRouter } from "next/router"
 import { Alata } from "next/font/google"
-import { toast } from "react-toastify"
+import { toast, ToastOptions } from "react-toastify"
 import ConnectDatabase from "../lib/ConnectDatabase"
 import Unauthorize from "../helpers/Unauthorize"
 import Navigation from "../components/Navigation"
@@ -54,12 +54,13 @@ export const getServerSideProps: GetServerSideProps<IndexProps> = async ({ req, 
 
 interface UploadFormProps {
 	config: Config
+	toastConfig: ToastOptions
 	setIsUploadMenu: (state: boolean) => any
 	AddFileInfos: (infos: FileInfo[]) => any
 	SetInputRef(ref: RefObject<HTMLInputElement>): any
 }
 
-const UploadForm = memo(function UploadForm({ config, setIsUploadMenu, AddFileInfos, SetInputRef }: UploadFormProps){
+const UploadForm = memo(function UploadForm({ config, setIsUploadMenu, toastConfig, AddFileInfos, SetInputRef }: UploadFormProps){
 	const filesInputRef = useRef<HTMLInputElement>(null)
 
 	SetInputRef(filesInputRef)
@@ -75,7 +76,7 @@ const UploadForm = memo(function UploadForm({ config, setIsUploadMenu, AddFileIn
 					const files = event.dataTransfer?.files
 					const filesInput = filesInputRef.current!
 
-					if(!files?.length) return toast.error("Nenhum arquivo foi detectado")
+					if(!files?.length) return toast.error("Nenhum arquivo foi detectado", toastConfig)
 
 					filesInput.files = files
 					filesInput.dispatchEvent(new Event("change", { bubbles: true }))
@@ -93,7 +94,7 @@ const UploadForm = memo(function UploadForm({ config, setIsUploadMenu, AddFileIn
 
 					if(!files?.length){
 						setIsUploadMenu(false)
-						toast.error("Nenhum arquivo foi selecionado")
+						toast.error("Nenhum arquivo foi selecionado", toastConfig)
 
 						return
 					}
@@ -102,7 +103,7 @@ const UploadForm = memo(function UploadForm({ config, setIsUploadMenu, AddFileIn
 
 					if(files.length > maxFiles){
 						setIsUploadMenu(false)
-						toast.error(`O número máximo de arquivos permitidos é ${maxFiles}`)
+						toast.error(`O número máximo de arquivos permitidos é ${maxFiles}`, toastConfig)
 
 						return
 					}
@@ -114,7 +115,7 @@ const UploadForm = memo(function UploadForm({ config, setIsUploadMenu, AddFileIn
 						const sizeString = `${sizeMB % 1 === 0 ? sizeMB : sizeMB.toFixed(2)} MB`
 
 						setIsUploadMenu(false)
-						toast.error(`O tamanho máximo por arquivo é ${sizeString}`)
+						toast.error(`O tamanho máximo por arquivo é ${sizeString}`, toastConfig)
 
 						return
 					}
@@ -127,7 +128,7 @@ const UploadForm = memo(function UploadForm({ config, setIsUploadMenu, AddFileIn
 							return { name, type, size, date, file, show: true } as FileInfo
 						}))
 					}catch(error){
-						if(typeof error === "string") toast.error(error)
+						if(typeof error === "string") toast.error(error, toastConfig)
 						console.error(error)
 					}
 				}} />
@@ -138,8 +139,13 @@ const UploadForm = memo(function UploadForm({ config, setIsUploadMenu, AddFileIn
 
 export default function IndexPage({ config, userAccess }: IndexProps){
 	const [isUploadMenu, setIsUploadMenu] = useState(false)
+	const [toastConfig, setToastConfig] = useState<ToastOptions>({})
 	const [files] = useState<FileInfo[]>([])
 	const router = useRouter()
+
+	useEffect(() => {
+		setToastConfig(isUploadMenu ? { position: "bottom-right" } : {})
+	}, [isUploadMenu])
 
 	let fileInputRef: RefObject<HTMLInputElement>
 
@@ -181,7 +187,13 @@ export default function IndexPage({ config, userAccess }: IndexProps){
 			<article className={style.content}>
 				<section className={`${style.title} ${alata.className}`}>Busque com rapidez e facilidade!</section>
 				<section className={style.button}>
-					<UploadForm {...{ setIsUploadMenu, AddFileInfos, SetInputRef, config }} />
+					<UploadForm {...{
+						setIsUploadMenu,
+						AddFileInfos,
+						SetInputRef,
+						toastConfig,
+						config
+					}} />
 				</section>
 			</article>
 
@@ -196,6 +208,7 @@ export default function IndexPage({ config, userAccess }: IndexProps){
 			isUploadMenu,
 			setIsUploadMenu,
 			clearInput,
+			toastConfig,
 			types: config.types
 		}} />
 	</>
