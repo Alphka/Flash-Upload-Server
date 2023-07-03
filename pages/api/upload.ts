@@ -18,18 +18,14 @@ interface FileData {
 	hash: string
 	filename: string
 	createdAt: Date
+	expiresAt: Date
 	access: FileAccess
 	typeId: number
 	extension?: string
 }
 
-async function UploadFile(file: Buffer, { hash, filename, createdAt, access, typeId, extension }: FileData){
+async function UploadFile(file: Buffer, { hash, filename, createdAt, expiresAt, access, typeId, extension }: FileData){
 	extension ??= extname(filename)
-
-	const expiresAt = new Date(createdAt)
-
-	// TODO: Get year from config, for each document type
-	expiresAt.setFullYear(createdAt.getFullYear() + 5)
 
 	await File.create({
 		content: file,
@@ -98,6 +94,9 @@ export default async function Upload(request: NextApiRequest, response: NextApiR
 				case "date":
 					part.date = value
 				break
+				case "expire":
+					part.expire = value
+				break
 				case "type":
 					part.typeId = value
 				break
@@ -107,7 +106,7 @@ export default async function Upload(request: NextApiRequest, response: NextApiR
 			}
 		})
 
-		busboy.on("file", (name, stream, { filename, mimeType }) => {
+		busboy.on("file", (name, stream, { filename }) => {
 			const part = parts.at(-1)
 
 			if(name !== "image") return stream.resume()
@@ -116,11 +115,14 @@ export default async function Upload(request: NextApiRequest, response: NextApiR
 			part.isFile = true
 
 			filePromises.push((async () => {
-				const date = part.date ? new Date(part.date) : new Date
-				const type = GetTypeById(config, part.typeId)
-				const extension = extname(filename)
+				const date = part.date && new Date(part.date)
+				const expire = part.expire && new Date(part.expire)
+				const type = part.typeId && GetTypeById(config, part.typeId)
+				const extension = filename && extname(filename)
 
 				try{
+					if(!date) throw "Data de criação inválida"
+					if(!expire) throw "Data de expiração inválida"
 					if(!type) throw "O tipo de documento não é válido"
 					if(!extension) throw "Extensão de arquivo inválida"
 
@@ -145,6 +147,7 @@ export default async function Upload(request: NextApiRequest, response: NextApiR
 						hash,
 						filename,
 						createdAt: date,
+						expiresAt: expire,
 						access: part.folder as FileAccess || "public",
 						typeId: type.id,
 						extension

@@ -5,6 +5,7 @@ import { useState, useEffect, type CSSProperties } from "react"
 import { toast } from "react-toastify"
 import HandleRequestError from "../../helpers/HandleRequestError"
 import ValidateFilename from "../../helpers/ValidateFilename"
+import LocalInputDate from "../../helpers/LocalInputDate"
 import FileContainer from "./FileContainer"
 import axios from "axios"
 import style from "../../styles/modules/upload-menu.module.scss"
@@ -107,16 +108,14 @@ export default function UploadMenu({ userAccess, types, inputFiles, isUploadMenu
 				</section>
 
 				<section className={style.submit}>
-					<input type="button" value="Enviar" onClick={async () => {
+					<input type="submit" value="Enviar" onClick={async () => {
 						if(submitBusy) return
 
-						const offset = new Date().getTimezoneOffset(), absOffset = Math.abs(offset)
-						const gmt = "GMT" + (offset < 0 ? "+" : "-") + ("00" + Math.floor(absOffset / 60)).slice(-2) + ":" + ("00" + (absOffset % 60)).slice(-2)
 						const formData = new FormData()
 
 						for(const file of files.values()){
 							const { info: { name, file: blob }, references, getErrorMessage, setErrorMessage } = file
-							const { nameInput, dateInput, typeSelect, checkboxInput } = references
+							const { nameInput, dateInput, expireInput, typeSelect, checkboxInput } = references
 
 							const filename = nameInput.current!.value
 							const typeId = typeSelect.current!.value
@@ -131,7 +130,8 @@ export default function UploadMenu({ userAccess, types, inputFiles, isUploadMenu
 								continue
 							}
 
-							formData.set("date", new Date(`${dateInput.current!.value} ${gmt}`).toISOString())
+							formData.set("date", LocalInputDate(dateInput.current!.value).toISOString())
+							formData.set("expire", LocalInputDate(expireInput.current!.value).toISOString())
 							formData.set("type", typeId)
 							formData.set("isPrivate", userAccess === "all" && checkboxInput.current ? String(checkboxInput.current.checked) : "false")
 							formData.set("image", blob, filename + "." + name.substring(name.lastIndexOf(".") + 1))

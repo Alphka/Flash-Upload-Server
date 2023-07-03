@@ -44,6 +44,7 @@ interface FileReferences {
 	nameInput: RefObject<HTMLInputElement>
 	dateInput: RefObject<HTMLInputElement>
 	typeSelect: RefObject<HTMLSelectElement>
+	expireInput: RefObject<HTMLInputElement>
 	checkboxInput: RefObject<HTMLInputElement>
 }
 
@@ -58,6 +59,7 @@ export interface FilePart {
 	folder?: FileAccess
 	typeId?: string
 	date?: string
+	expire?: string
 	isFile?: boolean
 }
 

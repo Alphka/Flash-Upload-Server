@@ -17,6 +17,7 @@ const FileContainer = memo(({ userAccess, info, setFile, deleteFile, types }: Fi
 	const nameInput = useRef<HTMLInputElement>(null)
 	const dateInput = useRef<HTMLInputElement>(null)
 	const typeSelect = useRef<HTMLSelectElement>(null)
+	const expireInput = useRef<HTMLInputElement>(null)
 	const checkboxInput = useRef<HTMLInputElement>(null)
 	const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
@@ -31,6 +32,7 @@ const FileContainer = memo(({ userAccess, info, setFile, deleteFile, types }: Fi
 			nameInput,
 			dateInput,
 			typeSelect,
+			expireInput,
 			checkboxInput
 		}
 	})
@@ -39,6 +41,11 @@ const FileContainer = memo(({ userAccess, info, setFile, deleteFile, types }: Fi
 		deleteFile(info.name, true)
 	}, [])
 
+	const expireDate = new Date(info.date)
+
+	// TODO: Get year from config, for each document type
+	expireDate.setFullYear(expireDate.getFullYear() + 5)
+
 	return (
 		<section ref={container} className={style.file}>
 			<button className={`icon ${style.delete} material-symbols-outlined`} onClick={handleDelete}>delete</button>
@@ -46,13 +53,17 @@ const FileContainer = memo(({ userAccess, info, setFile, deleteFile, types }: Fi
 				<span className={style.label}>Nome</span>
 				<input type="text" defaultValue={info.name.substring(0, info.name.lastIndexOf("."))} ref={nameInput} />
 			</p>
-			<p className="mime">
+			<p>
 				<span className={style.label}>Tipo de arquivo</span>
 				<span className={style.content}>{info.type}</span>
 			</p>
 			<p className={style.date}>
 				<span className={style.label}>Data de criação</span>
 				<input type="date" defaultValue={GetInputDate(info.date)} ref={dateInput} />
+			</p>
+			<p className={style.date}>
+				<span className={style.label}>Data de expiração</span>
+				<input type="date" defaultValue={GetInputDate(expireDate)} ref={expireInput} />
 			</p>
 			<p className={style.type}>
 				<span className={style.label}>Tipo de documento</span>
