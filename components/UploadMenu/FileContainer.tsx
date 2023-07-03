@@ -5,14 +5,15 @@ import GetInputDate from "../../helpers/GetInputDate"
 import style from "../../styles/modules/upload-menu.module.scss"
 
 interface FileContainerProps {
+	id: number
 	userAccess: AccessTypes
 	info: FileInfo
 	types: DocumentTypeInfo[] | null
-	setFile: (filename: string, data: FileObject) => any
-	deleteFile: (filename: string, deleteContainer?: boolean) => any
+	setFile: (index: number, data: FileObject) => any
+	deleteFile: (index: number, deleteContainer?: boolean) => any
 }
 
-const FileContainer = memo(({ userAccess, info, setFile, deleteFile, types }: FileContainerProps) => {
+const FileContainer = memo(({ id, userAccess, info, setFile, deleteFile, types }: FileContainerProps) => {
 	const container = useRef<HTMLElement>(null)
 	const nameInput = useRef<HTMLInputElement>(null)
 	const dateInput = useRef<HTMLInputElement>(null)
@@ -23,7 +24,7 @@ const FileContainer = memo(({ userAccess, info, setFile, deleteFile, types }: Fi
 
 	const getErrorMessage = useCallback(() => errorMessage, [errorMessage])
 
-	setFile(info.name, {
+	setFile(id, {
 		info,
 		setErrorMessage,
 		getErrorMessage,
@@ -37,9 +38,7 @@ const FileContainer = memo(({ userAccess, info, setFile, deleteFile, types }: Fi
 		}
 	})
 
-	const handleDelete = useCallback(() => {
-		deleteFile(info.name, true)
-	}, [])
+	const handleDelete = useCallback(() => deleteFile(id, true), [])
 
 	const expireDate = new Date(info.date)
 

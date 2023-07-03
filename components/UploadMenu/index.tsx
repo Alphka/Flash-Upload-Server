@@ -1,7 +1,7 @@
 import type { AccessTypes, DocumentTypeInfo } from "../../typings/database"
 import type { FileInfo, FileObject } from "../../typings"
 import type { APIUploadResponse } from "../../typings/api"
-import { useState, useEffect, type CSSProperties } from "react"
+import { useState, useEffect, useCallback, type CSSProperties } from "react"
 import { toast } from "react-toastify"
 import HandleRequestError from "../../helpers/HandleRequestError"
 import ValidateFilename from "../../helpers/ValidateFilename"
@@ -23,9 +23,9 @@ export default function UploadMenu({ userAccess, types, inputFiles, isUploadMenu
 	const [uploadPercentage, setUploadPercentage] = useState(0)
 	const [isProgressBar, setIsProgressBar] = useState(false)
 	const [submitBusy, setSubmitBusy] = useState(false)
-	const [files, setFiles] = useState<Map<string, FileObject>>(new Map)
+	const [files, setFiles] = useState<Map<number, FileObject>>(new Map)
 
-	function closeMenu(){
+	const closeMenu = useCallback(() => {
 		if(submitBusy) return
 
 		inputFiles.splice(0, inputFiles.length)
@@ -39,7 +39,7 @@ export default function UploadMenu({ userAccess, types, inputFiles, isUploadMenu
 
 		clearInput()
 		setIsUploadMenu(false)
-	}
+	}, [submitBusy])
 
 	function EscListener(event: KeyboardEvent){
 		if(!isUploadMenu) return
@@ -67,21 +67,18 @@ export default function UploadMenu({ userAccess, types, inputFiles, isUploadMenu
 		if(!isProgressBar && uploadPercentage !== 0) setUploadPercentage(0)
 	})
 
-	function setFile(filename: string, data: FileObject){
-		files.set(filename, data)
-	}
+	const setFile = useCallback((id: number, data: FileObject) => files.set(id, data), [files])
 
-	function deleteFile(filename: string, deleteContainer?: boolean){
-		inputFiles.splice(inputFiles.findIndex(info => info.name === filename), 1)
-		files.delete(filename)
+	const deleteFile = useCallback((id: number, deleteContainer?: boolean) => {
+		if(!files.has(id)) return
+
+		inputFiles[id].show = false
+		files.delete(id)
+
+		if(deleteContainer && !files.size) closeMenu()
 
 		setFiles(new Map(files))
-
-		if(deleteContainer && !files.size){
-			closeMenu()
-			clearInput()
-		}
-	}
+	}, [inputFiles, files])
 
 	if(!isUploadMenu) return null
 
@@ -95,8 +92,11 @@ export default function UploadMenu({ userAccess, types, inputFiles, isUploadMenu
 				</section>
 
 				<section className={style.files}>
-					{inputFiles.map(info => (
-						<FileContainer {...{
+					{inputFiles.map((info, index) => {
+						if(!info.show) return null
+
+						return <FileContainer {...{
+							id: index,
 							userAccess,
 							info,
 							types,
@@ -104,7 +104,7 @@ export default function UploadMenu({ userAccess, types, inputFiles, isUploadMenu
 							deleteFile,
 							key: info.name
 						}} />
-					))}
+					})}
 				</section>
 
 				<section className={style.submit}>
@@ -113,7 +113,7 @@ export default function UploadMenu({ userAccess, types, inputFiles, isUploadMenu
 
 						const formData = new FormData()
 
-						for(const file of files.values()){
+						for(const [id, file] of files.entries()){
 							const { info: { name, file: blob }, references, getErrorMessage, setErrorMessage } = file
 							const { nameInput, dateInput, expireInput, typeSelect, checkboxInput } = references
 
@@ -130,11 +130,12 @@ export default function UploadMenu({ userAccess, types, inputFiles, isUploadMenu
 								continue
 							}
 
-							formData.set("date", LocalInputDate(dateInput.current!.value).toISOString())
-							formData.set("expire", LocalInputDate(expireInput.current!.value).toISOString())
-							formData.set("type", typeId)
-							formData.set("isPrivate", userAccess === "all" && checkboxInput.current ? String(checkboxInput.current.checked) : "false")
-							formData.set("image", blob, filename + "." + name.substring(name.lastIndexOf(".") + 1))
+							formData.append("id", id.toString())
+							formData.append("date", LocalInputDate(dateInput.current!.value).toISOString())
+							formData.append("expire", LocalInputDate(expireInput.current!.value).toISOString())
+							formData.append("type", typeId)
+							formData.append("isPrivate", userAccess === "all" && checkboxInput.current ? String(checkboxInput.current.checked) : "false")
+							formData.append("image", blob, filename + "." + name.substring(name.lastIndexOf(".") + 1))
 
 							if(getErrorMessage() !== null) setErrorMessage(null)
 						}
@@ -165,29 +166,27 @@ export default function UploadMenu({ userAccess, types, inputFiles, isUploadMenu
 							if(!response.data.success) throw "Upload failed"
 
 							// Handle each error
-							for(const { filename, message } of response.data.errors){
-								if(!filename){
+							for(const { id, message } of response.data.errors){
+								if(!id && id !== 0){
 									if(message) toast.error(`Erro: ${message}`)
 									else console.error("Unknown API Error")
 									continue
 								}
 
-								// TODO: If filename changes, this doesn't work
-								const file = files.get(filename)
+								const file = files.get(id)
 								const container = file?.references.container
 
 								if(file && container) file.setErrorMessage(message)
-								else toast.error(`O arquivo '${filename}' não pôde ser enviado`)
 							}
 
 							// Remove uploaded files
-							for(const filename of response.data.uploaded){
-								const file = files.get(filename)
+							for(const index of response.data.uploaded){
+								const file = files.get(index)
 
 								if(!file) continue
 								if(file.getErrorMessage() !== null) file.setErrorMessage(null)
 
-								deleteFile(filename, true)
+								deleteFile(index, true)
 							}
 
 							if(response.data.message){

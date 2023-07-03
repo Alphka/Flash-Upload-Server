@@ -37,6 +37,7 @@ export interface FileInfo {
 	size: number
 	date: number
 	file: File
+	show: boolean
 }
 
 interface FileReferences {
@@ -56,6 +57,7 @@ export interface FileObject {
 }
 
 export interface FilePart {
+	id?: string
 	folder?: FileAccess
 	typeId?: string
 	date?: string

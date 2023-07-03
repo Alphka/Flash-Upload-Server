@@ -10,6 +10,7 @@ import ValidateSize from "../../helpers/ValidateSize"
 import SendAPIError from "../../helpers/SendAPIError"
 import GetTypeById from "../../helpers/GetTypeById"
 import UserToken from "../../models/UserToken"
+import IsNumber from "../../helpers/IsNumber"
 import Busboy from "busboy"
 import Crypto from "crypto"
 import File from "../../models/File"
@@ -73,7 +74,7 @@ export default async function Upload(request: NextApiRequest, response: NextApiR
 
 		const parts = new Array<FilePart>
 		const errors = new Array<UploadFileError>
-		const uploaded = new Array<string>
+		const uploaded = new Array<number>
 		const filePromises = new Array<Promise<any>>
 
 		function GetLastPart(){
@@ -91,6 +92,9 @@ export default async function Upload(request: NextApiRequest, response: NextApiR
 			const part = GetLastPart()
 
 			switch(name){
+				case "id":
+					part.id = value
+				break
 				case "date":
 					part.date = value
 				break
@@ -115,12 +119,14 @@ export default async function Upload(request: NextApiRequest, response: NextApiR
 			part.isFile = true
 
 			filePromises.push((async () => {
+				const id = IsNumber(part.id) ? Number(part.id) : part.id === "0" ? 0 : undefined
 				const date = part.date && new Date(part.date)
 				const expire = part.expire && new Date(part.expire)
 				const type = part.typeId && GetTypeById(config, part.typeId)
 				const extension = filename && extname(filename)
 
 				try{
+					if(!id && id !== 0) throw "ID do documento inválido"
 					if(!date) throw "Data de criação inválida"
 					if(!expire) throw "Data de expiração inválida"
 					if(!type) throw "O tipo de documento não é válido"
@@ -153,11 +159,11 @@ export default async function Upload(request: NextApiRequest, response: NextApiR
 						extension
 					})
 
-					uploaded.push(filename)
+					uploaded.push(id)
 				}catch(error: any){
 					if(typeof error === "string"){
 						stream.resume()
-						errors.push({ message: error, filename })
+						errors.push({ message: error, id })
 						return
 					}
 

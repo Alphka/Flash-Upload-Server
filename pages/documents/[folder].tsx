@@ -8,6 +8,7 @@ import type { Config } from "../../typings/database"
 import { memo, useCallback, useEffect, useRef, useState, type MouseEvent as ReactMouseEvent } from "react"
 import { toast, type ToastOptions } from "react-toastify"
 import { GetCachedConfig } from "../../helpers/Config"
+import { useRouter } from "next/router"
 import HandleRequestError from "../../helpers/HandleRequestError"
 import ValidateFilename from "../../helpers/ValidateFilename"
 import ConnectDatabase from "../../lib/ConnectDatabase"
@@ -155,32 +156,28 @@ const Overflow = memo(function Overflow({ config, setIsOverflow, isOverflow, dat
 	useEffect(() => setClearErrors(() => ClearErrors), [])
 
 	async function FetchAPI(method: "GET" | "PUT" | "DELETE", messageSuccess?: string, documentData?: IUpdateDocument){
-		try{
-			const options: RequestInit = {
-				headers: {
-					Accept: "application/json,*/*",
-				},
-				method,
-				credentials: "include"
-			}
-
-			if(documentData){
-				Object.assign(options.headers!, { "Content-Type": "application/json" })
-				options.body = JSON.stringify(documentData)
-			}
-
-			const response = await fetch(`/api/files/${data.hash}`, options)
-			const json: APIResponse = await response.json()
-
-			if(!json.success) throw json.error
-
-			UpdateDocument(data.hash, documentData)
-			CloseMenu()
-
-			if(messageSuccess) toast.success(messageSuccess)
-		}catch(error: any){
-			HandleRequestError(error)
+		const options: RequestInit = {
+			headers: {
+				Accept: "application/json,*/*",
+			},
+			method,
+			credentials: "include"
 		}
+
+		if(documentData){
+			Object.assign(options.headers!, { "Content-Type": "application/json" })
+			options.body = JSON.stringify(documentData)
+		}
+
+		const response = await fetch(`/api/files/${data.hash}`, options)
+		const json: APIResponse = await response.json()
+
+		if(!json.success) throw json.error
+
+		UpdateDocument(data.hash, documentData)
+		CloseMenu()
+
+		if(messageSuccess) toast.success(messageSuccess)
 	}
 
 	async function EditDocument(event: ReactMouseEvent){
@@ -242,11 +239,14 @@ const Overflow = memo(function Overflow({ config, setIsOverflow, isOverflow, dat
 			if(conditions[2]) delete documentData.createdDate
 			if(conditions[3]) delete documentData.expireDate
 
-			setFetching(true)
-
-			await FetchAPI("PUT", "Documento editado com sucesso", documentData)
-
-			setFetching(false)
+			try{
+				setFetching(true)
+				await FetchAPI("PUT", "Documento editado com sucesso", documentData)
+			}catch(error: any){
+				HandleRequestError(error)
+			}finally{
+				setFetching(false)
+			}
 		}catch(error){
 			if(typeof error === "string") return toast.error(error, toastConfig)
 
@@ -258,11 +258,14 @@ const Overflow = memo(function Overflow({ config, setIsOverflow, isOverflow, dat
 	async function RemoveDocument(event: ReactMouseEvent){
 		event.preventDefault()
 
-		setRemoving(true)
-
-		await FetchAPI("DELETE", "Documento removido com sucesso")
-
-		setRemoving(false)
+		try{
+			setRemoving(true)
+			await FetchAPI("DELETE", "Documento removido com sucesso")
+		}catch(error: any){
+			HandleRequestError(error)
+		}finally{
+			setRemoving(false)
+		}
 	}
 
 	if(!isOverflow) return null
@@ -351,6 +354,7 @@ export default function DocumentFolder({ config, type, userAccess, ...props }: D
 	const documentType = GetTypeById(config, type)
 	const hasAccess = userAccess === "all"
 	const title = documentType?.name
+	const router = useRouter()
 
 	const UpdateDocument = useCallback((hash: string, data?: IUpdateDocument) => {
 		const file = files.find(file => file.hash === hash)
@@ -360,7 +364,11 @@ export default function DocumentFolder({ config, type, userAccess, ...props }: D
 		// Remove document
 		if(!data){
 			const index = files.indexOf(file)
-			return setFiles([...files.slice(0, index), ...files.slice(index + 1)])
+			const newFiles = files.slice(0, index).concat(files.slice(index + 1))
+
+			if(!newFiles.length) return router.push("/documents", undefined)
+
+			return setFiles(newFiles)
 		}
 
 		const { filename, access, createdDate, expireDate } = data

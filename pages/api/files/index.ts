@@ -66,12 +66,12 @@ async function SendFolder(response: NextApiResponse<APIFilesFolderResponse>, fol
 
 	const documentType = await GetDocumentType(folder)
 
-	if(!documentType) return SendError(404, "Tipo de documento não encontrado")
+	if(!documentType) return SendError(404, "Tipo de documento inválido")
 
 	const { id } = documentType
 	const files = await GetFiles({ type: id }, hasAccess)
 
-	if(!files.length) return SendError(404)
+	if(!files.length) return SendError(404, "A pasta não foi encontrada")
 
 	const filesObjects = GetFilesObjects(files).map(({ type, ...data }) => data)
 

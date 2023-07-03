@@ -15,14 +15,14 @@ export interface APIResponseError {
 
 export interface UploadFileError {
 	message: string
-	filename?: string
+	id?: number
 }
 
 export type APIUploadResponse = {
 	success: boolean
 	message: string
 	errors: UploadFileError[]
-	uploaded: string[]
+	uploaded: number[]
 } | {
 	success: false
 	error: string

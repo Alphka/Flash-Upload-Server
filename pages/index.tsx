@@ -124,7 +124,7 @@ const UploadForm = memo(function UploadForm({ config, setIsUploadMenu, AddFileIn
 
 						AddFileInfos(filesArray.map(file => {
 							const { name, type, size, lastModified: date } = file
-							return { name, type, size, date, file } as FileInfo
+							return { name, type, size, date, file, show: true } as FileInfo
 						}))
 					}catch(error){
 						if(typeof error === "string") toast.error(error)
@@ -196,7 +196,7 @@ export default function IndexPage({ config, userAccess }: IndexProps){
 			isUploadMenu,
 			setIsUploadMenu,
 			clearInput,
-			types: config.types }}
-		/>
+			types: config.types
+		}} />
 	</>
 }
