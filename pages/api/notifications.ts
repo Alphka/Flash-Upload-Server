@@ -18,9 +18,9 @@ export interface INotificationData {
 }
 
 export default async function NotificationsAPI(request: NextApiRequest, response: NextApiResponse<APIResponse<INotificationData[]>>){
-	const token = request.cookies.token || request.headers.authorization
 	const HandleError = HandleAPIError.bind(undefined, response)
 	const SendError = SendAPIError.bind(undefined, response)
+	const token = request.cookies.token || request.headers.authorization
 
 	if(request.method !== "GET") return HandleError("method")
 	if(!request.headers["user-agent"]) return HandleError("userAgent")

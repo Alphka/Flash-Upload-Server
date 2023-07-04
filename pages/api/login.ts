@@ -20,6 +20,7 @@ function CreateToken(){
 export default async function Login(request: NextApiRequest, response: NextApiResponse){
 	const HandleError = HandleAPIError.bind(undefined, response)
 	const SendError = SendAPIError.bind(undefined, response)
+	const oldToken = request.cookies.token || request.headers.authorization
 
 	if(request.method !== "POST") return HandleError("method")
 	if(request.headers["content-type"] !== "application/x-www-form-urlencoded") return HandleError("contentType")
@@ -28,8 +29,6 @@ export default async function Login(request: NextApiRequest, response: NextApiRe
 	if(!ValidateSize(request.headers["content-length"], maxSize)) return HandleError("length")
 
 	async function Register(name: string, access: AccessTypes){
-		const oldToken = request.cookies.token
-
 		if(oldToken){
 			try{
 				await UserToken.findOneAndDelete({ token: oldToken })
@@ -89,10 +88,10 @@ export default async function Login(request: NextApiRequest, response: NextApiRe
 
 		const user = await User.findOne({ name: username })
 
-		if(user){
-			if(user.ValidatePassword(password!)) await Register(username, user.access)
-			else Unauthorize("Senha inválida")
-		}else Unauthorize("Usuário inválido")
+		if(!user) return Unauthorize("Usuário inválido")
+		if(!user.ValidatePassword(password!)) return Unauthorize("Senha inválida")
+
+		await Register(username, user.access)
 	}catch(error){
 		switch(typeof error){
 			case "string": return SendError(400, error)

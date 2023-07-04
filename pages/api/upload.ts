@@ -58,7 +58,7 @@ export default async function Upload(request: NextApiRequest, response: NextApiR
 
 		const user = await UserToken.findOne({ token })
 
-		if(!user) return HandleError(401)
+		if(!user) return SendError(401)
 
 		const { maxFileSize, maxFiles } = config
 

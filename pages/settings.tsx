@@ -44,6 +44,7 @@ const User = memo(function User({ username, password, access, removeUser, clearE
 
 					try{
 						const response = await fetch("/api/user", {
+							headers: { Accept: "application/json,*/*" },
 							body: new URLSearchParams({ username }),
 							method: "DELETE",
 							credentials: "include"
@@ -156,6 +157,7 @@ const AddUser = memo(function AddUser({ config, addUser, setClearErrors, toastCo
 
 				try{
 					const response = await fetch("/api/user", {
+						headers: { Accept: "application/json,*/*" },
 						body: new URLSearchParams({ username, password, access }),
 						method: "POST",
 						credentials: "include"
