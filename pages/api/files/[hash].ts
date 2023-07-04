@@ -6,7 +6,6 @@ import type { IFileData } from "."
 import type { Config } from "../../../typings/database"
 import { GetCachedConfig } from "../../../helpers/Config"
 import ValidateFileAccess from "../../../helpers/ValidateFileAccess"
-import ValidateInputDate from "../../../helpers/ValidateInputDate"
 import ValidateFilename from "../../../helpers/ValidateFilename"
 import ConnectDatabase from "../../../lib/ConnectDatabase"
 import HandleAPIError from "../../../helpers/HandleAPIError"
@@ -106,13 +105,15 @@ async function UpdateDocument(file: FileDocument, { filename, access, expireDate
 		}
 
 		if(expireDate){
-			if(!ValidateInputDate(expireDate)) throw "Data de expiração do documento inválida"
-			data.expiresAt = expireDate
+			const date = new Date(expireDate)
+			if(Number.isNaN(date.getTime())) throw "Data de expiração do documento inválida"
+			data.expiresAt = date
 		}
 
 		if(createdDate){
-			if(!ValidateInputDate(createdDate)) throw "Data de criação do documento inválida"
-			data.createdAt = createdDate
+			const date = new Date(createdDate)
+			if(Number.isNaN(date.getTime())) throw "Data de criação do documento inválida"
+			data.expiresAt = date
 		}
 
 		await file.updateOne({ $set: data })

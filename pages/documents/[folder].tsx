@@ -13,6 +13,7 @@ import HandleRequestError from "../../helpers/HandleRequestError"
 import ValidateFilename from "../../helpers/ValidateFilename"
 import GetDocumentType from "../../helpers/GetDocumentType"
 import ConnectDatabase from "../../lib/ConnectDatabase"
+import LocalInputDate from "../../helpers/LocalInputDate"
 import GetInputDate from "../../helpers/GetInputDate"
 import Navigation from "../../components/Navigation"
 import getBaseURL from "../../helpers/getBaseURL"
@@ -173,6 +174,10 @@ const Overflow = memo(function Overflow({ config, setIsOverflow, isOverflow, dat
 
 		if(documentData){
 			Object.assign(options.headers!, { "Content-Type": "application/json" })
+
+			if(documentData.expireDate) documentData.expireDate = LocalInputDate(documentData.expireDate).toISOString()
+			if(documentData.createdDate) documentData.createdDate = LocalInputDate(documentData.createdDate).toISOString()
+
 			options.body = JSON.stringify(documentData)
 		}
 
@@ -210,11 +215,12 @@ const Overflow = memo(function Overflow({ config, setIsOverflow, isOverflow, dat
 
 			let errored = false
 
+			// TODO: Fix styles
 			if(filenameInput.checkValidity()) setNameError(undefined)
 			else setNameError(filename ? "Nome do documento inválido." : "O nome do documento não pode estar vazio."), errored = true
 
 			if(createdDateInput.checkValidity()) setCreatedError(undefined)
-			else setExpireError(createdDateInput.validationMessage), errored = true
+			else setCreatedError(createdDateInput.validationMessage), errored = true
 
 			if(expireDateInput.checkValidity()) setExpireError(undefined)
 			else setExpireError(expireDateInput.validationMessage), errored = true
@@ -358,6 +364,8 @@ interface DocumentFolderProps extends DocumentsProps {
 }
 
 export default function DocumentFolder({ config, folder: { reduced, name: title }, userAccess, ...props }: DocumentFolderProps){
+	// TODO: Use SWR to get files, like documents/index
+
 	const [files, setFiles] = useState<typeof props["files"]>([])
 	const [toastConfig, setToastConfig] = useState<ToastOptions>({})
 	const [clearErrors, setClearErrors] = useState(() => () => {})

@@ -120,12 +120,13 @@ export default async function Upload(request: NextApiRequest, response: NextApiR
 
 			filePromises.push((async () => {
 				const id = IsNumber(part.id) ? Number(part.id) : part.id === "0" ? 0 : undefined
-				const date = part.date && new Date(part.date)
-				const expire = part.expire && new Date(part.expire)
-				const type = part.typeId && GetDocumentType(config, part.typeId)
-				const extension = filename && extname(filename)
 
 				try{
+					const date = part.date && new Date(part.date)
+					const expire = part.expire && new Date(part.expire)
+					const type = part.typeId && GetDocumentType(config, part.typeId)
+					const extension = filename && extname(filename)
+
 					if(!id && id !== 0) throw "ID do documento inválido"
 					if(!date) throw "Data de criação inválida"
 					if(!expire) throw "Data de expiração inválida"
