@@ -1,7 +1,7 @@
 {
 	"author": "Alphka",
 	"name": "flash-upload-server",
-	"version": "4.0.6",
+	"version": "4.0.7",
 	"description": "A website to archive Quality documents",
 	"scripts": {
 		"dev": "next dev",

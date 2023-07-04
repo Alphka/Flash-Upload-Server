@@ -58,22 +58,20 @@ export const getServerSideProps: GetServerSideProps<DocumentsProps> = async ({ r
 	}
 }
 
-type FoldersMap = Map<string, Omit<Folder, "name"> & { files: APIFileObject[] }>
-
-interface FoldersProps {
-	folders: FoldersMap
-	loading: boolean
-	error: any
-	userAccess: DocumentsProps["userAccess"]
-}
-
 interface Folder {
 	name: string
 	count: number
 	reduced: string
 }
 
-const Folders = memo<FoldersProps>(function Folders({ folders, loading, error }){
+type FoldersMap = Map<string, Omit<Folder, "name"> & { files: APIFileObject[] }>
+
+interface FoldersProps {
+	folders: FoldersMap
+	userAccess: DocumentsProps["userAccess"]
+}
+
+const Folders = memo<FoldersProps>(function Folders({ folders }){
 	const [nameLength, setNameLength] = useState<number | undefined>(undefined)
 	const filenameRef = useRef<HTMLSpanElement>(null)
 
@@ -94,9 +92,6 @@ const Folders = memo<FoldersProps>(function Folders({ folders, loading, error })
 			if(element) updateLength(element)
 		})
 	}, [])
-
-	if(loading) return <div className={style.loading}>Carregando…</div>
-	if(error) return <div className={style.error}>Algo deu errado</div>
 
 	interface MoreDocumentsProps {
 		href: string
@@ -182,12 +177,22 @@ export default function DocumentsPage({ config, userAccess }: DocumentsProps){
 		<Navigation {...{ userAccess }} />
 
 		<main className={style.main}>
-			<Folders {...{
-				userAccess,
-				loading: !data,
-				folders,
-				error
-			}} />
+			<header>
+				<h1 className={style.title}>Documentos</h1>
+			</header>
+
+			{error ? (
+				<p className={style.error}>Algo deu errado</p>
+			) : data ? Object.keys(data).length ? (
+				<Folders {...{
+					userAccess,
+					folders
+				}} />
+			) : (
+				<p className={style.warning}>Não há documentos publicados</p>
+			) : (
+				<p className={style.loading}>Carregando...</p>
+			)}
 		</main>
 	</>
 }

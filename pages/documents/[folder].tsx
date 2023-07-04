@@ -358,18 +358,13 @@ interface DocumentFolderProps extends DocumentsProps {
 }
 
 export default function DocumentFolder({ config, folder: { reduced, name: title }, userAccess, ...props }: DocumentFolderProps){
-	const [files, setFiles] = useState(props.files.sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()))
+	const [files, setFiles] = useState<typeof props["files"]>([])
 	const [toastConfig, setToastConfig] = useState<ToastOptions>({})
 	const [clearErrors, setClearErrors] = useState(() => () => {})
 	const [isOverflow, setIsOverflow] = useState(false)
 	const [data, setData] = useState<OverflowData | undefined>()
 	const hasAccess = userAccess === "all"
 	const router = useRouter()
-
-	useEffect(() => {
-		setFiles(props.files.sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()))
-		return () => setFiles([])
-	})
 
 	const UpdateDocument = useCallback((hash: string, data?: IUpdateDocument) => {
 		const file = files.find(file => file.hash === hash)
@@ -378,12 +373,14 @@ export default function DocumentFolder({ config, folder: { reduced, name: title 
 
 		// Remove document
 		if(!data){
+			if(files.length === 1){
+				setFiles([])
+				return router.push("/documents", undefined)
+			}
+
 			const index = files.indexOf(file)
-			const newFiles = files.slice(0, index).concat(files.slice(index + 1))
 
-			if(!newFiles.length) return router.push("/documents", undefined)
-
-			return setFiles(newFiles)
+			return setFiles([...files.slice(0, index), ...files.slice(index + 1)])
 		}
 
 		const { filename, access, createdDate, expireDate } = data
@@ -395,6 +392,10 @@ export default function DocumentFolder({ config, folder: { reduced, name: title 
 
 		setFiles(files.slice())
 	}, [files])
+
+	useEffect(() => {
+		setFiles(props.files.sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()))
+	}, [router.query.folder])
 
 	useEffect(() => {
 		setToastConfig(isOverflow ? { position: "bottom-right" } : {})
@@ -414,43 +415,45 @@ export default function DocumentFolder({ config, folder: { reduced, name: title 
 				{reduced && <h2>({reduced})</h2>}
 			</header>
 
-			<table>
-				<thead>
-					<tr>
-						<td colSpan={hasAccess ? 2 : undefined}>Nome</td>
-						<td>Data de criação</td>
-						<td>Data de expiração</td>
-					</tr>
-				</thead>
-				<tbody>
-					{files.map(({ hash, filename, createdAt, expiresAt, access }) => (
-						<tr key={hash}>
-							{hasAccess && <td className={style.edit}>
-								<span className="icon material-symbols-outlined" title="Editar documento" onClick={event => {
-									event.currentTarget.blur()
-
-									setData({
-										name: filename.substring(0, filename.lastIndexOf(".")),
-										hash,
-										access,
-										filename,
-										createdAt,
-										expiresAt
-									})
-
-									clearErrors()
-									setIsOverflow(true)
-								}}>edit</span>
-							</td>}
-							<td className={style.filename}>
-								<Link href={`/api/files/${hash}`} target="_blank">{filename}</Link>
-							</td>
-							<td>{new Date(createdAt).toLocaleDateString("pt-BR")}</td>
-							<td>{new Date(expiresAt).toLocaleDateString("pt-BR")}</td>
+			{files.length ? (
+				<table>
+					<thead>
+						<tr>
+							<td colSpan={hasAccess ? 2 : undefined}>Nome</td>
+							<td>Data de criação</td>
+							<td>Data de expiração</td>
 						</tr>
-					))}
-				</tbody>
-			</table>
+					</thead>
+					<tbody>
+						{files.map(({ hash, filename, createdAt, expiresAt, access }) => (
+							<tr key={hash}>
+								{hasAccess && <td className={style.edit}>
+									<span className="icon material-symbols-outlined" title="Editar documento" onClick={event => {
+										event.currentTarget.blur()
+
+										setData({
+											name: filename.substring(0, filename.lastIndexOf(".")),
+											hash,
+											access,
+											filename,
+											createdAt,
+											expiresAt
+										})
+
+										clearErrors()
+										setIsOverflow(true)
+									}}>edit</span>
+								</td>}
+								<td className={style.filename}>
+									<Link href={`/api/files/${hash}`} target="_blank">{filename}</Link>
+								</td>
+								<td>{new Date(createdAt).toLocaleDateString("pt-BR")}</td>
+								<td>{new Date(expiresAt).toLocaleDateString("pt-BR")}</td>
+							</tr>
+						))}
+					</tbody>
+				</table>
+			) : <p className={style.loading}>Carregando...</p>}
 		</main>
 
 		{data && <Overflow {...{
