@@ -2,6 +2,7 @@ import type { AppContext, AppProps } from "next/app"
 import { Poppins, Michroma } from "next/font/google"
 import { ToastContainer } from "react-toastify"
 import { matchesUA } from "browserslist-useragent"
+import NextNProgress from "nextjs-progressbar"
 import browserslist from "browserslist"
 import Head from "next/head"
 import App from "next/app"
@@ -68,6 +69,7 @@ const MyApp = ({ Component, pageProps, supportsSVG }: MyAppProps) => (
 				--logo-font-family: ${michroma.style.fontFamily}, Verdana, Segoe UI, Arial, sans-serif;
 			}
 		`}</style>
+		<NextNProgress color="#ff3c5f" startPosition={0.1} stopDelayMs={100} height={3} options={{ showSpinner: false }} />
 		<Component {...pageProps} />
 		<ToastContainer autoClose={2000} theme="dark" pauseOnHover={false} pauseOnFocusLoss={false} />
 	</>

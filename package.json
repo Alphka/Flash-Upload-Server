@@ -1,7 +1,7 @@
 {
 	"author": "Alphka",
 	"name": "flash-upload-server",
-	"version": "4.0.5",
+	"version": "4.0.6",
 	"description": "A website to archive Quality documents",
 	"scripts": {
 		"dev": "next dev",
@@ -17,6 +17,7 @@
 		"mime": "^3.0.0",
 		"mongoose": "^7.3.1",
 		"next": "^13.2",
+		"nextjs-progressbar": "^0.0.16",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",
 		"react-toastify": "^9.1.3",
