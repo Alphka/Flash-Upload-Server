@@ -55,13 +55,17 @@ main.list{
 		}
 
 		tbody tr td{
-			&.edit :global .icon{
-				font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 48;
-				font-size: 14pt;
-				cursor: pointer;
+			&.edit{
+				width: 14pt;
 
-				&:hover{
-					filter: brightness(80%);
+				:global .icon{
+					font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 48;
+					font-size: 14pt;
+					cursor: pointer;
+
+					&:hover{
+						filter: brightness(80%);
+					}
 				}
 			}
 

@@ -177,15 +177,19 @@ nav{
 		right: 0;
 		padding: 4pt 4pt;
 		border-radius: 4pt;
+		font-size: 0.9em;
 
 		&.hidden{
 			display: none;
 		}
 
-		> .title{
-			font-size: larger;
+		> p{
 			text-align: center;
 			padding: 4pt 0;
+
+			&.title{
+				font-size: larger;
+			}
 		}
 
 		hr{
