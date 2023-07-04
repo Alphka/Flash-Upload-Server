@@ -1,7 +1,10 @@
 import type { MouseEvent as ReactMouseEvent } from "react"
+import type { INotificationData } from "../pages/api/notifications"
 import type { AccessTypes } from "../typings/database"
+import type { APIResponse } from "../typings/api"
 import { memo, useRef, useState, useCallback } from "react"
 import { useRouter } from "next/router"
+import useSWR from "swr"
 import Image from "next/image"
 import Link from "next/link"
 
@@ -117,10 +120,18 @@ const Logo = memo(function Logo(){
 })
 
 const Notifications = memo(function Notifications(){
+	const { data, error } = useSWR("/api/notifications", async (url: string) => {
+		const response = await fetch(url, { cache: "no-cache" })
+		const json = await response.json() as APIResponse<INotificationData[]>
+
+		if(!json.success) throw new Error(json.error || "Algo deu errado")
+
+		return json.data
+	})
+
 	const [contentHidden, setContentHidden] = useState(true)
 	const { unread } = notifications
 
-	// TODO: Fix the notifications
 	return (
 		<div id="notifications">
 			<span className={unread ? fillIconClass : iconClass} onClick={event => {
@@ -135,6 +146,36 @@ const Notifications = memo(function Notifications(){
 					{locales.notifications}
 				</p>
 				<hr />
+				{error ? (
+					<p className="error">Algo deu errado</p>
+				) : data ? data.length ? (data.map(({ hash, folder, filename, expiresAt }) => {
+					const url = `/documents/${folder.reduced?.toLowerCase() || folder.name.toLowerCase()}`
+					const message = (() => {
+						const today = new Date
+						const expireDate = new Date(expiresAt)
+						const expireUTC = Date.UTC(expireDate.getFullYear(), expireDate.getMonth(), expireDate.getDate())
+						const todayUTC = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate())
+
+						let daysLeft = Math.floor((expireUTC - todayUTC) / 86400000) // 1000 * 60 * 60 * 24
+
+						if(daysLeft === 0) return "Expira hoje"
+
+						return `${daysLeft > 0 ? "Irá expirar" : (daysLeft = Math.abs(daysLeft), "Expirou")} em ${daysLeft} ${daysLeft === 1 ? "dia" : "dias"}`
+					})()
+
+					return (
+						<div className="notification" key={hash}>
+							<p className="title">
+								<Link href={url} prefetch={false}>{filename}</Link>
+							</p>
+							<p className="content">{message}</p>
+						</div>
+					)
+				})) : (
+					<p>Não há notificações no momento</p>
+				) : (
+					<p>Carregando...</p>
+				)}
 			</div>
 		</div>
 	)

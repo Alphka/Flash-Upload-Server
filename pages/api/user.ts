@@ -150,18 +150,18 @@ async function UpdateUser({ username, data }: IUpdateUser, { accessTypes }: Conf
 
 		const user = await User.findOne({ name: username })
 
-		if(!user) return response.status(404).json({ success: false, error: "Usuário não encontrado" })
+		if(!user) return SendError(404, "Usuário não encontrado")
 
 		const { username: name, password, access } = data
 		const sameUser = await User.findOne({ name })
 
-		if(sameUser) return response.status(409).json({ success: false, error: "Este nome de usuário já está em uso" })
+		if(sameUser) return SendError(409, "Este nome de usuário já está em uso")
 
 		try{
 			await user.updateOne({ $set: { name, password, access } })
 			response.status(200).json({ success: true })
 		}catch{
-			response.status(500).json({ success: false, error: "Erro ao atualizar informações do usuário" })
+			SendError(500, "Erro ao atualizar informações do usuário")
 		}
 	}catch(error){
 		if(typeof error === "string") return SendError(400, error)

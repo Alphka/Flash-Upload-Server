@@ -4,8 +4,8 @@ import type { GetServerSideProps } from "next"
 import type { APIResponseError } from "../../typings/api"
 import { memo, useCallback, useEffect, useRef, useState } from "react"
 import { GetCachedConfig } from "../../helpers/Config"
+import GetDocumentType from "../../helpers/GetDocumentType"
 import ConnectDatabase from "../../lib/ConnectDatabase"
-import GetTypeById from "../../helpers/GetTypeById"
 import Navigation from "../../components/Navigation"
 import UserToken from "../../models/UserToken"
 import useSWR from "swr"
@@ -160,7 +160,7 @@ export default function DocumentsPage({ config, userAccess }: DocumentsProps){
 
 	if(data){
 		for(const [type, { files, length }] of Object.entries(data)){
-			const documentType = GetTypeById(config, type)!
+			const documentType = GetDocumentType(config, type)!
 			const { name: folder, reduced } = documentType
 
 			folders.set(folder, {

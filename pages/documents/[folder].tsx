@@ -4,27 +4,22 @@ import type { APIResponse, APIResponseError } from "../../typings/api"
 import type { IUpdateDocument } from "../api/files/[hash]"
 import type { DocumentsProps } from "."
 import type { FileAccess } from "../../models/typings"
-import type { Config } from "../../typings/database"
+import type { Config, DocumentTypeInfo } from "../../typings/database"
 import { memo, useCallback, useEffect, useRef, useState, type MouseEvent as ReactMouseEvent } from "react"
 import { toast, type ToastOptions } from "react-toastify"
 import { GetCachedConfig } from "../../helpers/Config"
 import { useRouter } from "next/router"
 import HandleRequestError from "../../helpers/HandleRequestError"
 import ValidateFilename from "../../helpers/ValidateFilename"
+import GetDocumentType from "../../helpers/GetDocumentType"
 import ConnectDatabase from "../../lib/ConnectDatabase"
 import GetInputDate from "../../helpers/GetInputDate"
-import GetTypeById from "../../helpers/GetTypeById"
 import Navigation from "../../components/Navigation"
 import getBaseURL from "../../helpers/getBaseURL"
 import UserToken from "../../models/UserToken"
 import style from "../../styles/modules/documents.module.scss"
 import Head from "next/head"
 import Link from "next/link"
-
-interface DocumentFolderProps extends DocumentsProps {
-	type: APIFilesFolderResponse["data"]["type"]
-	files: APIFilesFolderResponse["data"]["files"]
-}
 
 export const getServerSideProps: GetServerSideProps<DocumentFolderProps> = async ({ req, query: { folder } }) => {
 	const { token } = req.cookies
@@ -41,12 +36,24 @@ export const getServerSideProps: GetServerSideProps<DocumentFolderProps> = async
 	try{
 		await ConnectDatabase()
 
-		const config = await GetCachedConfig(true)
 		const user = await UserToken.findOne({ token })
 
 		if(!user) return {
 			redirect: {
 				destination: "/login",
+				permanent: false
+			}
+		}
+
+		const config = await GetCachedConfig(true)
+		const documentType = GetDocumentType(config, folder)
+
+		if(!documentType) return { notFound: true }
+
+		// Redirect to reduced name
+		if(documentType.reduced ? folder !== documentType.reduced.toLowerCase() : folder !== documentType.name.toLowerCase()) return {
+			redirect: {
+				destination: `/documents/${(documentType.reduced || documentType.name).toLowerCase()}`,
 				permanent: false
 			}
 		}
@@ -71,7 +78,7 @@ export const getServerSideProps: GetServerSideProps<DocumentFolderProps> = async
 
 		return {
 			props: {
-				type,
+				folder: documentType,
 				files,
 				config,
 				userToken: user.token,
@@ -345,16 +352,24 @@ const Overflow = memo(function Overflow({ config, setIsOverflow, isOverflow, dat
 	)
 })
 
-export default function DocumentFolder({ config, type, userAccess, ...props }: DocumentFolderProps){
+interface DocumentFolderProps extends DocumentsProps {
+	folder: DocumentTypeInfo
+	files: APIFilesFolderResponse["data"]["files"]
+}
+
+export default function DocumentFolder({ config, folder: { reduced, name: title }, userAccess, ...props }: DocumentFolderProps){
 	const [files, setFiles] = useState(props.files.sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()))
 	const [toastConfig, setToastConfig] = useState<ToastOptions>({})
 	const [clearErrors, setClearErrors] = useState(() => () => {})
 	const [isOverflow, setIsOverflow] = useState(false)
 	const [data, setData] = useState<OverflowData | undefined>()
-	const documentType = GetTypeById(config, type)
 	const hasAccess = userAccess === "all"
-	const title = documentType?.name
 	const router = useRouter()
+
+	useEffect(() => {
+		setFiles(props.files.sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()))
+		return () => setFiles([])
+	})
 
 	const UpdateDocument = useCallback((hash: string, data?: IUpdateDocument) => {
 		const file = files.find(file => file.hash === hash)
@@ -396,7 +411,7 @@ export default function DocumentFolder({ config, type, userAccess, ...props }: D
 		<main className={style.list}>
 			<header>
 				<h1>{title}</h1>
-				{documentType?.reduced && <h2>({documentType.reduced})</h2>}
+				{reduced && <h2>({reduced})</h2>}
 			</header>
 
 			<table>

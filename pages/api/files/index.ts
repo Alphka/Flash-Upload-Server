@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse, PageConfig } from "next"
 import type { APIResponseError, APIResponseSuccess } from "../../../typings/api"
 import type { Document, FilterQuery, Query } from "mongoose"
 import type { IFile } from "../../../models/typings"
+import { GetCachedConfig } from "../../../helpers/Config"
 import ConnectDatabase from "../../../lib/ConnectDatabase"
 import GetDocumentType from "../../../helpers/GetDocumentType"
 import HandleAPIError from "../../../helpers/HandleAPIError"
@@ -64,7 +65,8 @@ async function SendFolder(response: NextApiResponse<APIFilesFolderResponse>, fol
 
 	if(!folder) return SendError(400, "Tipo de documento inválido")
 
-	const documentType = await GetDocumentType(folder)
+	const config = await GetCachedConfig(true)
+	const documentType = GetDocumentType(config, folder)
 
 	if(!documentType) return SendError(404, "Tipo de documento inválido")
 

@@ -4,11 +4,11 @@ import type { BusboyStream, FilePart } from "../../typings"
 import type { FileAccess } from "../../models/typings"
 import { GetCachedConfig } from "../../helpers/Config"
 import { extname } from "path"
+import GetDocumentType from "../../helpers/GetDocumentType"
 import ConnectDatabase from "../../lib/ConnectDatabase"
 import HandleAPIError from "../../helpers/HandleAPIError"
 import ValidateSize from "../../helpers/ValidateSize"
 import SendAPIError from "../../helpers/SendAPIError"
-import GetTypeById from "../../helpers/GetTypeById"
 import UserToken from "../../models/UserToken"
 import IsNumber from "../../helpers/IsNumber"
 import Busboy from "busboy"
@@ -122,7 +122,7 @@ export default async function Upload(request: NextApiRequest, response: NextApiR
 				const id = IsNumber(part.id) ? Number(part.id) : part.id === "0" ? 0 : undefined
 				const date = part.date && new Date(part.date)
 				const expire = part.expire && new Date(part.expire)
-				const type = part.typeId && GetTypeById(config, part.typeId)
+				const type = part.typeId && GetDocumentType(config, part.typeId)
 				const extension = filename && extname(filename)
 
 				try{

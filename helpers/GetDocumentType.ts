@@ -1,11 +1,13 @@
-import { GetCachedConfig } from "./Config"
-import GetTypeById from "./GetTypeById"
+import type { Config } from "../typings/database"
 import IsNumber from "./IsNumber"
 
-export default async function GetDocumentType(folder: string){
-	const config = await GetCachedConfig(true)
+export default function GetDocumentType({ types }: Config, folder: number | string){
+	if(IsNumber(folder)){
+		const id = Number(folder)
+		return types.find(type => type.id === id)
+	}
 
-	return IsNumber(folder)
-		? GetTypeById(config, Number(folder))
-		: Object.values(config.types).find(({ name, reduced }) => (reduced && folder.toLowerCase() === reduced.toLowerCase()) || folder.toLowerCase() === name.toLowerCase())
+	const lowerFolder = (folder as string).toLowerCase()
+
+	return types.find(({ name, reduced }) => (reduced && lowerFolder === reduced.toLowerCase()) || lowerFolder === name.toLowerCase())
 }
