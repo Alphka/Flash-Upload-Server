@@ -25,6 +25,7 @@ export default async function UserAPI(request: NextApiRequest, response: NextApi
 	const HandleError = HandleAPIError.bind(undefined, response)
 	const SendError = SendAPIError.bind(undefined, response)
 	const config = await GetCachedConfig(true)
+	const token = request.cookies.token || request.headers.authorization
 
 	if(!ValidateSize(request.headers["content-length"], maxSize)) return HandleError("length")
 	if(!contentType) return HandleError("contentType")
@@ -33,6 +34,13 @@ export default async function UserAPI(request: NextApiRequest, response: NextApi
 
 	try{
 		await ConnectDatabase()
+
+		const user = await UserToken.findOne({ token })
+
+		if(!user) return SendError(401)
+		if(user.access !== "all") return SendError(403)
+
+		response.setHeader("Access-Control-Allow-Methods", "POST, DELETE, PUT")
 
 		switch(request.method){
 			case "POST": {
