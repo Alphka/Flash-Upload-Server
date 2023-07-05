@@ -1,0 +1,23 @@
+@use "../import/documents.module.scss" as documents;
+
+main.main{
+	@include documents.main;
+	@include documents.heading;
+	@include documents.table;
+
+	header{
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		gap: 8pt;
+
+		h2{
+			font-size: 0.9em;
+			font-weight: 500;
+			text-align: justify;
+			word-break: break-all;
+			color: var(--font-secondary-color);
+		}
+	}
+}

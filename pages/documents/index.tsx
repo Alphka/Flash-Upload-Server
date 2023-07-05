@@ -146,7 +146,10 @@ export default function DocumentsPage({ config, userAccess }: DocumentsProps){
 		const response = await fetch(url, { cache: "no-cache" })
 		const json = await response.json() as APIFilesDocumentsResponse | APIResponseError
 
-		if(!json.success) throw new Error(json.error || "Algo deu errado")
+		if(!json.success){
+			if(json.error) throw new Error(json.error)
+			return {} as APIFilesDocumentsResponse["data"]
+		}
 
 		return json.data
 	})

@@ -1,7 +1,7 @@
 {
 	"author": "Alphka",
 	"name": "flash-upload-server",
-	"version": "4.0.9",
+	"version": "4.1.0",
 	"description": "A website to archive Quality documents",
 	"scripts": {
 		"dev": "next dev",
@@ -30,7 +30,7 @@
 		"@types/browserslist-useragent": "^3.0.4",
 		"@types/busboy": "^1.5.0",
 		"@types/mime": "^3.0.1",
-		"@types/node": "^20.3.3",
+		"@types/node": "^20.4.0",
 		"@types/react": "^18.2.14",
 		"@types/type-is": "^1.6.3",
 		"sass": "^1.63.6",

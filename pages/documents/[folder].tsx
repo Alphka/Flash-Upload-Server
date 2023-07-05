@@ -283,7 +283,6 @@ const Overflow = memo(function Overflow({ config, setIsOverflow, isOverflow, dat
 
 	if(!isOverflow) return null
 
-	const todayInputDate = GetInputDate()
 	const accessFileIndex = config.accessFiles.findIndex(name => name === data.access)
 
 	return (
@@ -296,52 +295,59 @@ const Overflow = memo(function Overflow({ config, setIsOverflow, isOverflow, dat
 				</section>
 
 				<section className={style.form}>
-					<label>
-						<span>Nome do documento: </span>
-						<input type="text"
-							defaultValue={data.name}
-							className="no-outline"
-							onKeyPress={event => {
-								const input = event.target as HTMLInputElement
+					<div>
+						<label>
+							<span>Nome do documento: </span>
+							<input type="text"
+								defaultValue={data.name}
+								className="no-outline"
+								onKeyPress={event => {
+									const input = event.target as HTMLInputElement
 
-								if(nameError && ValidateFilename(input.value.trim())) setNameError(undefined)
-								if(event.key === "Enter") event.preventDefault(), createdRef.current!.focus()
-							}}
-							ref={nameRef}
-							required
-						/>
+									if(nameError && ValidateFilename(input.value.trim())) setNameError(undefined)
+									if(event.key === "Enter") event.preventDefault(), createdRef.current!.focus()
+								}}
+								ref={nameRef}
+								required
+							/>
+						</label>
 						{nameError && <span className={style.error}>{nameError}</span>}
-					</label>
-					<label>
-						<span>Data de criação: </span>
-						<input type="date"
-							defaultValue={GetInputDate(data.createdAt)}
-							max={todayInputDate}
-							className="no-outline"
-							onChange={event => createdError && event.currentTarget.checkValidity() && setCreatedError(undefined)}
-							ref={createdRef}
-							required
-						/>
+					</div>
+					<div>
+						<label>
+							<span>Data de criação: </span>
+							<input type="date"
+								defaultValue={GetInputDate(data.createdAt)}
+								max={GetInputDate()}
+								className="no-outline"
+								onChange={event => createdError && event.currentTarget.checkValidity() && setCreatedError(undefined)}
+								ref={createdRef}
+								required
+							/>
+						</label>
 						{createdError && <span className={style.error}>{createdError}</span>}
-					</label>
-					<label>
-						<span>Data de expiração: </span>
-						<input type="date"
-							defaultValue={GetInputDate(data.expiresAt)}
-							className="no-outline"
-							min={todayInputDate}
-							onChange={event => expireError && event.currentTarget.checkValidity() && setExpireError(undefined)}
-							ref={expireRef}
-							required
-						/>
+					</div>
+					<div>
+						<label>
+							<span>Data de expiração: </span>
+							<input type="date"
+								defaultValue={GetInputDate(data.expiresAt)}
+								className="no-outline"
+								onChange={event => expireError && event.currentTarget.checkValidity() && setExpireError(undefined)}
+								ref={expireRef}
+								required
+							/>
+						</label>
 						{expireError && <span className={style.error}>{expireError}</span>}
-					</label>
-					<label>
-						<span>Tipo de acesso: </span>
-						<select defaultValue={accessFileIndex} className="no-outline" ref={accessRef} required>
-							{config.accessFiles.map((name, index) => <option value={index} key={index}>{name}</option>)}
-						</select>
-					</label>
+					</div>
+					<div>
+						<label>
+							<span>Tipo de acesso: </span>
+							<select defaultValue={accessFileIndex} className="no-outline" ref={accessRef} required>
+								{config.accessFiles.map((name, index) => <option value={index} key={index}>{name}</option>)}
+							</select>
+						</label>
+					</div>
 				</section>
 
 				<section className={style.submit}>

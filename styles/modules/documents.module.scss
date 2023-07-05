@@ -1,41 +1,14 @@
 @use "../import/variables";
 @use "../import/mixins";
+@use "../import/documents.module.scss" as documents;
 
 main.main,
 main.list{
-	display: flex;
-	flex-direction: column;
-	align-items: flex-start;
-	margin-top: 40pt;
-	gap: 12pt;
-
-	header{
-		width: 100%;
-		display: flex;
-		flex-direction: row;
-		justify-content: center;
-		align-items: center;
-		margin-bottom: 12pt;
-		padding: 0 8pt;
-		gap: 4pt;
-
-		h1{
-			font-size: 30pt;
-			font-weight: 600;
-		}
-	}
-
-	> p{
-		width: 100%;
-		text-align: center;
-		font-size: larger;
-		color: var(--font-secondary-color);
-	}
+	@include documents.main;
+	@include documents.heading;
 }
 
 main.list{
-	padding: 0 8pt 12pt;
-
 	header h2{
 		color: var(--font-secondary-color);
 		font-size: 14pt;
@@ -45,47 +18,7 @@ main.list{
 		align-self: end;
 	}
 
-	table{
-		@include mixins.gradientBackground;
-
-		width: 100%;
-		border-radius: 4pt;
-		border-spacing: 12pt 8pt;
-
-		@media screen and (max-width: variables.$mobileSize){
-			border-spacing: 8pt 4pt;
-			font-size: small;
-		}
-
-		thead tr td,
-		tbody tr td:not(.filename){
-			text-align: center;
-		}
-
-		tbody tr td{
-			&.edit{
-				width: 14pt;
-
-				:global .icon{
-					font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 48;
-					font-size: 14pt;
-					cursor: pointer;
-
-					&:hover{
-						filter: brightness(80%);
-					}
-				}
-			}
-
-			&.filename{
-				word-break: break-all;
-
-				a{
-					color: var(--link-color);
-				}
-			}
-		}
-	}
+	@include documents.table;
 }
 
 .folders{
@@ -93,7 +26,6 @@ main.list{
 	flex-direction: column;
 	justify-content: flex-start;
 	align-items: stretch;
-	padding: 0 8pt 12pt;
 	width: 100%;
 	gap: 12pt;
 

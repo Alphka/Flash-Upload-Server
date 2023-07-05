@@ -57,6 +57,13 @@
 		width: 100%;
 		position: relative;
 		flex-direction: column;
+
+		.error{
+			display: block;
+			position: relative;
+			color: var(--error-color);
+			font-size: 11px;
+		}
 	}
 
 	div,
