@@ -127,7 +127,7 @@ nav{
 			}
 		}
 
-		.content{
+		> .content{
 			display: flex;
 			flex-direction: column;
 			gap: 8pt;
@@ -166,8 +166,12 @@ nav{
 	}
 }
 
-#notifications{
+.notifications{
 	position: relative;
+
+	&.mobile{
+		position: initial;
+	}
 
 	> .content{
 		background-color: var(--background-dark);

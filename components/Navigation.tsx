@@ -1,4 +1,4 @@
-import type { MouseEvent as ReactMouseEvent } from "react"
+import type { MutableRefObject, MouseEvent as ReactMouseEvent } from "react"
 import type { INotificationData } from "../pages/api/notifications"
 import type { AccessTypes } from "../typings/database"
 import type { APIResponse } from "../typings/api"
@@ -34,6 +34,29 @@ const locales = {
 const iconClass = "icon material-symbols-outlined"
 const fillIconClass = "icon fill material-symbols-outlined"
 
+const SearchForm = memo<SearchFormProps>(function SearchForm({ icon, search }){
+	const router = useRouter()
+
+	return (
+		<div id="search">
+			<input type="search" placeholder="Faça uma pesquisa..." defaultValue={search} onKeyPress={event => {
+				const input: HTMLInputElement = event.currentTarget
+
+				if(event.key === "Enter"){
+					event.preventDefault()
+
+					const value = input.value.trim()
+
+					if(!value) return
+
+					router.push("/search?q=" + encodeURIComponent(value))
+				}
+			}} autoComplete="off" />
+			{icon && <span className={iconClass}>search</span>}
+		</div>
+	)
+})
+
 function MobileMenu({ userAccess }: MobileProps){
 	const [searchBarCollapsed, setSearchBarCollapsed] = useState(true)
 	const [contentHidden, setContentHidden] = useState(true)
@@ -41,6 +64,7 @@ function MobileMenu({ userAccess }: MobileProps){
 	const refMenuIcon = useRef<HTMLSpanElement>(null)
 	const refSearchBar = useRef<HTMLDivElement>(null)
 	const refSearchIcon = useRef<HTMLSpanElement>(null)
+	const refNotificationsOpen = useRef<boolean | null>(null)
 
 	const handleEventHide = (callback: typeof setSearchBarCollapsed | typeof setContentHidden, value: boolean, ref: typeof refMenuIcon | typeof refSearchBar) => {
 		return (event: ReactMouseEvent<HTMLDivElement>) => {
@@ -73,13 +97,25 @@ function MobileMenu({ userAccess }: MobileProps){
 	}, [contentHidden, searchBarCollapsed])
 
 	const handleSearchBarHide = useCallback((event: ReactMouseEvent<HTMLDivElement>) => {
-		if(searchBarCollapsed && !contentHidden) setContentHidden(true)
+		if(searchBarCollapsed){
+			if(!contentHidden) setContentHidden(true)
+			refSearchBar.current!.querySelector("input")?.focus()
+		}
+
 		return handleEventHide(setSearchBarCollapsed, searchBarCollapsed, refSearchBar)(event)
 	}, [contentHidden, searchBarCollapsed])
+
+	const closePopups = useCallback(() => {
+		if(!contentHidden) setContentHidden(true)
+		if(!searchBarCollapsed) setSearchBarCollapsed(true)
+	}, [contentHidden, searchBarCollapsed])
+
+	// TODO: Close notifications when the other popups open
 
 	return (
 		<div className="icons mobile">
 			<span className={iconClass} aria-label={locales.search} onClick={handleSearchBarHide} ref={refSearchIcon}>search</span>
+			<Notifications openRef={refNotificationsOpen} mobile={true} handleOpen={closePopups} />
 			<span className={iconClass} aria-label={locales.menu} onClick={handleContentHide} ref={refMenuIcon}>menu</span>
 
 			<div className={searchBarCollapsed ? "search collapsed" : "search"} aria-hidden={searchBarCollapsed} ref={refSearchBar}>
@@ -119,7 +155,13 @@ const Logo = memo(function Logo(){
 	)
 })
 
-const Notifications = memo(function Notifications(){
+interface NotificationsProps {
+	mobile?: boolean
+	openRef?: MutableRefObject<boolean | null>
+	handleOpen?: () => void
+}
+
+const Notifications = memo(function Notifications({ mobile, openRef, handleOpen }: NotificationsProps){
 	const { data, error } = useSWR("/api/notifications", async (url: string) => {
 		const response = await fetch(url, { cache: "no-cache" })
 		const json = await response.json() as APIResponse<INotificationData[]>
@@ -130,18 +172,42 @@ const Notifications = memo(function Notifications(){
 	})
 
 	const [contentHidden, setContentHidden] = useState(true)
+	const refMenu = useRef<HTMLDivElement>(null)
+
+	// FIXME: Get this from API or LocalStorage
 	const { unread } = notifications
 
 	return (
-		<div id="notifications">
+		<div className={mobile ? "notifications mobile" : "notifications"} ref={refMenu}>
 			<span className={unread ? fillIconClass : iconClass} onClick={event => {
+				event.nativeEvent.stopImmediatePropagation()
 				event.preventDefault()
-				setContentHidden(!contentHidden)
+
+				function CloseHandler(event: MouseEvent){
+					if(refMenu.current && event.target instanceof HTMLElement){
+						if(event.target === refMenu.current || refMenu.current.contains(event.target)) return
+					}
+
+					setContentHidden(true)
+					event.preventDefault()
+					window.removeEventListener("click", CloseHandler)
+				}
+
+				if(openRef) openRef.current = !contentHidden
+
+				if(contentHidden){
+					handleOpen?.()
+					setContentHidden(false)
+					window.addEventListener("click", CloseHandler)
+				}else{
+					setContentHidden(true)
+					window.removeEventListener("click", CloseHandler)
+				}
 			}} aria-label={locales.notifications}>
 				{unread ? "notifications_active" : "notifications"}
 			</span>
 
-			<div className={"content".concat(contentHidden ? " hidden" : "")}>
+			<div className={"content".concat(contentHidden ? " hidden" : "")} aria-hidden={contentHidden}>
 				<p className="title">
 					{locales.notifications}
 				</p>
@@ -149,18 +215,21 @@ const Notifications = memo(function Notifications(){
 				{error ? (
 					<p className="error">Algo deu errado</p>
 				) : data ? data.length ? (data.map(({ hash, folder, filename, expiresAt }) => {
+					function DateUTC(isoDate: string){
+						const [year, month, day] = isoDate.substring(0, 10).split("-").map(Number) as [number, number, number]
+						return Date.UTC(year, month - 1, day)
+					}
+
 					const url = `/documents/${folder.reduced?.toLowerCase() || folder.name.toLowerCase()}`
 					const message = (() => {
-						const today = new Date
-						const expireDate = new Date(expiresAt)
-						const expireUTC = Date.UTC(expireDate.getFullYear(), expireDate.getMonth(), expireDate.getDate())
-						const todayUTC = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate())
+						const todayUTC = DateUTC(new Date().toISOString())
+						const expireUTC = DateUTC(expiresAt)
 
 						let daysLeft = Math.floor((expireUTC - todayUTC) / 86400000) // 1000 * 60 * 60 * 24
 
 						if(daysLeft === 0) return "Expira hoje"
 
-						return `${daysLeft > 0 ? "Irá expirar" : (daysLeft = Math.abs(daysLeft), "Expirou")} em ${daysLeft} ${daysLeft === 1 ? "dia" : "dias"}`
+						return `${daysLeft > 0 ? "Irá expirar em" : (daysLeft = Math.abs(daysLeft), "Expirou há")} ${daysLeft} ${daysLeft === 1 ? "dia" : "dias"}`
 					})()
 
 					return (
@@ -177,29 +246,6 @@ const Notifications = memo(function Notifications(){
 					<p>Carregando...</p>
 				)}
 			</div>
-		</div>
-	)
-})
-
-const SearchForm = memo<SearchFormProps>(function SearchForm({ icon, search }){
-	const router = useRouter()
-
-	return (
-		<div id="search">
-			<input type="search" placeholder="Faça uma pesquisa..." defaultValue={search} onKeyPress={event => {
-				const input: HTMLInputElement = event.currentTarget
-
-				if(event.key === "Enter"){
-					event.preventDefault()
-
-					const value = input.value.trim()
-
-					if(!value) return
-
-					router.push("/search?q=" + encodeURIComponent(value))
-				}
-			}} autoComplete="off" />
-			{icon && <span className={iconClass}>search</span>}
 		</div>
 	)
 })
