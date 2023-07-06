@@ -2,8 +2,9 @@ import type { MutableRefObject, MouseEvent as ReactMouseEvent } from "react"
 import type { INotificationData } from "../pages/api/notifications"
 import type { AccessTypes } from "../typings/database"
 import type { APIResponse } from "../typings/api"
-import { memo, useRef, useState, useCallback } from "react"
+import { memo, useRef, useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/router"
+import LocalReadNotifications from "../helpers/LocalReadNotifications"
 import useSWR from "swr"
 import Image from "next/image"
 import Link from "next/link"
@@ -16,10 +17,6 @@ interface GlobalProps {
 interface NavigationProps extends GlobalProps {}
 interface MobileProps extends GlobalProps {}
 interface SearchFormProps extends GlobalProps { icon?: boolean }
-
-const notifications = {
-	unread: false
-}
 
 const locales = {
 	siteLogo: "Logotipo do site",
@@ -171,15 +168,57 @@ const Notifications = memo(function Notifications({ mobile, openRef, handleOpen 
 		return json.data
 	})
 
+	const [notificationsUnread, setNotificationsUnread] = useState(false)
 	const [contentHidden, setContentHidden] = useState(true)
 	const refMenu = useRef<HTMLDivElement>(null)
 
-	// FIXME: Get this from API or LocalStorage
-	const { unread } = notifications
+	const markAsRead = useCallback(() => {
+		if(data?.length){
+			const hashes = data.map(({ hash }) => hash)
+			LocalReadNotifications.AddHashes(hashes)
+		}else{
+			LocalReadNotifications.SetHashes([])
+		}
+
+		setNotificationsUnread(false)
+	}, [data, contentHidden])
+
+	useEffect(() => {
+		let unread = false
+
+		if(data?.length){
+			const localHashes = LocalReadNotifications.GetHashes()
+
+			if(localHashes.length){
+				const hashes = data.map(({ hash }) => hash)
+
+				for(const hash of hashes){
+					if(!localHashes.includes(hash)){
+						unread = true
+						break
+					}
+				}
+
+				// Remove old hashes from local storage
+				let outdatedHashes: string[] = []
+
+				for(const hash of localHashes){
+					if(!hashes.includes(hash)) outdatedHashes.push(hash)
+				}
+
+				if(outdatedHashes.length){
+					LocalReadNotifications.SetHashes(localHashes.filter(hash => !outdatedHashes.includes(hash)))
+				}
+			}else unread = true
+
+		}else unread = false
+
+		setNotificationsUnread(unread)
+	}, [data])
 
 	return (
 		<div className={mobile ? "notifications mobile" : "notifications"} ref={refMenu}>
-			<span className={unread ? fillIconClass : iconClass} onClick={event => {
+			<span className={notificationsUnread ? fillIconClass : iconClass} onClick={event => {
 				event.nativeEvent.stopImmediatePropagation()
 				event.preventDefault()
 
@@ -196,6 +235,7 @@ const Notifications = memo(function Notifications({ mobile, openRef, handleOpen 
 				if(openRef) openRef.current = !contentHidden
 
 				if(contentHidden){
+					markAsRead()
 					handleOpen?.()
 					setContentHidden(false)
 					window.addEventListener("click", CloseHandler)
@@ -204,7 +244,7 @@ const Notifications = memo(function Notifications({ mobile, openRef, handleOpen 
 					window.removeEventListener("click", CloseHandler)
 				}
 			}} aria-label={locales.notifications}>
-				{unread ? "notifications_active" : "notifications"}
+				{notificationsUnread ? "notifications_active" : "notifications"}
 			</span>
 
 			<div className={"content".concat(contentHidden ? " hidden" : "")} aria-hidden={contentHidden}>
