@@ -3,6 +3,7 @@ import type { Config, AccessTypes } from "../../typings/database"
 import type { MongoServerError } from "mongodb"
 import type { IUser } from "../../models/typings"
 import { GetCachedConfig } from "../../helpers/Config"
+import RemoveAPITokens from "../../helpers/RemoveAPITokens"
 import ConnectDatabase from "../../lib/ConnectDatabase"
 import HandleAPIError from "../../helpers/HandleAPIError"
 import ValidateSize from "../../helpers/ValidateSize"
@@ -37,8 +38,19 @@ export default async function UserAPI(request: NextApiRequest, response: NextApi
 
 		const user = await UserToken.findOne({ token })
 
-		if(!user) return SendError(401)
-		if(user.access !== "all") return SendError(403)
+		if(user){
+			if(user.access !== "all") return SendError(403)
+		}else{
+			const users = await User.find({})
+
+			if(users.length){
+				if(users.some(({ access }) => access === "all")) return SendError(401)
+				console.log("UserAPI: No users found, access permitted")
+			}else{
+				console.log("UserAPI: No administrators found, access permitted")
+				RemoveAPITokens()
+			}
+		}
 
 		response.setHeader("Access-Control-Allow-Methods", "POST, DELETE, PUT")
 
@@ -112,16 +124,8 @@ async function DeleteUser(username: string | undefined, request: NextApiRequest,
 		const user = await User.findOneAndDelete({ name: username })
 
 		if(user){
-			let error: string | undefined
-
-			try{
-				await UserToken.deleteMany({ name: username })
-			}catch(error){
-				console.error(error)
-				error = "Falha ao deletar os tokens"
-			}
-
-			return response.status(200).json({ success: true, error })
+			RemoveAPITokens({ name: username })
+			return response.status(200).json({ success: true })
 		}
 
 		return SendError(404, "Este usuário não existe")

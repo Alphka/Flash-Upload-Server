@@ -586,13 +586,15 @@ export const getServerSideProps: GetServerSideProps<SettingsPageProps> = async (
 				}
 			}
 		}else{
-			if(users.length) return Unauthorize(res)
-			else console.log("No users found, access permitted")
+			if(users.length){
+				if(!users.some(user => user.access === "all")) console.log("SettingsPage: No administrators found, access permitted")
+				else return Unauthorize(res)
+			}else console.log("SettingsPage: No users found, access permitted")
 		}
 
 		const config = await GetCachedConfig(true)
 
-		return { props: { users, config, userAccess: user?.access || "all" } }
+		return { props: { users, config, userAccess: "all" } }
 	}catch(error){
 		console.error(error)
 		return { notFound: true }
