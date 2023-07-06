@@ -459,7 +459,7 @@ export default function DocumentFolder({ config, folder: { reduced, name: title 
 									}}>edit</span>
 								</td>}
 								<td className={style.filename}>
-									<Link href={`/api/files/${hash}`} target="_blank">{filename}</Link>
+									<Link href={`/api/files/${hash}`} target="_blank" prefetch={false}>{filename}</Link>
 								</td>
 								<td>{new Date(createdAt).toLocaleDateString("pt-BR")}</td>
 								<td>{new Date(expiresAt).toLocaleDateString("pt-BR")}</td>

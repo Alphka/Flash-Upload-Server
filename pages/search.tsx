@@ -124,8 +124,12 @@ export default function SearchPage({ config, userAccess, ...props }: SearchPageP
 
 							return (
 								<tr key={hash}>
-									<td className={`${style.no_underline} ${style.folder}`}><Link href={folderUrl}>{folderName}</Link></td>
-									<td className={`${style.no_underline} ${style.filename}`}><Link href={`/api/files/${hash}`} target="_blank">{filename}</Link></td>
+									<td className={`${style.no_underline} ${style.folder}`}>
+										<Link href={folderUrl} prefetch={false}>{folderName}</Link>
+									</td>
+									<td className={`${style.no_underline} ${style.filename}`}>
+										<Link href={`/api/files/${hash}`} target="_blank" prefetch={false}>{filename}</Link>
+									</td>
 									<td>{new Date(createdAt).toLocaleDateString("pt-BR")}</td>
 									<td>{new Date(expiresAt).toLocaleDateString("pt-BR")}</td>
 								</tr>

@@ -104,7 +104,7 @@ const Folders = memo<FoldersProps>(function Folders({ folders }){
 		const message = `mais ${count} ${count === 1 ? "arquivo" : "arquivos"}`
 
 		return (
-			<Link className={style.more} href={href}>
+			<Link className={style.more} href={href} prefetch={false}>
 				<span className="icon material-symbols-outlined">expand_more</span>
 				<span>{message}</span>
 			</Link>
@@ -121,7 +121,7 @@ const Folders = memo<FoldersProps>(function Folders({ folders }){
 				return (
 					<div className={style.folder} key={`folder-${reduced}`}>
 						<div className={style.header}>
-							<Link href={`/documents/${reduced}`}>
+							<Link href={`/documents/${reduced}`} prefetch={false}>
 								<span className="icon material-symbols-outlined">folder</span>
 								<span className={style.title}>{name}</span>
 							</Link>
