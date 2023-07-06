@@ -4,7 +4,6 @@
 $height: 36pt;
 $logoWidth: $height - 8pt;
 $logoFontSize: $logoWidth - 2pt;
-$menuWidth: 260pt;
 
 nav{
 	display: flex;
@@ -44,16 +43,25 @@ nav{
 				line-height: $logoFontSize;
 				font-family: var(--logo-font-family);
 				text-transform: uppercase;
-
-				@media screen and (max-width: 400px){
-					font-size: 20pt;
-				}
 			}
 
 			@media screen and (max-width: 400px){
+				$iconSize: $logoWidth - 8pt;
+				$fontSize: $logoFontSize - 8pt;
+
 				justify-content: flex-start;
 				gap: 8pt;
 				padding: 0 8pt;
+
+				img{
+					width: $iconSize;
+					height: $iconSize;
+				}
+
+				span{
+					font-size: $fontSize;
+					line-height: $iconSize;
+				}
 			}
 		}
 	}
@@ -140,7 +148,7 @@ nav{
 			right: 4pt;
 			padding: 8pt;
 			border-radius: 4pt;
-			width: 50vw;
+			width: clamp(150px, 60vw, 400px);
 			z-index: 1;
 
 			&.hidden{
@@ -175,7 +183,7 @@ nav{
 
 	> .content{
 		background-color: var(--background-dark);
-		width: $menuWidth;
+		width: 260pt;
 		position: absolute;
 		top: calc(100% + 8pt);
 		right: 0;
@@ -185,6 +193,10 @@ nav{
 
 		&.hidden{
 			display: none;
+		}
+
+		@media screen and (max-width: 365px){
+			width: max(200px, calc(100vw - 8pt * 2));
 		}
 
 		> p{

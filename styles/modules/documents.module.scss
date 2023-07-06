@@ -9,13 +9,23 @@ main.list{
 }
 
 main.list{
-	header h2{
-		color: var(--font-secondary-color);
-		font-size: 14pt;
-		font-weight: 500;
-		line-height: 30pt;
-		text-transform: uppercase;
-		align-self: end;
+	header{
+		h2{
+			color: var(--font-secondary-color);
+			font-size: 14pt;
+			font-weight: 500;
+			line-height: 30pt;
+			text-transform: uppercase;
+			align-self: end;
+		}
+
+		@media screen and (max-width: variables.$mobileSize){
+			flex-direction: column;
+
+			h2{
+				align-self: center
+			}
+		}
 	}
 
 	@include documents.table;

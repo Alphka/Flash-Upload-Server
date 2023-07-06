@@ -9,14 +9,10 @@ main.main{
 	width: 100vw;
 	height: 100vh;
 
-	@media screen and (max-width: 700px){
-		justify-content: space-evenly;
-	}
-
 	@media screen and (max-width: variables.$mediumSize){
 		flex-direction: column;
 		justify-content: flex-start;
-		gap: 24pt;
+		gap: 48pt;
 	}
 
 	section:nth-of-type(1){
@@ -41,6 +37,16 @@ main.main{
 			font-weight: 700;
 			font-family: var(--logo-font-family);
 			text-transform: uppercase;
+		}
+
+		@media screen and (max-width: variables.$mediumSize){
+			.image{
+				height: clamp(200px, calc(100vw - 48pt * 2), 230px);
+			}
+
+			span{
+				font-size: 36pt;
+			}
 		}
 	}
 
@@ -90,8 +96,15 @@ main.main{
 						}
 
 						@media screen and (max-width: variables.$mediumSize){
-							width: clamp(400px, 80vw, 500px);
+							width: clamp(200px, calc(100vw - 16pt * 2), 500px);
+							font-size: calc(1em - 4px);
+							font-family: var(--font-family);
 						}
+					}
+
+					@media screen and (max-width: variables.$mediumSize){
+						font-size: 14pt;
+						padding: 4pt 0;
 					}
 				}
 			}
@@ -105,7 +118,7 @@ main.main{
 				align-items: center;
 				flex-direction: column;
 				color: $color;
-				width: 80%;
+				width: clamp(30px, 50%, 200px);
 				height: $height;
 				padding: 2pt 0;
 				border-radius: 8pt;
@@ -126,6 +139,14 @@ main.main{
 				.spinner{
 					@include mixins.spinner($color, $height - 4pt, block);
 				}
+
+				@media screen and (max-width: variables.$mediumSize){
+					width: clamp(30px, 50%, 200px);
+				}
+			}
+
+			@media screen and (max-width: variables.$mediumSize){
+				padding: 8pt 2pt;
 			}
 		}
 	}
