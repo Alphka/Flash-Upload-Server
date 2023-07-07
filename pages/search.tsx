@@ -5,7 +5,7 @@ import type { APIResponseError } from "../typings/api"
 import { useState, useEffect } from "react"
 import { GetCachedConfig } from "../helpers/Config"
 import { useRouter } from "next/router"
-import GetDocumentType from "../helpers/GetDocumentType"
+import GetDocumentType, { type DocumentTypeConfig } from "../helpers/GetDocumentType"
 import ConnectDatabase from "../lib/ConnectDatabase"
 import Navigation from "../components/Navigation"
 import getBaseURL from "../helpers/getBaseURL"
@@ -26,12 +26,11 @@ export const getServerSideProps: GetServerSideProps = async ({ req, query: { q: 
 		}
 	}
 
-	if(typeof search !== "string") return { notFound: true }
+	if(Array.isArray(search)) return { notFound: true }
 
 	try{
 		await ConnectDatabase()
 
-		const config = await GetCachedConfig(true)
 		const user = await UserToken.findOne({ token })
 
 		if(!user) return {
@@ -41,6 +40,14 @@ export const getServerSideProps: GetServerSideProps = async ({ req, query: { q: 
 			}
 		}
 
+		if(!search || !(search = search.trim())) return {
+			redirect: {
+				destination: "/documents",
+				permanent: true
+			}
+		}
+
+		const { types } = await GetCachedConfig(true)
 		const url = new URL(`/api/search`, getBaseURL(req))
 
 		url.searchParams.set("q", search)
@@ -62,7 +69,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req, query: { q: 
 		return {
 			props: {
 				files,
-				config,
+				config: { types },
 				userToken: user.token,
 				userAccess: user.access,
 			}
@@ -75,11 +82,11 @@ export const getServerSideProps: GetServerSideProps = async ({ req, query: { q: 
 
 interface SearchPageProps {
 	userAccess: AccessTypes
-	config: Config
+	config: DocumentTypeConfig
 	files: IFileData[]
 }
 
-export default function SearchPage({ config, userAccess, ...props }: SearchPageProps){
+export default function SearchPage({ config: { types }, userAccess, ...props }: SearchPageProps){
 	const [files, setFiles] = useState(props.files.sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()))
 	const router = useRouter()
 	const search = router.query.q as string
@@ -118,7 +125,7 @@ export default function SearchPage({ config, userAccess, ...props }: SearchPageP
 					</thead>
 					<tbody>
 						{files.map(({ hash, filename, expiresAt, createdAt, type }) => {
-							const { reduced, name } = GetDocumentType(config, type)!
+							const { reduced, name } = GetDocumentType({ types }, type)!
 							const folderName = reduced || name
 							const folderUrl = `/documents/${folderName.toLowerCase()}`
 
