@@ -215,7 +215,6 @@ const Overflow = memo(function Overflow({ config, setIsOverflow, isOverflow, dat
 
 			let errored = false
 
-			// TODO: Fix styles
 			if(filenameInput.checkValidity()) setNameError(undefined)
 			else setNameError(filename ? "Nome do documento inválido." : "O nome do documento não pode estar vazio."), errored = true
 
@@ -428,6 +427,8 @@ export default function DocumentFolder({ config, folder: { reduced, name: title 
 				<h1>{title}</h1>
 				{reduced && <h2>({reduced})</h2>}
 			</header>
+
+			{/* TODO: Add button to redirect to /documents */}
 
 			{files.length ? (
 				<table>

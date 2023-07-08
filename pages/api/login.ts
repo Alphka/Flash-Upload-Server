@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse, PageConfig } from "next"
 import type { AccessTypes } from "../../typings/database"
 import { randomBytes } from "crypto"
+import RemoveAPITokens from "../../helpers/RemoveAPITokens"
 import ConnectDatabase from "../../lib/ConnectDatabase"
 import HandleAPIError from "../../helpers/HandleAPIError"
 import ValidateSize from "../../helpers/ValidateSize"
@@ -29,13 +30,7 @@ export default async function Login(request: NextApiRequest, response: NextApiRe
 	if(!ValidateSize(request.headers["content-length"], maxSize)) return HandleError("length")
 
 	async function Register(name: string, access: AccessTypes){
-		if(oldToken){
-			try{
-				await UserToken.findOneAndDelete({ token: oldToken })
-			}catch(error){
-				console.error(error)
-			}
-		}
+		if(oldToken) RemoveAPITokens({ token: oldToken })
 
 		const token = await CreateToken()
 		const date = new Date
