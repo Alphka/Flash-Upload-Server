@@ -9,7 +9,7 @@ import ValidateFilename from "../../helpers/ValidateFilename"
 import LocalInputDate from "../../helpers/LocalInputDate"
 import FileContainer from "./FileContainer"
 import axios from "axios"
-import style from "../../styles/modules/upload-menu.module.scss"
+import style from "../../styles/modules/homepage.module.scss"
 
 interface UploadMenuProps {
 	toastConfig: ToastOptions

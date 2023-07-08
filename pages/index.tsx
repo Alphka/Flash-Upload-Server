@@ -198,7 +198,19 @@ export default function IndexPage({ config, userAccess }: IndexProps){
 			</article>
 
 			<aside className={style.image}>
-				<Image src="/images/documents.png" alt="Ilustração de documentos" width={600} height={480} priority={true} quality={80} draggable={false} />
+				<Image src="/images/documents.png"
+					alt="Ilustração de documentos"
+					width={600}
+					height={480}
+					quality={90}
+					priority={true}
+					draggable={false}
+					onLoad={event => {
+						const image = event.currentTarget
+						image.removeAttribute("width")
+						image.removeAttribute("height")
+					}}
+				/>
 			</aside>
 		</main>
 

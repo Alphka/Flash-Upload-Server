@@ -45,6 +45,10 @@ nav{
 				text-transform: uppercase;
 			}
 
+			&:focus-visible{
+				outline: 1px solid var(--font-color);
+			}
+
 			@media screen and (max-width: 400px){
 				$iconSize: $logoWidth - 8pt;
 				$fontSize: $logoFontSize - 8pt;
@@ -128,11 +132,6 @@ nav{
 					padding: 0;
 				}
 			}
-
-			#search input::-webkit-search-cancel-button{
-				display: initial;
-				color: black;
-			}
 		}
 
 		> .content{
@@ -181,6 +180,21 @@ nav{
 		position: initial;
 	}
 
+	&:not(.mobile) > .content::after{
+		content: "";
+		position: absolute;
+		top: -4px;
+		right: 4px;
+		width: 20pt;
+		aspect-ratio: 1;
+		background-color: inherit;
+		transform: rotate(45deg);
+		border-top-right-radius: 100%;
+		border-bottom-right-radius: 100%;
+		border-bottom-left-radius: 100%;
+		z-index: -1;
+	}
+
 	> .content{
 		background-color: var(--background-dark);
 		width: 260pt;
@@ -222,7 +236,6 @@ nav{
 		}
 
 		.notification{
-			font-size: 0.9em;
 			width: calc(100% - 8pt);
 			margin: auto;
 
@@ -244,6 +257,7 @@ nav{
 
 			.content{
 				font-size: 0.9em;
+				line-height: 1.5em;
 			}
 
 			&:not(:first-of-type){
@@ -258,15 +272,14 @@ nav{
 #search{
 	$searchIconSize: $logoFontSize - 4pt;
 	$searchIconSpacing: 2pt;
+	$background: white;
+	$color: black;
 
 	height: 100%;
 	position: relative;
 	align-self: center;
 
 	input{
-		$background: white;
-		$color: black;
-
 		@include mixins.fixAutofill($background, $color, inherit);
 
 		width: clamp(200px, 60vw, 400px);
@@ -278,12 +291,16 @@ nav{
 		border-radius: 4pt;
 		padding: 4pt calc(4pt + $searchIconSpacing + $searchIconSize) 4pt 8pt;
 
+		&::placeholder{
+			color: lighten($color, 40);
+		}
+
 		@media screen and (min-width: variables.$smallSize) and (max-width: variables.$mediumSize){
 			width: min(400px, 35vw);
 		}
 
 		@media screen and (min-width: variables.$mediumSize){
-			width: 35vw;
+			width: clamp(400px, 25vw, 600px);
 		}
 
 		&::-webkit-search-cancel-button{
@@ -295,7 +312,7 @@ nav{
 		position: absolute;
 		top: $searchIconSpacing;
 		right: $searchIconSpacing;
-		color: black;
+		color: $color;
 		cursor: pointer;
 		font-size: $searchIconSize;
 	}

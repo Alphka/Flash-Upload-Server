@@ -100,6 +100,7 @@
 	label{
 		flex-direction: row;
 		width: inherit;
+		cursor: pointer;
 
 		span{
 			flex: 200px 0;
@@ -113,6 +114,7 @@
 			max-width: 600px;
 			flex: 1;
 			width: calc(100% - 200px - $gap);
+			outline: none;
 		}
 
 		input{

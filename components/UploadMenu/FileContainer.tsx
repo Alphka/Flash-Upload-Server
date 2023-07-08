@@ -2,7 +2,7 @@ import type { AccessTypes, DocumentTypeInfo } from "../../typings/database"
 import type { FileInfo, FileObject } from "../../typings"
 import { memo, useCallback, useRef, useState } from "react"
 import GetInputDate from "../../helpers/GetInputDate"
-import style from "../../styles/modules/upload-menu.module.scss"
+import style from "../../styles/modules/homepage.module.scss"
 
 interface FileContainerProps {
 	id: number
@@ -38,8 +38,7 @@ const FileContainer = memo(({ id, userAccess, info, setFile, deleteFile, types }
 		}
 	})
 
-	const handleDelete = useCallback(() => deleteFile(id, true), [])
-
+	const handleDelete = useCallback(() => deleteFile(id, true), [id])
 	const expireDate = new Date(info.date)
 
 	// TODO: Get year from config, for each document type
@@ -47,43 +46,54 @@ const FileContainer = memo(({ id, userAccess, info, setFile, deleteFile, types }
 
 	return (
 		<section ref={container} className={style.file}>
-			<button className={`icon ${style.delete} material-symbols-outlined`} onClick={handleDelete}>delete</button>
-			<p className={style.name}>
-				<span className={style.label}>Nome</span>
-				<input type="text" defaultValue={info.name.substring(0, info.name.lastIndexOf("."))} ref={nameInput} />
-			</p>
-			<p>
-				<span className={style.label}>Tipo de arquivo</span>
-				<span className={style.content}>{info.type}</span>
-			</p>
-			<p className={style.date}>
-				<span className={style.label}>Data de criação</span>
-				<input type="date" defaultValue={GetInputDate(info.date)} ref={dateInput} />
-			</p>
-			<p className={style.date}>
-				<span className={style.label}>Data de expiração</span>
-				<input type="date" defaultValue={GetInputDate(expireDate)} ref={expireInput} />
-			</p>
-			<p className={style.type}>
-				<span className={style.label}>Tipo de documento</span>
-				<select className={style.content} defaultValue={0} ref={typeSelect}>
-					<option disabled hidden value={0}>Selecione um tipo</option>
-					{types && types.map(({ id, name }) => (
-						<option value={id} key={`documentType-${id}`}>{name}</option>
-					))}
-				</select>
-			</p>
+			<div>
+				<label>
+					<span>Nome</span>
+					<input type="text" defaultValue={info.name.substring(0, info.name.lastIndexOf("."))} ref={nameInput} />
+				</label>
+			</div>
+			<div>
+				<label>
+					<span>Data de criação</span>
+					<input type="date" defaultValue={GetInputDate(info.date)} ref={dateInput} />
+				</label>
+			</div>
+			<div>
+				<label>
+					<span>Tipo de arquivo</span>
+					<input type="text" value={info.type} disabled />
+				</label>
+			</div>
+			<div>
+				<label>
+					<span>Data de expiração</span>
+					<input type="date" defaultValue={GetInputDate(expireDate)} ref={expireInput} />
+				</label>
+			</div>
+			<div>
+				<label>
+					<span>Tipo de documento</span>
+					<select defaultValue={0} ref={typeSelect}>
+						<option disabled hidden value={0}>Selecione um tipo</option>
+						{types && types.map(({ id, name }) => (
+							<option value={id} key={`documentType-${id}`}>{name}</option>
+						))}
+					</select>
+				</label>
+			</div>
 			{userAccess === "all" && (
-				<p className={style.checkbox}>
+				<div className={style.checkbox}>
 					<label>
 						<input type="checkbox" ref={checkboxInput} />
-						<span className={style.label}>Arquivo privado</span>
+						<span>Arquivo privado</span>
 					</label>
-				</p>
+				</div>
 			)}
-			{errorMessage && (
-				<p className={style.error}>{errorMessage}</p>
-			)}
+			<button className={style.delete} onClick={handleDelete}>
+				<span className="icon material-symbols-outlined">delete</span>
+				<span>Remover</span>
+			</button>
+			{errorMessage && <p className={style.error}>{errorMessage}</p>}
 		</section>
 	)
 })

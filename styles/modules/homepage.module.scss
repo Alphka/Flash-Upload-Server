@@ -1,4 +1,5 @@
 @use "../import/variables";
+@use "../import/mixins";
 
 main.main{
 	display: flex;
@@ -61,7 +62,7 @@ main.main{
 				justify-content: center;
 				align-items: center;
 				background-color: var(--secondary-color);
-				box-shadow: 5px 5px 0 var(--terciary-color);
+				box-shadow: 2px 2px 3px var(--terciary-color);
 				font-size: 32px;
 				font-weight: 600;
 				width: clamp(400px, 50vw, 500px);
@@ -105,13 +106,150 @@ main.main{
 		margin: auto 0;
 
 		img{
-			width: 600px;
+			height: min(480px, 65vh);
+			max-width: 600px;
 			border-radius: 8px;
 			aspect-ratio: 5 / 4;
 		}
 
 		@media screen and (max-width: #{variables.$largeSize - 1px}){
 			display: none;
+		}
+	}
+}
+
+.overflow{
+	@import "../import/overflow.module.scss";
+
+	> .content{
+		.files{
+			@include mixins.formLayout;
+
+			display: flex;
+			width: calc(100% - 8pt);
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			padding: 8pt 4pt;
+			gap: 4pt;
+
+			.file{
+				position: relative;
+				width: 100%;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				padding: 8pt 4pt;
+				border-top: 1px solid var(--font-color);
+				gap: 4pt;
+
+				.checkbox{
+					padding: 4pt 0;
+
+					label{
+						@include mixins.userSelectNone;
+
+						position: relative;
+						justify-content: flex-start;
+						line-height: 1.2em;
+						gap: 4pt;
+
+						input{
+							appearance: none;
+							margin: 0;
+							padding: 0;
+							flex: 14pt 0;
+
+							&::after{
+								content: "";
+								display: block;
+								position: absolute;
+								background-color: inherit;
+								text-align: center;
+								font-size: 16pt;
+								line-height: 1;
+								border-radius: 4pt;
+								top: 0;
+								left: 0;
+								margin: auto;
+								width: 14pt;
+								height: 14pt;
+								cursor: pointer;
+							}
+
+							&:checked::after{
+								background-color: var(--secondary-constrast-color);
+							}
+
+							&:hover::after{
+								filter: brightness(120%);
+								box-shadow: 0 0 3px solid black;
+							}
+
+							&:focus-visible::after{
+								border: 1px solid var(--font-color);
+							}
+						}
+					}
+				}
+
+				.delete{
+					background-color: var(--remove-button);
+					width: clamp(150px, 80%, 300px);
+					margin: auto;
+					display: flex;
+					justify-content: center;
+					align-items: center;
+					border-radius: 8pt;
+					padding: 2pt 4pt;
+					gap: 8pt;
+					cursor: pointer;
+
+					&:hover{
+						filter: brightness(80%);
+						box-shadow: 0 0 5px solid black;
+					}
+
+					:global .icon{
+						font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 48;
+					}
+				}
+
+				.error{
+					color: var(--error-color);
+					text-align: center;
+					font-weight: 500;
+				}
+			}
+		}
+
+		.submit .progress{
+			$color: darken(gray, 20%);
+
+			background-color: $color;
+			position: relative;
+			display: block;
+			width: 100%;
+			height: 1.5em;
+			margin: 4pt 0 10pt;
+			border-radius: 8pt;
+			overflow: hidden;
+
+			.bar{
+				@include mixins.gradientBackground;
+
+				width: var(--width);
+				height: inherit;
+				transition: width .3s ease-out;
+			}
+
+			.percentage{
+				position: absolute;
+				left: 50%;
+				top: 0%;
+				padding: 0;
+				line-height: 1.5;
+			}
 		}
 	}
 }

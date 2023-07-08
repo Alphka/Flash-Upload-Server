@@ -1,5 +1,5 @@
-@use "../import/variables";
-@use "../import/mixins";
+@use "./variables";
+@use "./mixins";
 
 @mixin main{
 	display: flex;
