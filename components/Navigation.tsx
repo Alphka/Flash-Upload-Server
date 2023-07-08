@@ -44,7 +44,7 @@ const SearchForm = memo<SearchFormProps>(function SearchForm({ icon, search, sho
 
 	return (
 		<div id="search">
-			<input type="search" placeholder="Faça uma pesquisa..." defaultValue={search} onKeyPress={event => {
+			<input type="search" placeholder="Faça uma pesquisa..." className="no-outline" defaultValue={search} onKeyPress={event => {
 				const input = event.currentTarget
 
 				if(event.key === "Enter"){

@@ -18,6 +18,27 @@
 	text-overflow: ellipsis;
 }
 
+@mixin fixAutofill($backgroundColor, $color: var(--font-color), $fontFamily: var(--font-family)){
+	&:-webkit-autofill,
+	&:-webkit-autofill:hover,
+	&:-webkit-autofill:focus,
+	&:-webkit-autofill:active{
+		-webkit-box-shadow: 0 0 0 30px $backgroundColor inset !important;
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: $color;
+	}
+
+	&:-webkit-autofill::first-line{
+		font-family: $fontFamily !important;
+	}
+
+	&:-internal-autofill-selected{
+		appearance: auto;
+		background-color: $backgroundColor !important;
+		color: $color !important;
+	}
+}
+
 @mixin spinner($color: var(--font-color), $size: 32px, $display: inline-block, $border-width: 3px){
 	display: $display;
 	background-color: transparent;

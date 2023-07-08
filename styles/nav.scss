@@ -206,6 +206,14 @@ nav{
 			&.title{
 				font-size: larger;
 			}
+
+			&.error{
+				color: var(--error-color);
+			}
+
+			&.more{
+				color: var(--font-secondary-color);
+			}
 		}
 
 		hr{
@@ -259,6 +267,8 @@ nav{
 		$background: white;
 		$color: black;
 
+		@include mixins.fixAutofill($background, $color, inherit);
+
 		width: clamp(200px, 60vw, 400px);
 		height: 100%;
 		background-color: $background;
@@ -278,20 +288,6 @@ nav{
 
 		&::-webkit-search-cancel-button{
 			display: none;
-		}
-
-		&:-webkit-autofill{
-			-webkit-background-clip: text;
-			-webkit-box-shadow: 0 0 0 30px $background inset;
-			-webkit-text-fill-color: $color;
-
-			&,
-			&:hover,
-			&:focus,
-			&:active,
-			&::first-line{
-				font: var(--font-family);
-			}
 		}
 	}
 
