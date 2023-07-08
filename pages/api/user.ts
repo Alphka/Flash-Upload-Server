@@ -45,9 +45,9 @@ export default async function UserAPI(request: NextApiRequest, response: NextApi
 
 			if(users.length){
 				if(users.some(({ access }) => access === "all")) return SendError(401)
-				console.log("UserAPI: No users found, access permitted")
-			}else{
 				console.log("UserAPI: No administrators found, access permitted")
+			}else{
+				console.log("UserAPI: No users found, access permitted")
 				RemoveAPITokens()
 			}
 		}
@@ -61,7 +61,7 @@ export default async function UserAPI(request: NextApiRequest, response: NextApi
 				const body = (await ParseBody(request)).toString()
 				const data = Object.fromEntries(new URLSearchParams(body)) as unknown as IAddUser
 
-				return await AddUser(data, config, request, response)
+				return await AddUser(data, config, response)
 			}
 			case "DELETE": {
 				if(!typeis.is(contentType, "application/x-www-form-urlencoded")) return HandleError("contentType")
@@ -69,7 +69,7 @@ export default async function UserAPI(request: NextApiRequest, response: NextApi
 				const body = (await ParseBody(request)).toString()
 				const { username } = Object.fromEntries(new URLSearchParams(body)) as { username?: string }
 
-				return await DeleteUser(username, request, response)
+				return await DeleteUser(user?.name, username, response)
 			}
 			case "PUT": {
 				if(!typeis.is(contentType, "application/json")) return HandleError("contentType")
@@ -77,7 +77,7 @@ export default async function UserAPI(request: NextApiRequest, response: NextApi
 				const body = (await ParseBody(request)).toString()
 				const data = JSON.parse(body) as IUpdateUser
 
-				return await UpdateUser(data, config, request, response)
+				return await UpdateUser(data, config, response)
 			}
 			default: return HandleError("method")
 		}
@@ -87,7 +87,7 @@ export default async function UserAPI(request: NextApiRequest, response: NextApi
 	}
 }
 
-async function AddUser({ username, password, access }: IAddUser, { accessTypes }: Config, request: NextApiRequest, response: NextApiResponse){
+async function AddUser({ username, password, access }: IAddUser, { accessTypes }: Config, response: NextApiResponse){
 	const SendError = SendAPIError.bind(undefined, response)
 
 	try{
@@ -115,16 +115,21 @@ async function AddUser({ username, password, access }: IAddUser, { accessTypes }
 	}
 }
 
-async function DeleteUser(username: string | undefined, request: NextApiRequest, response: NextApiResponse){
+async function DeleteUser(userName: string | undefined, username: string | undefined, response: NextApiResponse){
 	const SendError = SendAPIError.bind(undefined, response)
 
 	try{
 		if(!username || !(username = username.trim())) throw "Usuário inválido"
 
-		const user = await User.findOneAndDelete({ name: username })
+		const user = await User.findOne({ name: username })
 
 		if(user){
+			// Trying to delete own user
+			if(userName === user.name) return SendError(403, "Você não pode remover este usuário")
+
+			await user.deleteOne()
 			RemoveAPITokens({ name: username })
+
 			return response.status(200).json({ success: true })
 		}
 
@@ -150,7 +155,7 @@ export interface IUpdateUser {
 	}
 }
 
-async function UpdateUser({ username, data }: IUpdateUser, { accessTypes }: Config, request: NextApiRequest, response: NextApiResponse){
+async function UpdateUser({ username, data }: IUpdateUser, { accessTypes }: Config, response: NextApiResponse){
 	const SendError = SendAPIError.bind(undefined, response)
 
 	try{

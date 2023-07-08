@@ -6,7 +6,7 @@ import UserToken from "../models/UserToken"
 export default async function RemoveAPITokens(query: FilterQuery<IUserToken> = {}){
 	try{
 		await ConnectDatabase()
-		await UserToken.deleteMany(query)
+		return await UserToken.deleteMany(query)
 	}catch(error){
 		console.error(error)
 	}

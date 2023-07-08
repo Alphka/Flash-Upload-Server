@@ -168,9 +168,9 @@ function DateUTC(isoDate: string){
 	return Date.UTC(year, month - 1, day)
 }
 
-type INotificationProps = Pick<INotificationData, "folder" | "filename" | "expiresAt"> & Attributes
+type INotificationProps = Pick<INotificationData, "folder" | "filename" | "expiresAt">
 
-const Notification = memo<INotificationProps>(function Notification({ key, folder, filename, expiresAt }){
+const Notification = memo<INotificationProps>(function Notification({ folder, filename, expiresAt }){
 	const url = `/documents/${folder.reduced?.toLowerCase() || folder.name.toLowerCase()}`
 	const message = (() => {
 		const todayUTC = DateUTC(new Date().toISOString())
@@ -183,10 +183,8 @@ const Notification = memo<INotificationProps>(function Notification({ key, folde
 		return `${daysLeft > 0 ? "Irá expirar em" : (daysLeft = Math.abs(daysLeft), "Expirou há")} ${daysLeft} ${daysLeft === 1 ? "dia" : "dias"}`
 	})()
 
-	console.log(key)
-
 	return (
-		<div className="notification" key={key}>
+		<div className="notification">
 			<p className="title">
 				<Link href={url} prefetch={false}>{filename}</Link>
 			</p>
