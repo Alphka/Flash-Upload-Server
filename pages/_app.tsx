@@ -60,7 +60,6 @@ const MyApp = ({ Component, pageProps, supportsSVG }: MyAppProps) => (<>
 		<meta name="color-scheme" content="dark" />
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-		<link rel="preload" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" as="style" />
 	</Head>
 	<style jsx global>{`
 		:root{

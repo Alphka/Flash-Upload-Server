@@ -1,4 +1,4 @@
-import type { MutableRefObject, MouseEvent as ReactMouseEvent, Dispatch, SetStateAction, Attributes } from "react"
+import type { MutableRefObject, MouseEvent as ReactMouseEvent, KeyboardEvent as ReactKeyboardEvent, Dispatch, SetStateAction } from "react"
 import type { INotificationData } from "../pages/api/notifications"
 import type { AccessTypes } from "../typings/database"
 import type { APIResponse } from "../typings/api"
@@ -42,21 +42,35 @@ const SearchForm = memo<SearchFormProps>(function SearchForm({ icon, search, sho
 		}
 	}, [router.asPath])
 
+	const handleSubmit = useCallback((event: ReactMouseEvent | ReactKeyboardEvent) => {
+		const input = inputRef.current
+
+		if(!input) throw new Error("Search input not found")
+
+		const search = input.value.trim()
+
+		if(search){
+			event.preventDefault()
+			router.push("/search?q=" + encodeURIComponent(search), "/search")
+		}
+	}, [inputRef])
+
+	const handleInputSubmit = useCallback((event: ReactKeyboardEvent) => {
+		if(event.key === "Enter") handleSubmit(event)
+	}, [handleSubmit])
+
 	return (
 		<div id="search">
-			<input type="search" placeholder="Faça uma pesquisa..." className="no-outline" defaultValue={search} onKeyPress={event => {
-				const input = event.currentTarget
-
-				if(event.key === "Enter"){
-					const value = input.value.trim()
-
-					if(!value) return
-
-					event.preventDefault()
-					router.push("/search?q=" + encodeURIComponent(value), "/search")
-				}
-			}} autoComplete="off" autoFocus={autoFocus} ref={inputRef} />
-			{icon && <span className="icon material-symbols-outlined">search</span>}
+			<input type="search"
+				placeholder="Faça uma pesquisa..."
+				className="no-outline"
+				defaultValue={search}
+				onKeyPress={handleInputSubmit}
+				autoComplete="off"
+				autoFocus={autoFocus}
+				ref={inputRef}
+			/>
+			{icon && <span className="icon material-symbols-outlined" onClick={handleSubmit}>search</span>}
 		</div>
 	)
 })
@@ -156,7 +170,7 @@ const Logo = memo(function Logo(){
 	return (
 		<header>
 			<Link href="/" prefetch={false}>
-				<Image src="/icons/logo.svg" alt={locales.siteLogo} loading="eager" width={32} height={32} draggable={false} />
+				<Image src="/icons/logo.svg" alt={locales.siteLogo} loading="eager" width={32} height={32} draggable={false} priority={true} />
 				<span>Flash</span>
 			</Link>
 		</header>
