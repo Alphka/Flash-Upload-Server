@@ -14,7 +14,9 @@ import ValidateFilename from "../../helpers/ValidateFilename"
 import GetDocumentType from "../../helpers/GetDocumentType"
 import ConnectDatabase from "../../lib/ConnectDatabase"
 import LocalInputDate from "../../helpers/LocalInputDate"
+import GetExtension from "../../helpers/GetExtension"
 import GetInputDate from "../../helpers/GetInputDate"
+import GetFileName from "../../helpers/GetFileName"
 import Navigation from "../../components/Navigation"
 import getBaseURL from "../../helpers/getBaseURL"
 import UserToken from "../../models/UserToken"
@@ -228,7 +230,7 @@ const Overflow = memo(function Overflow({ config, setIsOverflow, isOverflow, dat
 			if(errored || !access) return
 
 			const documentData: IUpdateDocument = {
-				filename: filename + data.filename.substring(data.filename.lastIndexOf(".")),
+				filename: `${filename}.${GetExtension(data.filename)}`,
 				access,
 				createdDate,
 				expireDate
@@ -447,7 +449,7 @@ export default function DocumentFolder({ config, folder: { reduced, name: title 
 										event.currentTarget.blur()
 
 										setData({
-											name: filename.substring(0, filename.lastIndexOf(".")),
+											name: GetFileName(filename),
 											hash,
 											access,
 											filename,

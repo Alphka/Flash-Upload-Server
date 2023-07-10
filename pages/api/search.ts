@@ -1,5 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next"
 import type { APIResponse } from "../../typings/api"
+import type { FilterQuery } from "mongoose"
+import type { IFile } from "../../models/typings"
 import ConnectDatabase from "../../lib/ConnectDatabase"
 import HandleAPIError from "../../helpers/HandleAPIError"
 import SendAPIError from "../../helpers/SendAPIError"
@@ -24,11 +26,15 @@ export default async function SearchAPI(request: NextApiRequest, response: NextA
 
 		if(!user) return SendError(401)
 
-		const results = await File.find({
+		const query: FilterQuery<IFile> = {
 			filename: {
 				$regex: new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i")
 			}
-		}, {
+		}
+
+		if(user.access !== "all") query.access = "public"
+
+		const results = await File.find(query, {
 			_id: 0,
 			__v: 0,
 			content: 0

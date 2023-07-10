@@ -8,6 +8,7 @@ import HandleRequestError from "../../helpers/HandleRequestError"
 import ValidateFilename from "../../helpers/ValidateFilename"
 import LocalInputDate from "../../helpers/LocalInputDate"
 import FileContainer from "./FileContainer"
+import GetExtension from "../../helpers/GetExtension"
 import axios from "axios"
 import style from "../../styles/modules/homepage.module.scss"
 
@@ -142,7 +143,7 @@ export default function UploadMenu({ userAccess, types, inputFiles, toastConfig,
 							formData.append("expire", LocalInputDate(expireInput.current!.value).toISOString())
 							formData.append("type", typeId)
 							formData.append("isPrivate", userAccess === "all" && checkboxInput.current ? String(checkboxInput.current.checked) : "false")
-							formData.append("image", blob, filename + "." + name.substring(name.lastIndexOf(".") + 1))
+							formData.append("image", blob, `${filename}.${GetExtension(name)}`)
 
 							if(getErrorMessage() !== null) setErrorMessage(null)
 						}

@@ -2,6 +2,7 @@ import type { AccessTypes, DocumentTypeInfo } from "../../typings/database"
 import type { FileInfo, FileObject } from "../../typings"
 import { memo, useCallback, useRef, useState } from "react"
 import GetInputDate from "../../helpers/GetInputDate"
+import GetFileName from "../../helpers/GetFileName"
 import style from "../../styles/modules/homepage.module.scss"
 
 interface FileContainerProps {
@@ -49,7 +50,7 @@ const FileContainer = memo(({ id, userAccess, info, setFile, deleteFile, types }
 			<div>
 				<label>
 					<span>Nome</span>
-					<input type="text" defaultValue={info.name.substring(0, info.name.lastIndexOf("."))} ref={nameInput} />
+					<input type="text" defaultValue={GetFileName(info.name)} ref={nameInput} />
 				</label>
 			</div>
 			<div>

@@ -90,22 +90,20 @@ const UploadForm = memo(function UploadForm({ config, setIsUploadMenu, toastConf
 			}>
 				Enviar documento
 				<input tabIndex={-1} type="file" name="file" multiple aria-hidden ref={filesInputRef} onChange={(event) => {
-					const { files } = event.target
+					const { files } = event.currentTarget
 
-					if(!files?.length){
+					if(!files) return toast.error("Algo deu errado")
+
+					if(!files.length){
 						setIsUploadMenu(false)
-						toast.error("Nenhum arquivo foi selecionado", toastConfig)
-
-						return
+						return toast.error("Nenhum arquivo foi selecionado", toastConfig)
 					}
 
 					const { maxFiles, maxFileSize } = config
 
 					if(files.length > maxFiles){
 						setIsUploadMenu(false)
-						toast.error(`O número máximo de arquivos permitidos é ${maxFiles}`, toastConfig)
-
-						return
+						return toast.error(`O número máximo de arquivos permitidos é ${maxFiles}`, toastConfig)
 					}
 
 					const filesArray = Array.from(files)
@@ -115,20 +113,40 @@ const UploadForm = memo(function UploadForm({ config, setIsUploadMenu, toastConf
 						const sizeString = `${sizeMB % 1 === 0 ? sizeMB : sizeMB.toFixed(2)} MB`
 
 						setIsUploadMenu(false)
-						toast.error(`O tamanho máximo por arquivo é ${sizeString}`, toastConfig)
-
-						return
+						return toast.error(`O tamanho máximo por arquivo é ${sizeString}`, toastConfig)
 					}
 
-					try{
-						setIsUploadMenu(true)
+					const invalidFiles = filesArray.filter(file => !file.type)
 
+					if(invalidFiles.length){
+						const { length } = invalidFiles
+
+						if(length === 1){
+							toast.error("Arquivo inválido")
+							return setIsUploadMenu(false)
+						}
+
+						if(length === filesArray.length){
+							toast.error("Arquivos inválidos")
+							return setIsUploadMenu(false)
+						}
+
+						const indexes = invalidFiles.map(file => filesArray.indexOf(file))
+
+						for(const index of indexes.reverse()) filesArray.splice(index, 1)
+
+						toast.error("Arquivos inválidos removidos")
+					}
+
+					setIsUploadMenu(true)
+
+					try{
 						AddFileInfos(filesArray.map(file => {
 							const { name, type, size, lastModified: date } = file
 							return { name, type, size, date, file, show: true } as FileInfo
 						}))
 					}catch(error){
-						if(typeof error === "string") toast.error(error, toastConfig)
+						if(typeof error === "string") return toast.error(error, toastConfig)
 						console.error(error)
 					}
 				}} />

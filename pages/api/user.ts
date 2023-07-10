@@ -77,7 +77,7 @@ export default async function UserAPI(request: NextApiRequest, response: NextApi
 				const body = (await ParseBody(request)).toString()
 				const data = JSON.parse(body) as IUpdateUser
 
-				return await UpdateUser(data, config, response)
+				return await UpdateUser(user?.name, data, config, response)
 			}
 			default: return HandleError("method")
 		}
@@ -125,7 +125,7 @@ async function DeleteUser(userName: string | undefined, username: string | undef
 
 		if(user){
 			// Trying to delete own user
-			if(userName === user.name) return SendError(403, "Você não pode remover este usuário")
+			if(userName && user.name === userName) return SendError(403, "Você não pode remover este usuário")
 
 			await user.deleteOne()
 			RemoveAPITokens({ name: username })
@@ -155,7 +155,7 @@ export interface IUpdateUser {
 	}
 }
 
-async function UpdateUser({ username, data }: IUpdateUser, { accessTypes }: Config, response: NextApiResponse){
+async function UpdateUser(userName: string | undefined, { username, data }: IUpdateUser, { accessTypes }: Config, response: NextApiResponse){
 	const SendError = SendAPIError.bind(undefined, response)
 
 	try{
@@ -168,6 +168,9 @@ async function UpdateUser({ username, data }: IUpdateUser, { accessTypes }: Conf
 		const user = await User.findOne({ name: username })
 
 		if(!user) return SendError(404, "Usuário não encontrado")
+
+		// Trying to modify own user
+		if(userName && user.name === userName) return SendError(403, "Você não pode alterar as informações deste usuário")
 
 		const { username: name, password, access } = data
 		const sameUser = await User.findOne({ name })

@@ -1,14 +1,16 @@
 import type { NextApiRequest, NextApiResponse } from "next"
-import type { APIResponse } from "../../typings/api"
 import type { DocumentTypeInfo } from "../../typings/database"
+import type { APIResponse } from "../../typings/api"
+import type { FilterQuery } from "mongoose"
+import type { IFile } from "../../models/typings"
 import { GetCachedConfig } from "../../helpers/Config"
+import GetDocumentType from "../../helpers/GetDocumentType"
 import ConnectDatabase from "../../lib/ConnectDatabase"
 import HandleAPIError from "../../helpers/HandleAPIError"
 import GetInputDate from "../../helpers/GetInputDate"
 import SendAPIError from "../../helpers/SendAPIError"
 import UserToken from "../../models/UserToken"
 import File from "../../models/File"
-import GetDocumentType from "../../helpers/GetDocumentType"
 
 export interface INotificationData {
 	hash: string
@@ -37,11 +39,15 @@ export default async function NotificationsAPI(request: NextApiRequest, response
 
 		maxDate.setDate(maxDate.getDate() + 3)
 
-		const results = await File.find({
+		const query: FilterQuery<IFile> = {
 			expiresAt: {
 				$lte: GetInputDate(maxDate)
 			}
-		}, {
+		}
+
+		if(user.access !== "all") query.access = "public"
+
+		const results = await File.find(query, {
 			_id: 0,
 			hash: 1,
 			type: 1,
