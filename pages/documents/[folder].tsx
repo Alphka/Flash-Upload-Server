@@ -20,6 +20,7 @@ import GetFileName from "../../helpers/GetFileName"
 import Navigation from "../../components/Navigation"
 import getBaseURL from "../../helpers/getBaseURL"
 import UserToken from "../../models/UserToken"
+import useSWR from "swr"
 import style from "../../styles/modules/documents.module.scss"
 import Head from "next/head"
 import Link from "next/link"
@@ -116,6 +117,7 @@ interface OverflowProps {
 }
 
 const Overflow = memo(function Overflow({ config, setIsOverflow, isOverflow, data, setData, UpdateDocument, toastConfig, setClearErrors }: OverflowProps){
+	const [today] = useState(GetInputDate())
 	const nameRef = useRef<HTMLInputElement>(null)
 	const createdRef = useRef<HTMLInputElement>(null)
 	const expireRef = useRef<HTMLInputElement>(null)
@@ -319,7 +321,7 @@ const Overflow = memo(function Overflow({ config, setIsOverflow, isOverflow, dat
 							<span>Data de criação: </span>
 							<input type="date"
 								defaultValue={GetInputDate(data.createdAt)}
-								max={GetInputDate()}
+								max={today}
 								className="no-outline"
 								onChange={event => createdError && event.currentTarget.checkValidity() && setCreatedError(undefined)}
 								ref={createdRef}
@@ -333,6 +335,7 @@ const Overflow = memo(function Overflow({ config, setIsOverflow, isOverflow, dat
 							<span>Data de expiração: </span>
 							<input type="date"
 								defaultValue={GetInputDate(data.expiresAt)}
+								min={today}
 								className="no-outline"
 								onChange={event => expireError && event.currentTarget.checkValidity() && setExpireError(undefined)}
 								ref={expireRef}
@@ -371,8 +374,6 @@ interface DocumentFolderProps extends DocumentsProps {
 }
 
 export default function DocumentFolder({ config, folder: { reduced, name: title }, userAccess, ...props }: DocumentFolderProps){
-	// TODO: Use SWR to get files, like documents/index
-
 	const [files, setFiles] = useState<typeof props["files"]>([])
 	const [toastConfig, setToastConfig] = useState<ToastOptions>({})
 	const [clearErrors, setClearErrors] = useState(() => () => {})
@@ -380,6 +381,28 @@ export default function DocumentFolder({ config, folder: { reduced, name: title 
 	const [data, setData] = useState<OverflowData | undefined>()
 	const hasAccess = userAccess === "all"
 	const router = useRouter()
+
+	const { data: swrData, error: swrError } = useSWR(`/api/files?folder=${reduced}`, async url => {
+		const response = await fetch(url, { cache: "reload" })
+		const json = await response.json() as APIFilesFolderResponse | APIResponseError
+
+		if(!json.success) throw new Error(json.error || "Algo deu errado")
+
+		return json.data.files
+	})
+
+	function sortFiles(files: typeof props["files"]){
+		return files.sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime())
+	}
+
+	useEffect(() => {
+		if(swrData) setFiles(sortFiles(swrData))
+		else if(swrError) toast.error(swrError)
+	}, [swrData, swrError])
+
+	useEffect(() => setFiles(sortFiles(props.files)), [router.query.folder])
+
+	useEffect(() => setToastConfig(isOverflow ? { position: "bottom-right" } : {}), [isOverflow])
 
 	const UpdateDocument = useCallback((hash: string, data?: IUpdateDocument) => {
 		const file = files.find(file => file.hash === hash)
@@ -407,14 +430,6 @@ export default function DocumentFolder({ config, folder: { reduced, name: title 
 
 		setFiles(files.slice())
 	}, [files])
-
-	useEffect(() => {
-		setFiles(props.files.sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()))
-	}, [router.query.folder])
-
-	useEffect(() => {
-		setToastConfig(isOverflow ? { position: "bottom-right" } : {})
-	}, [isOverflow])
 
 	return <>
 		<Head>

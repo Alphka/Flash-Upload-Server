@@ -142,7 +142,7 @@ const Folders = memo<FoldersProps>(function Folders({ folders }){
 })
 
 export default function DocumentsPage({ config, userAccess }: DocumentsProps){
-	const { data, error } = useSWR("/api/files?documents", async (url: string) => {
+	const { data, error } = useSWR("/api/files?documents", async url => {
 		const response = await fetch(url, { cache: "no-cache" })
 		const json = await response.json() as APIFilesDocumentsResponse | APIResponseError
 

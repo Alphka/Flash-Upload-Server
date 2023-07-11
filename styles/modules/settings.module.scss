@@ -9,8 +9,8 @@ main.main{
 }
 
 .user_management{
-	width: 100%;
-	padding: 0 8pt;
+	width: calc(100% - 8pt * 2);
+	margin: auto;
 
 	header .title{
 		display: flex;
@@ -23,21 +23,19 @@ main.main{
 	}
 
 	@media screen and (max-width: variables.$mobileSize){
-		padding: 0 10pt;
+		width: calc(100% - 10pt * 2);
 	}
 
 	.users{
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(230px, 320px));
-		width: 100%;
+		grid-template-columns: repeat(auto-fit, minmax(205px, 1fr));
+		margin-bottom: 8pt;
 		gap: 8pt;
 
 		$headerPadding: 4pt 0;
 
-		@media screen and (max-width: variables.$mobileSize){
-			display: flex;
-			flex-direction: column;
-			grid-template-columns: none;
+		@media screen and (max-width: variables.$largeSize){
+			justify-content: space-evenly;
 		}
 
 		.cell{

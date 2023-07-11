@@ -44,12 +44,15 @@ export default async function FileAPI(request: NextApiRequest, response: NextApi
 		const file = await File.findOne({ hash })
 
 		if(!file) return SendError(404, "O documento não foi encontrado")
-		if(user.access !== "all" && file.access === "private") return SendError(403)
 
 		switch(request.method){
 			case "GET":
-			case "HEAD": return SendFile(file, request.method, response)
+			case "HEAD":
+				if(user.access !== "all" && file.access === "private") return SendError(403)
+				return SendFile(file, request.method, response)
 			case "PUT": {
+				if(user.access !== "all") return SendError(403)
+
 				const contentType = request.headers["content-type"]
 				const config = await GetCachedConfig(true)
 
@@ -113,7 +116,7 @@ async function UpdateDocument(file: FileDocument, { filename, access, expireDate
 		if(createdDate){
 			const date = new Date(createdDate)
 			if(Number.isNaN(date.getTime())) throw "Data de criação do documento inválida"
-			data.expiresAt = date
+			data.createdAt = date
 		}
 
 		await file.updateOne({ $set: data })

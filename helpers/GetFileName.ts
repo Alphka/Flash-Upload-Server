@@ -12,7 +12,6 @@ export default function GetFileName(filename: string){
 		}
 		default: {
 			const name = filename.substring(0, filename.lastIndexOf("."))
-			console.log(filename, name)
 			return name.length ? name : filename
 		}
 	}

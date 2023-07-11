@@ -119,8 +119,13 @@ nav{
 		.search{
 			position: absolute;
 			top: calc(100% + 8pt);
-			right: 0;
+			right: 4pt;
 			transition: width .2s cubic-bezier(0.075, 0.82, 0.165, 1);
+			z-index: 1;
+
+			#search input{
+				padding: 4pt 8pt;
+			}
 
 			&.collapsed{
 				&,
@@ -197,6 +202,7 @@ nav{
 
 	> .content{
 		background-color: var(--background-dark);
+		box-shadow: 0 0 5px black;
 		width: 260pt;
 		position: absolute;
 		top: calc(100% + 8pt);
@@ -204,6 +210,7 @@ nav{
 		padding: 4pt 4pt;
 		border-radius: 4pt;
 		font-size: 0.9em;
+		z-index: 1;
 
 		&.hidden{
 			display: none;
