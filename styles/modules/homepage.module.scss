@@ -181,9 +181,16 @@ main.main{
 								background-color: var(--secondary-constrast-color);
 							}
 
+							&::after{
+								box-shadow: 0 0 3px black;
+							}
+
+							&:checked:hover::after{
+								box-shadow: 0 0 3px var(--secondary-constrast-color);
+							}
+
 							&:hover::after{
 								filter: brightness(120%);
-								box-shadow: 0 0 3px solid black;
 							}
 
 							&:focus-visible::after{
@@ -196,7 +203,7 @@ main.main{
 				.delete{
 					background-color: var(--remove-button);
 					width: clamp(150px, 80%, 300px);
-					margin: auto;
+					margin: 4pt 0;
 					display: flex;
 					justify-content: center;
 					align-items: center;
@@ -207,7 +214,7 @@ main.main{
 
 					&:hover{
 						filter: brightness(80%);
-						box-shadow: 0 0 5px solid black;
+						box-shadow: 0 0 5px black;
 					}
 
 					:global .icon{

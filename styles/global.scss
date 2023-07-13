@@ -29,11 +29,12 @@
 }
 
 body{
-	background-color: variables.$primaryColor;
+	background-color: var(--background);
 	font-family: var(--font-family);
 	font-size: 16px;
 	color: var(--font-color);
 	text-rendering: optimizeLegibility;
+	min-height: 100vh;
 
 	input,
 	button,
@@ -42,6 +43,10 @@ body{
 		font-size: 14px;
 		color: inherit;
 		text-rendering: optimizeLegibility;
+
+		&::-webkit-calendar-picker-indicator{
+			filter: none !important;
+		}
 	}
 }
 

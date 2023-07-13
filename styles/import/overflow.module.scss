@@ -36,7 +36,7 @@
 		&:hover,
 		&:focus{
 			filter: brightness(80%);
-			box-shadow: 0 0 2px solid black;
+			box-shadow: 0 0 2px black;
 		}
 
 		@media screen and (max-width: variables.$mobileSize){
