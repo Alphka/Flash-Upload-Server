@@ -15,9 +15,10 @@
 	flex-direction: column;
 	align-items: center;
 
+	$buttonCloseSize: 25pt;
+
 	> .close{
-		$size: 25pt;
-		$fontSize: $size - 5pt;
+		$fontSize: $buttonCloseSize - 5pt;
 
 		@include mixins.userSelectNone;
 
@@ -25,8 +26,8 @@
 		position: absolute;
 		top: 4pt;
 		right: 4pt;
-		width: $size;
-		height: $size;
+		width: $buttonCloseSize;
+		height: $buttonCloseSize;
 		font-size: $fontSize;
 		line-height: $fontSize;
 		border-radius: 2pt;
@@ -50,7 +51,11 @@
 		justify-content: center;
 		align-items: center;
 		max-width: 1920px;
-		width: 80%;
+		width: 90%;
+
+		@media screen and (max-width: variables.$mobileSize){
+			width: calc(100% - 4pt * 2);
+		}
 
 		> section{
 			display: flex;
@@ -67,8 +72,13 @@
 					text-align: center;
 
 					@media screen and (max-width: variables.$mobileSize){
-						font-size: 28pt;
+						font-size: 24pt;
 						white-space: nowrap;
+						padding: 0 $buttonCloseSize + 2pt;
+					}
+
+					@media screen and (max-width: 396px){
+						white-space: break-spaces;
 					}
 				}
 			}

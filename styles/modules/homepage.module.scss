@@ -155,25 +155,30 @@ main.main{
 						gap: 4pt;
 
 						input{
+							$size: 14pt;
+
 							appearance: none;
+							background-color: transparent;
 							margin: 0;
 							padding: 0;
-							flex: 14pt 0;
+							height: $size;
+							width: $size;
+							flex: none;
 
 							&::after{
 								content: "";
 								display: block;
 								position: absolute;
-								background-color: inherit;
+								background-color: var(--background-dark-light);
 								text-align: center;
-								font-size: 16pt;
+								font-size: $size + 2pt;
 								line-height: 1;
 								border-radius: 4pt;
 								top: 0;
 								left: 0;
 								margin: auto;
-								width: 14pt;
-								height: 14pt;
+								width: $size;
+								height: $size;
 								cursor: pointer;
 							}
 
@@ -196,6 +201,10 @@ main.main{
 							&:focus-visible::after{
 								border: 1px solid var(--font-color);
 							}
+						}
+
+						span{
+							flex: calc(1em * 10) 0;
 						}
 					}
 				}
