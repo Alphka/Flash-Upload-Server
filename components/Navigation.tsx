@@ -182,17 +182,19 @@ function DateUTC(isoDate: string){
 	return Date.UTC(year, month - 1, day)
 }
 
-type INotificationProps = Pick<INotificationData, "folder" | "filename" | "expiresAt">
+interface NotificationProps extends Pick<INotificationData, "folder" | "filename" | "expiresAt"> {}
 
-const Notification = memo<INotificationProps>(function Notification({ folder, filename, expiresAt }){
+const Notification = memo<NotificationProps>(function Notification({ folder, filename, expiresAt }){
 	const url = `/documents/${folder.reduced?.toLowerCase() || folder.name.toLowerCase()}`
 	const message = (() => {
-		const todayUTC = DateUTC(new Date().toISOString())
+		const today = new Date
+		const todayUTC = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate())
 		const expireUTC = DateUTC(expiresAt)
 
-		let daysLeft = Math.floor((expireUTC - todayUTC) / 86400000) // 1000 * 60 * 60 * 24
+		let daysLeft = Math.trunc((expireUTC - todayUTC) / 86400000) // 1000 * 60 * 60 * 24
 
 		if(daysLeft === 0) return "Expira hoje"
+		if(daysLeft === 1) return "Irá expirar amanhã"
 
 		return `${daysLeft > 0 ? "Irá expirar em" : (daysLeft = Math.abs(daysLeft), "Expirou há")} ${daysLeft} ${daysLeft === 1 ? "dia" : "dias"}`
 	})()
