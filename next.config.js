@@ -1,5 +1,3 @@
-// @ts-check
-
 const { join } = require("path")
 
 /** @type {import("next").NextConfig} */
@@ -10,6 +8,5 @@ module.exports = {
 	},
 	experimental: {
 		legacyBrowsers: false
-	},
-	swcMinify: true
+	}
 }

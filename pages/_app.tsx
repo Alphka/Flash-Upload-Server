@@ -23,6 +23,8 @@ const michroma = Michroma({
 	display: "swap"
 })
 
+const svgBrowsers = browserslist("Chrome >= 80, Edge >= 80, Firefox >= 41, Opera >= 67, ChromeAndroid >= 114, Samsung >= 13, OperaMobile >= 73, Baidu >= 13.18, KaiOS >= 2.5")
+
 type MyAppProps = Pick<AppProps, "Component" | "pageProps"> & {
 	supportsSVG: boolean
 }
@@ -78,10 +80,7 @@ MyApp.getInitialProps = async (context: AppContext) => {
 
 	let supportsSVG = false
 
-	if(userAgent){
-		const browsers = browserslist("Chrome >= 80, Edge >= 80, Firefox >= 41, Opera >= 67, ChromeAndroid >= 114, Samsung >= 13, OperaMobile >= 73, Baidu >= 13.18, KaiOS >= 2.5")
-		supportsSVG = matchesUA(userAgent, { browsers })
-	}
+	if(userAgent) supportsSVG = matchesUA(userAgent, { browsers: svgBrowsers })
 
 	return { ...ctx, supportsSVG } as MyAppProps
 }
