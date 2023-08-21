@@ -13,7 +13,7 @@ export default class LocalReadNotifications {
 	static Get(set = true){
 		let notifications: string | null | LocalNotificationsData = localStorage.getItem(this.key)
 
-		if(!notifications || !(notifications = notifications.trim()).length || !/^\{(?:.|\s)+\}$/.test(notifications)){
+		if(!notifications || !(notifications = notifications.trim()).length || !/^\{[\w\W]+\}$/.test(notifications)){
 			notifications = this.defaultData
 
 			if(set) this.Set(notifications)
