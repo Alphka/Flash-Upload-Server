@@ -6,7 +6,5 @@ module.exports = {
 	sassOptions: {
 		includePaths: [join(__dirname, "styles")]
 	},
-	experimental: {
-		legacyBrowsers: false
-	}
+	legacyBrowsers: false
 }
