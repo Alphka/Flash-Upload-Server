@@ -24,7 +24,7 @@ dependencies:
     specifier: ^3.0.0
     version: 3.0.0
   mongodb:
-    specifier: '*'
+    specifier: 5.9.0
     version: 5.9.0
   mongoose:
     specifier: ^7.6.3

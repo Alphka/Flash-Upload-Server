@@ -17,7 +17,7 @@
 		"browserslist-useragent": "^4.0.0",
 		"busboy": "^1.6.0",
 		"mime": "^3.0.0",
-		"mongodb": "*",
+		"mongodb": "5.9.0",
 		"mongoose": "^7.6.3",
 		"next": "~14.0.0",
 		"nextjs-progressbar": "~0.0.16",
