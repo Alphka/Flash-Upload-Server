@@ -1,7 +1,7 @@
 {
 	"author": "Alphka",
 	"name": "flash-upload-server",
-	"version": "4.2.4",
+	"version": "4.3.0",
 	"description": "A website to archive Quality documents",
 	"private": true,
 	"scripts": {
@@ -19,7 +19,7 @@
 		"mime": "^3.0.0",
 		"mongodb": "*",
 		"mongoose": "^7.6.3",
-		"next": "13.5",
+		"next": "~14.0.0",
 		"nextjs-progressbar": "~0.0.16",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",
@@ -51,8 +51,8 @@
 	},
 	"homepage": "https://github.com/Alphka/Flash-Upload-Server#readme",
 	"engines": {
-		"node": ">=15.4 <21",
-		"npm": ">=7"
+		"node": "^16.4 || 17 || 18 || 19 || ^20.6.1",
+		"npm": ">=7.18.1"
 	},
 	"keywords": [
 		"archive",
@@ -74,6 +74,6 @@
 		"Opera 69",
 		"iOS 13.2",
 		"Samsung 14",
-		"OperaMobile 64"
+		"OperaMobile 73"
 	]
 }
