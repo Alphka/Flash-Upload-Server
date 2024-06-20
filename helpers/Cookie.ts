@@ -44,7 +44,7 @@ export function SetCookie(key: string, value: SetCookieValue, config?: SetCookie
 
 	if(config.path) cookie += "; Path=" + config.path
 	if(config.domain) cookie += "; Domain=" + config.domain
-	if(config.expires) cookie += "; Expires'=" + config.expires.toUTCString()
+	if(config.expires) cookie += "; Expires=" + config.expires.toUTCString()
 	if(config.maxAge) cookie += "; Max-Age=" + config.maxAge
 	if(config.sameSite) cookie += "; SameSite=" + config.sameSite
 	if(config.secure) cookie += "; Secure"

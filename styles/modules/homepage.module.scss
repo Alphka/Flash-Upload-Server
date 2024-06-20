@@ -106,10 +106,10 @@ main.main{
 		margin: auto 0;
 
 		img{
+			width: auto;
 			height: min(480px, 65vh);
 			max-width: 600px;
 			border-radius: 8px;
-			aspect-ratio: 5 / 4;
 		}
 
 		@media screen and (max-width: #{variables.$largeSize - 1px}){
