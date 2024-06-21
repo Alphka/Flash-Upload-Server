@@ -1,0 +1,148 @@
+@use "./variables";
+
+@mixin textEllipsis{
+	overflow-x: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+@mixin fixAutofill($backgroundColor, $color: var(--font-color), $fontFamily: var(--font-family)){
+	&:-webkit-autofill,
+	&:-webkit-autofill:hover,
+	&:-webkit-autofill:focus,
+	&:-webkit-autofill:active{
+		-webkit-box-shadow: 0 0 0 30px $backgroundColor inset!important;
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: $color;
+	}
+
+	&:-webkit-autofill::first-line{
+		font-family: $fontFamily!important;
+	}
+
+	&:-internal-autofill-selected{
+		appearance: auto;
+		background-color: $backgroundColor!important;
+		color: $color!important;
+	}
+}
+
+@mixin spinner($color: var(--font-color), $size: 32px, $display: inline-block, $border-width: 3px){
+	display: $display;
+	background-color: transparent;
+	border: $border-width solid $color;
+	border-top-color: transparent;
+	border-right-color: transparent;
+	width: $size;
+	height: $size;
+	border-radius: 50%;
+	animation: spinner-animation 650ms infinite linear;
+
+	@keyframes spinner-animation{
+		0%{
+			transform: rotate(0deg);
+		}
+
+		100%{
+			transform: rotate(360deg);
+		}
+	}
+}
+
+@mixin gradientBackground{
+	$background: lighten(variables.$secondaryColor, 10);
+	$backgroundDark: darken(variables.$secondaryColor, 10);
+
+	background: $background;
+	background: linear-gradient(120deg, $background, $backgroundDark);
+	box-shadow: 0 0 8px 4px $backgroundDark;
+}
+
+@mixin formLayout{
+	$maxSize: 800px;
+	$gap: 4pt;
+
+	div{
+		width: 100%;
+		position: relative;
+		flex-direction: column;
+
+		.error{
+			display: block;
+			position: relative;
+			color: var(--error-color);
+			font-size: 11px;
+		}
+	}
+
+	div,
+	label{
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		flex-wrap: wrap;
+		max-width: $maxSize + $gap;
+		gap: $gap;
+	}
+
+	label{
+		flex-direction: row;
+		width: inherit;
+		cursor: pointer;
+
+		span{
+			flex: 200px 0;
+		}
+
+		input,
+		select{
+			background-color: var(--background-dark-light);
+			border-radius: 2pt;
+			padding: 4pt 8pt;
+			max-width: 600px;
+			flex: 170px;
+			width: calc(100% - 200px - $gap);
+			outline: none;
+		}
+
+		input{
+			&[type=button],
+			&[type=submit]{
+				cursor: pointer;
+
+				:hover{
+					filter: brightness(90%);
+				}
+			}
+
+			&[type=text],
+			&[type=password]{
+				&::placeholder{
+					color: var(--font-secondary-color);
+					text-transform: initial;
+				}
+
+				&:disabled{
+					filter: opacity(.7);
+					user-select: none;
+				}
+
+				&:focus{
+					box-shadow: inset 0 0 4pt var(--background-dark);
+
+					&::placeholder{
+						visibility: hidden;
+					}
+				}
+			}
+
+			&[name=access]{
+				text-transform: lowercase;
+			}
+		}
+
+		select{
+			cursor: pointer;
+		}
+	}
+}

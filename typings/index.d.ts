@@ -1,12 +1,10 @@
 import type { Dispatch, RefObject, SetStateAction } from "react"
-import type { FileAccess } from "../models/typings"
-import type internal from "stream"
-
-export type Optional<T> = {
-	[K in keyof T]?: T[K]
-}
+import type { FileAccess } from "@models/typings"
+import type { Readable } from "stream"
 
 declare global {
+	var baseURL: URL
+
 	var mongoose: {
 		connection: typeof import("mongoose") | null,
 		promise: Promise<typeof import("mongoose")> | null
@@ -63,4 +61,4 @@ export interface FilePart {
 	isFile?: boolean
 }
 
-export type BusboyStream = internal.Readable & { truncated: boolean }
+export type BusboyStream = Readable & { truncated: boolean }

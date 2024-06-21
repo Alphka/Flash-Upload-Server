@@ -1,9 +1,11 @@
-const { join } = require("path")
+import { dirname, join } from "path"
+import { fileURLToPath } from "url"
 
-/** @type {import("next").NextConfig} */
-module.exports = {
-	poweredByHeader: false,
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
+
+export default {
 	sassOptions: {
-		includePaths: [join(__dirname, "styles")]
+		includePaths: [join(__dirname, "src/app/styles")]
 	}
 }

@@ -1,0 +1,137 @@
+@use "./variables";
+@use "./mixins";
+
+&{
+	position: absolute;
+	background-color: rgba(adjust-color(variables.$primaryColor, $lightness: -3%), 95%);
+	top: 0;
+	right: 0;
+	left: 0;
+	bottom: 0;
+	min-height: 100vh;
+	overflow: hidden auto;
+
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+
+	$buttonCloseSize: 25pt;
+
+	> .close{
+		$fontSize: $buttonCloseSize - 5pt;
+
+		background-color: var(--secondary-constrast-color);
+		position: absolute;
+		top: 4pt;
+		right: 4pt;
+		width: $buttonCloseSize;
+		height: $buttonCloseSize;
+		font-size: $fontSize;
+		line-height: $fontSize;
+		border-radius: 2pt;
+		user-select: none;
+		outline: none;
+		cursor: pointer;
+
+		&:hover,
+		&:focus{
+			filter: brightness(80%);
+			box-shadow: 0 0 2px black;
+		}
+
+		@media (max-width: variables.$mobileSize){
+			right: 8pt;
+		}
+	}
+
+	> .content{
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		max-width: 1920px;
+		width: 90%;
+
+		@media (max-width: variables.$mobileSize){
+			width: calc(100% - 4pt * 2);
+		}
+
+		> section{
+			display: flex;
+			flex-direction: column;
+
+			&.header{
+				width: inherit;
+				align-items: center;
+				margin: 4pt 0 12pt;
+
+				.title{
+					display: block;
+					font-size: 30pt;
+					text-align: center;
+
+					@media (max-width: variables.$mobileSize){
+						font-size: 24pt;
+						white-space: nowrap;
+						padding: 0 $buttonCloseSize + 2pt;
+					}
+
+					@media (max-width: 396px){
+						white-space: break-spaces;
+					}
+				}
+			}
+
+			&.form{
+				@include mixins.formLayout;
+
+				display: flex;
+				width: 100%;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+				border-top: 1px solid var(--font-color);
+				padding: 8pt 4pt;
+				gap: 4pt;
+			}
+
+			&.submit{
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				padding: 20pt 0 12pt;
+				width: 100%;
+				gap: 12pt;
+
+				input,
+				button{
+					display: block;
+					position: relative;
+					font-family: inherit;
+					font-size: 14px;
+					border-radius: 20pt;
+					padding: 4pt 16pt;
+					cursor: pointer;
+
+					&:hover{
+						filter: brightness(90%);
+					}
+
+					&[type=submit]{
+						background-color: var(--secondary-color);
+						box-shadow: 1px 1px 2px var(--terciary-color);
+					}
+
+					&.remove{
+						background-color: var(--remove-button);
+					}
+				}
+
+				button .spinner{
+					@include mixins.spinner(var(--font-color), calc(1em + 4pt * 2 - 1px * 2), block, 1px);
+				}
+			}
+		}
+	}
+}
+

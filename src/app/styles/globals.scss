@@ -1,0 +1,42 @@
+@use "import/variables";
+@use "import/mixins";
+
+@import "https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+	--background: #{variables.$primaryColor};
+	--background-dark: #222;
+	--background-dark-medium: #262626;
+	--background-dark-light: #484848;
+	--secondary-color: #{variables.$secondaryColor};
+	--terciary-color: #{variables.$terciaryColor};
+	--secondary-constrast-color: #{variables.$secondaryConstrastColor};
+	--font-color: white;
+	--font-secondary-color: #{darken(white, 30%)};
+	--font-terciary-color: #{darken(white, 60%)};
+	--link-color: #849df5;
+	--error-color: #ff4646;
+	--remove-button: #9d2929;
+
+	font-size: 16px;
+	color-scheme: dark;
+}
+
+body{
+	min-height: 100vh;
+	background-color: var(--background);
+	font-family: var(--font-family);
+	color: var(--font-color);
+}
+
+button{
+	@apply bg-transparent;
+}
+
+input::-webkit-calendar-picker-indicator{
+	filter: none!important;
+}
