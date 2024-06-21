@@ -1,7 +1,7 @@
 import type { Dispatch, MutableRefObject, SetStateAction } from "react"
 import { memo, useCallback, useEffect, useRef, useState } from "react"
 import { MdNotificationsActive, MdNotificationsNone } from "react-icons/md"
-import { INotificationData } from "@api/notifications/routes"
+import { INotificationData } from "@api/notifications/route"
 import { APIResponse } from "@typings/api"
 import { twJoin } from "tailwind-merge"
 import LocalReadNotifications from "@helpers/LocalReadNotifications"

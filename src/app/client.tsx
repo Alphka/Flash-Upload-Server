@@ -82,7 +82,9 @@ export default function HomepageClient({ config, userAccess }: HomepageClientPro
 	return <>
 		<main className={style.main}>
 			<article className={style.content}>
-				<section className={`${style.title} ${alata.className}`}>Busque com rapidez e facilidade!</section>
+				<section className={`${style.title} ${alata.className}`}>
+					Busque com rapidez e facilidade!
+				</section>
 				<section className={style.button}>
 					<UploadForm {...{
 						setIsUploadMenu,
@@ -101,8 +103,8 @@ export default function HomepageClient({ config, userAccess }: HomepageClientPro
 					width={600}
 					height={480}
 					quality={90}
-					priority={true}
 					draggable={false}
+					priority
 				/>
 			</aside>
 		</main>

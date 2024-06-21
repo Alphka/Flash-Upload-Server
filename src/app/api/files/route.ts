@@ -1,5 +1,11 @@
-import type { FileData, APIFileObject, APIFilesResponse, APIFilesFolderResponse, APIFilesDocumentsResponse } from "./typings"
-import type { Document, FilterQuery, Query } from "mongoose"
+import type {
+	FileData,
+	APIFileObject,
+	APIFilesResponse,
+	APIFilesFolderResponse,
+	APIFilesDocumentsResponse
+} from "./typings"
+import type { FilterQuery } from "mongoose"
 import type { IFile } from "@models/typings"
 import { NextResponse, type NextRequest } from "next/server"
 import { GetCachedConfig } from "@helpers/Config"
@@ -13,14 +19,14 @@ import File from "@models/File"
 
 const maxDocumentsPage = 5
 
-function GetFiles(query: FilterQuery<IFile>, hasAdminAccess: boolean){
+async function GetFiles(query: FilterQuery<IFile>, hasAdminAccess: boolean){
 	if(!hasAdminAccess) Object.assign(query, { access: "public" })
 
-	return File.find(query, {
+	return await File.find(query, {
 		_id: 0,
 		__v: 0,
 		content: 0
-	}).lean() as Query<FileData[], Document<unknown, {}, FileData>, {}, FileData>
+	}).lean() as FileData[]
 }
 
 function GetFilesObjects(files: FileData[]){
@@ -34,6 +40,8 @@ function GetFilesObjects(files: FileData[]){
 }
 
 export async function GET(request: NextRequest){
+	if(!request.headers.get("user-agent")) return HandleAPIError("userAgent")
+
 	const { nextUrl } = request
 	const documents = nextUrl.searchParams.get("documents")?.trim()
 	const folder = nextUrl.searchParams.get("folder")?.trim()
@@ -49,85 +57,79 @@ export async function GET(request: NextRequest){
 
 		const hasAdminAccess = user.access === "all"
 
-		switch(typeof folder){
-			// Send all files of a specific folder
-			case "string": {
-				if(!folder) return SendAPIError(400, "Tipo de documento inválido")
+		// Send all files of a specific folder
+		if(typeof folder === "string"){
+			if(!folder) return SendAPIError(400, "Tipo de documento inválido")
 
-				const config = await GetCachedConfig(true)
-				const documentType = GetDocumentType(config, folder)
+			const config = await GetCachedConfig(true)
+			const documentType = GetDocumentType(config, folder)
 
-				if(!documentType) return SendAPIError(404, "Tipo de documento inválido")
+			if(!documentType) return SendAPIError(404, "Tipo de documento inválido")
 
-				const { id } = documentType
-				const files = await GetFiles({ type: id }, hasAdminAccess)
+			const { id } = documentType
+			const files = await GetFiles({ type: id }, hasAdminAccess)
 
-				if(!files.length) return SendAPIError(404, "A pasta não foi encontrada")
+			if(!files.length) return SendAPIError(404, "A pasta não foi encontrada")
 
-				const filesObjects = GetFilesObjects(files).map(({ type, ...data }) => data)
+			const filesObjects = GetFilesObjects(files).map(({ type, ...data }) => data)
 
-				return NextResponse.json({
-					success: true,
-					data: {
-						type: id,
-						files: filesObjects
-					}
-				} as APIFilesFolderResponse)
-			}
-			// Send file(s)
-			case "undefined": {
-				const isDocumentsPage = typeof documents === "string"
-				const files = await GetFiles({}, hasAdminAccess)
+			return NextResponse.json({
+				success: true,
+				data: {
+					type: id,
+					files: filesObjects
+				}
+			} as APIFilesFolderResponse)
+		}
 
-				if(!files.length) return SendAPIError(404)
+		const isDocumentsPage = typeof documents === "string"
+		const files = await GetFiles({}, hasAdminAccess)
 
-				const filesObjects = GetFilesObjects(files)
+		if(!files.length) return SendAPIError(404)
 
-				if(!isDocumentsPage) return NextResponse.json({
-					success: true,
-					data: filesObjects
-				} as APIFilesResponse)
+		const filesObjects = GetFilesObjects(files)
 
-				const filesMap = new Map<number, {
-					files: typeof filesObjects
-					length: number
-				}>
+		if(!isDocumentsPage) return NextResponse.json({
+			success: true,
+			data: filesObjects
+		} as APIFilesResponse)
 
-				filesObjects.sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime())
+		const filesMap = new Map<number, {
+			files: typeof filesObjects
+			length: number
+		}>
 
-				for(const file of filesObjects){
-					const { type } = file
+		filesObjects.sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime())
 
-					if(filesMap.has(type)){
-						const { files, length } = filesMap.get(type)!
+		for(const file of filesObjects){
+			const { type } = file
 
-						if(length >= maxDocumentsPage){
-							filesMap.set(type, { files, length: length + 1 })
-							continue
-						}
+			if(filesMap.has(type)){
+				const { files, length } = filesMap.get(type)!
 
-						filesMap.set(type, {
-							files: [...files, file],
-							length: length + 1
-						})
-					}else{
-						filesMap.set(type, {
-							files: [file],
-							length: 1
-						})
-					}
+				if(length >= maxDocumentsPage){
+					filesMap.set(type, { files, length: length + 1 })
+					continue
 				}
 
-				return NextResponse.json({
-					success: true,
-					data: Object.fromEntries(filesMap.entries())
-				} as APIFilesDocumentsResponse)
+				filesMap.set(type, {
+					files: [...files, file],
+					length: length + 1
+				})
+			}else{
+				filesMap.set(type, {
+					files: [file],
+					length: 1
+				})
 			}
 		}
 
-		return SendAPIError(500, "Algo deu errado")
+		return NextResponse.json({
+			success: true,
+			data: Object.fromEntries(filesMap.entries())
+		} as APIFilesDocumentsResponse)
 	}catch(error){
 		console.error(error)
-		SendAPIError(500, "Não foi possível obter os documentos")
+		return SendAPIError(500, "Não foi possível obter os documentos")
 	}
 }

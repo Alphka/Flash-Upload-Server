@@ -1,4 +1,5 @@
 import type { APIResponseSuccess } from "@typings/api"
+import type { IFile } from "@models/typings"
 
 export interface FileData extends Omit<IFile, "content"> {}
 

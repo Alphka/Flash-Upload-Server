@@ -1,4 +1,4 @@
-import type { INotificationData } from "@api/notifications/routes"
+import type { INotificationData } from "@api/notifications/route"
 import { memo } from "react"
 import Link from "next/link"
 

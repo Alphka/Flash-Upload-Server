@@ -1,3 +1,4 @@
+import type { APIResponseError } from "@typings/api"
 import { NextResponse } from "next/server"
 
 /** Sets the response status and status code, and sends an error message to the client if there is one */
@@ -10,7 +11,7 @@ export default function SendAPIError(status = 500, error?: string | null | undef
 	return NextResponse.json({
 		success: false,
 		error
-	}, {
+	} as APIResponseError, {
 		status,
 		headers,
 		statusText
