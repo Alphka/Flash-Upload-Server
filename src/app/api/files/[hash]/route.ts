@@ -40,7 +40,7 @@ export async function GET(request: NextRequest, { params: { hash } }: { params: 
 				"Content-Type": mimeType
 					? /^text\/[^; ]+$/.test(mimeType) ? mimeType + "; charset=utf-8" : mimeType
 					: "application/octet-stream",
-				"Content-Disposition": contentDisposition(filename),
+				"Content-Disposition": contentDisposition(filename, { type: "inline" }),
 				Vary: "Authorization, Cookie"
 			}
 		})

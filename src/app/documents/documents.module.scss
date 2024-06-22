@@ -64,6 +64,7 @@ main.list{
 		width: 100%;
 		border-radius: 4pt;
 		border-spacing: 12pt 8pt;
+		border-collapse: separate;
 
 		@media (max-width: variables.$mobileSize){
 			border-spacing: 8pt 4pt;
@@ -76,17 +77,16 @@ main.list{
 		}
 
 		tbody tr td{
+			&:not(.filename){
+				@include mixins.textEllipsis;
+			}
+
 			&.edit{
 				width: 14pt;
+				font-size: 14pt;
 
-				:global .icon{
-					font-variation-settings: FILL 1;
-					font-size: 14pt;
-					cursor: pointer;
-
-					&:hover{
-						filter: brightness(80%);
-					}
+				&:hover{
+					filter: brightness(80%);
 				}
 			}
 
@@ -99,18 +99,8 @@ main.list{
 				word-break: break-all;
 			}
 
-			&:not(.filename){
-				@include mixins.textEllipsis;
-			}
-
 			a{
 				color: var(--link-color);
-			}
-
-			&.no_underline{
-				a{
-					text-decoration: none;
-				}
 			}
 		}
 	}
@@ -133,10 +123,6 @@ main.list{
 		gap: 8pt;
 
 		> .header{
-			:global .icon{
-				font-variation-settings: wght 600;
-			}
-
 			> a{
 				display: flex;
 				align-items: center;
@@ -170,10 +156,6 @@ main.list{
 				align-items: center;
 				flex-direction: row;
 				gap: 4pt;
-
-				:global .icon{
-					font-size: inherit;
-				}
 			}
 		}
 	}

@@ -1,7 +1,7 @@
 import type { Dispatch, MutableRefObject, SetStateAction } from "react"
+import type { INotificationData } from "@api/notifications/typings"
 import { memo, useCallback, useEffect, useRef, useState } from "react"
 import { MdNotificationsActive, MdNotificationsNone } from "react-icons/md"
-import { INotificationData } from "@api/notifications/route"
 import { APIResponse } from "@typings/api"
 import { twJoin } from "tailwind-merge"
 import LocalReadNotifications from "@helpers/LocalReadNotifications"
@@ -23,6 +23,11 @@ const Notifications = memo(function Notifications({ mobile = false, openRef, clo
 		if(!json.success) throw new Error(json.error || "Algo deu errado")
 
 		return json.data
+	}, {
+		onErrorRetry(error, _key, _config, revalidate, { retryCount }){
+			if(error.status === 404 || retryCount > 10) return
+			setTimeout(() => revalidate({ retryCount }), 3e3)
+		}
 	})
 
 	const [notificationsUnread, setNotificationsUnread] = useState(false)
