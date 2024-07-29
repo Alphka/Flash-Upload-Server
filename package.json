@@ -1,7 +1,7 @@
 {
 	"author": "Alphka",
 	"name": "flash-upload-server",
-	"version": "4.3.0",
+	"version": "4.3.1",
 	"description": "A website to archive Quality documents",
 	"private": true,
 	"scripts": {
@@ -12,32 +12,32 @@
 	},
 	"dependencies": {
 		"accepts": "^1.3.8",
-		"axios": "^1.6.0",
-		"browserslist": "^4.22.1",
+		"axios": "^1.7.2",
+		"browserslist": "^4.23.2",
 		"browserslist-useragent": "^4.0.0",
 		"busboy": "^1.6.0",
-		"mime": "^3.0.0",
-		"mongodb": "5.9.0",
-		"mongoose": "^7.6.3",
-		"next": "~14.0.0",
+		"mime": "^4.0.4",
+		"mongodb": "^6.8.0",
+		"mongoose": "^8.5.1",
+		"next": "~14.2.5",
 		"nextjs-progressbar": "~0.0.16",
-		"react": "^18.2.0",
-		"react-dom": "^18.2.0",
-		"react-toastify": "^9.1.3",
-		"sharp": "~0.32.6",
-		"swr": "~2.2.4",
+		"react": "^18.3.1",
+		"react-dom": "^18.3.1",
+		"react-toastify": "^10.0.5",
+		"sharp": "~0.33.4",
+		"swr": "~2.2.5",
 		"type-is": "~1.6.18"
 	},
 	"devDependencies": {
-		"@types/accepts": "^1.3.6",
-		"@types/browserslist-useragent": "^3.0.6 || 4",
-		"@types/busboy": "^1.5.2",
-		"@types/mime": "^3.0.3",
-		"@types/node": "^20.8.9",
-		"@types/react": "^18.2.33",
-		"@types/type-is": "~1.6.5",
-		"sass": "^1.69.5",
-		"typescript": "^5.2.2"
+		"@types/accepts": "^1.3.7",
+		"@types/browserslist-useragent": "^3.0.7",
+		"@types/busboy": "^1.5.4",
+		"@types/mime": "^3.0.4",
+		"@types/node": "^20.14.13",
+		"@types/react": "^18.3.3",
+		"@types/type-is": "~1.6.6",
+		"sass": "^1.77.8",
+		"typescript": "^5.5.4"
 	},
 	"overrides": {
 		"semver": ">=7.5.2"
@@ -66,14 +66,13 @@
 		"database"
 	],
 	"browserslist": [
-		"Chrome 85",
-		"ChromeAndroid 92",
-		"Edge 85",
-		"Firefox 79",
-		"FirefoxAndroid 90",
-		"Opera 69",
-		"iOS 13.2",
-		"Samsung 14",
-		"OperaMobile 73"
+		"Chrome >= 85",
+		"ChromeAndroid >= 92",
+		"Edge >= 85",
+		"Firefox >= 79",
+		"FirefoxAndroid >= 90",
+		"Opera >= 69",
+		"iOS >= 13.2",
+		"Samsung >= 14"
 	]
 }
