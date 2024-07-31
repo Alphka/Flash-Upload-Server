@@ -20,7 +20,7 @@ export default async function ConnectDatabase(){
 		mongoose.set("strictQuery", false)
 
 		cached.promise = mongoose.connect(MONGODB_URI!, {
-			dbName: "production"
+			dbName: "public"
 		})
 	}
 
