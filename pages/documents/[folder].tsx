@@ -1,6 +1,6 @@
 import type { APIFilesFolderResponse } from "../api/files"
 import type { GetServerSideProps } from "next"
-import type { APIResponse, APIResponseError } from "../../typings/api"
+import type { APIResponseError } from "../../typings/api"
 import type { IUpdateDocument } from "../api/files/[hash]"
 import type { DocumentsProps } from "."
 import type { FileAccess } from "../../models/typings"
@@ -13,7 +13,6 @@ import HandleRequestError from "../../helpers/HandleRequestError"
 import ValidateFilename from "../../helpers/ValidateFilename"
 import GetDocumentType from "../../helpers/GetDocumentType"
 import ConnectDatabase from "../../lib/ConnectDatabase"
-import LocalInputDate from "../../helpers/LocalInputDate"
 import GetExtension from "../../helpers/GetExtension"
 import GetInputDate from "../../helpers/GetInputDate"
 import GetFileName from "../../helpers/GetFileName"
@@ -78,7 +77,7 @@ export const getServerSideProps: GetServerSideProps<DocumentFolderProps> = async
 
 		if(!data.success) return { notFound: true }
 
-		const { files, type } = data.data
+		const { files } = data.data
 
 		return {
 			props: {
@@ -127,7 +126,6 @@ const Overflow = memo(function Overflow({ config, setIsOverflow, isOverflow, dat
 	const [expireError, setExpireError] = useState<string>()
 	const [nameError, setNameError] = useState<string>()
 	const [fetching, setFetching] = useState(false)
-	const [removing, setRemoving] = useState(false)
 
 	function EscListener(event: KeyboardEvent){
 		if(!isOverflow || event.key !== "Escape" || event.shiftKey || event.ctrlKey) return
@@ -166,35 +164,6 @@ const Overflow = memo(function Overflow({ config, setIsOverflow, isOverflow, dat
 	})
 
 	useEffect(() => setClearErrors(() => ClearErrors), [])
-
-	async function FetchAPI(method: "GET" | "PUT" | "DELETE", messageSuccess?: string, documentData?: IUpdateDocument){
-		const options: RequestInit = {
-			headers: {
-				Accept: "application/json,*/*",
-			},
-			method,
-			credentials: "include"
-		}
-
-		if(documentData){
-			Object.assign(options.headers!, { "Content-Type": "application/json" })
-
-			if(documentData.expireDate) documentData.expireDate = LocalInputDate(documentData.expireDate).toISOString()
-			if(documentData.createdDate) documentData.createdDate = LocalInputDate(documentData.createdDate).toISOString()
-
-			options.body = JSON.stringify(documentData)
-		}
-
-		const response = await fetch(`/api/files/${data.hash}`, options)
-		const json: APIResponse = await response.json()
-
-		if(!json.success) throw json.error
-
-		UpdateDocument(data.hash, documentData)
-		CloseMenu()
-
-		if(messageSuccess) toast.success(messageSuccess)
-	}
 
 	async function EditDocument(event: ReactMouseEvent){
 		event.preventDefault()
@@ -255,32 +224,15 @@ const Overflow = memo(function Overflow({ config, setIsOverflow, isOverflow, dat
 			if(conditions[2]) delete documentData.createdDate
 			if(conditions[3]) delete documentData.expireDate
 
-			try{
-				setFetching(true)
-				await FetchAPI("PUT", "Documento editado com sucesso", documentData)
-			}catch(error: any){
-				HandleRequestError(error)
-			}finally{
-				setFetching(false)
-			}
+			setFetching(true)
+			await new Promise(resolve => setTimeout(resolve, 1.5e3))
+			toast.success("Documento editado com sucesso", toastConfig)
+			setFetching(false)
 		}catch(error){
 			if(typeof error === "string") return toast.error(error, toastConfig)
 
 			console.error(error)
 			toast.error("Não foi possível editar o documento", toastConfig)
-		}
-	}
-
-	async function RemoveDocument(event: ReactMouseEvent){
-		event.preventDefault()
-
-		try{
-			setRemoving(true)
-			await FetchAPI("DELETE", "Documento removido com sucesso")
-		}catch(error: any){
-			HandleRequestError(error)
-		}finally{
-			setRemoving(false)
 		}
 	}
 
@@ -359,8 +311,8 @@ const Overflow = memo(function Overflow({ config, setIsOverflow, isOverflow, dat
 						{fetching ? <div className={style.spinner}></div> : "Enviar"}
 					</button>
 
-					<button className={`no-outline ${style.remove}`} onClick={RemoveDocument} disabled={fetching}>
-						{removing ? <div className={style.spinner}></div> : "Remover"}
+					<button className={`no-outline ${style.remove}`} disabled>
+						Remover
 					</button>
 				</section>
 			</article>
@@ -382,7 +334,7 @@ export default function DocumentFolder({ config, folder: { reduced, name: title 
 	const hasAccess = userAccess === "all"
 	const router = useRouter()
 
-	const { data: swrData, error: swrError } = useSWR(`/api/files?folder=${reduced}`, async url => {
+	const { data: swrData, error: swrError } = useSWR(`/api/files?folder=${reduced || title}`, async url => {
 		const response = await fetch(url, { cache: "reload" })
 		const json = await response.json() as APIFilesFolderResponse | APIResponseError
 

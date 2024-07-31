@@ -39,31 +39,16 @@ const User = memo(function User({ username, password, access, removeUser, clearE
 			<div className={style.header}>
 				<span className="icon material-symbols-outlined">person</span>
 				<span className={style.username}>{username}</span>
-				<span className={`icon ${style.remove} material-symbols-outlined`} title="Remover usuário" onClick={async event =>{
-					event.preventDefault()
-
-					try{
-						const response = await fetch("/api/user", {
-							headers: { Accept: "application/json,*/*" },
-							body: new URLSearchParams({ username }),
-							method: "DELETE",
-							credentials: "include"
-						})
-
-						const data = await response.json() as APIResponse
-
-						if(!data.success) throw data.error
-
-						const { message } = data
-
-						removeUser(username)
-						toast.success("Usuário removido com sucesso", toastConfig)
-
-						if(message) toast.error(message, toastConfig)
-					}catch(error){
-						HandleRequestError(error)
-					}
-				}}>close</span>
+				<span
+					className={`icon ${style.remove} material-symbols-outlined`}
+					title="Remover usuário"
+					aria-disabled="true"
+					role="button"
+					onClick={event => {
+						event.preventDefault()
+						toast.error("A remoção de usuários não é permitida no ambiente de teste")
+					}}
+				>close</span>
 			</div>
 
 			<div className={style.controls}>
@@ -113,7 +98,7 @@ const AddUser = memo(function AddUser({ config, addUser, setClearErrors, toastCo
 		})
 	}, [])
 
-	function CreateUser(event: MouseEvent){
+	async function CreateUser(event: MouseEvent){
 		event.preventDefault()
 
 		if(fetching) return
@@ -152,33 +137,10 @@ const AddUser = memo(function AddUser({ config, addUser, setClearErrors, toastCo
 			// Type checking
 			if(errored || !access) return
 
-			return (async function Fetch(){
-				setFetching(true)
-
-				try{
-					const response = await fetch("/api/user", {
-						headers: { Accept: "application/json,*/*" },
-						body: new URLSearchParams({ username, password, access }),
-						method: "POST",
-						credentials: "include"
-					})
-
-					const data: APIResponse = await response.json()
-
-					if(!data.success) throw data.error
-
-					addUser({ name: username, password, access })
-
-					usernameInput.value = passwordInput.value = accessInput.value = ""
-					passwordInput.dispatchEvent(new Event("input", { bubbles: true }))
-
-					toast.success("Usuário criado com sucesso", toastConfig)
-				}catch(error: any){
-					HandleRequestError(error)
-				}finally{
-					setFetching(false)
-				}
-			})()
+			setFetching(true)
+			await new Promise(resolve => setTimeout(resolve, 1.5e3))
+			toast.success("Usuário editado com sucesso", toastConfig)
+			setFetching(false)
 		}catch(error){
 			if(typeof error === "string") return toast.error(error, toastConfig)
 
@@ -386,7 +348,7 @@ const Overflow = memo(function Overflow({ config, data: userData, setData, editU
 		}
 	})
 
-	function EditUser(event: MouseEvent){
+	async function EditUser(event: MouseEvent){
 		event.preventDefault()
 
 		if(fetching) return
@@ -445,35 +407,10 @@ const Overflow = memo(function Overflow({ config, data: userData, setData, editU
 			if(conditions[1]) delete userObject.data.password
 			if(conditions[2]) delete userObject.data.access
 
-			return (async function Fetch(){
-				setFetching(true)
-
-				try{
-					const response = await fetch("/api/user", {
-						headers: {
-							Accept: "application/json,*/*",
-							"Content-Type": "application/json"
-						},
-						body: JSON.stringify(userObject),
-						method: "PUT",
-						credentials: "include"
-					})
-
-					const data: APIResponse = await response.json()
-
-					if(!data.success) throw data.error
-
-					editUser(userData.username, userObject.data)
-					CloseMenu()
-
-					// Use toastConfig if another setting other than position is used
-					toast.success("Usuário editado com sucesso")
-				}catch(error: any){
-					HandleRequestError(error)
-				}finally{
-					setFetching(false)
-				}
-			})()
+			setFetching(true)
+			await new Promise(resolve => setTimeout(resolve, 1.5e3))
+			toast.success("Usuário editado com sucesso", toastConfig)
+			setFetching(false)
 		}catch(error){
 			if(typeof error === "string") return toast.error(error, toastConfig)
 

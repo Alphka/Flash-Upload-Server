@@ -114,8 +114,14 @@
 					padding: 4pt 16pt;
 					cursor: pointer;
 
-					&:hover{
+					&:hover:not(:disabled){
 						filter: brightness(90%);
+						box-shadow: 0 0 5px black;
+					}
+
+					&:disabled{
+						filter: opacity(80%);
+						cursor: not-allowed;
 					}
 
 					&[type=submit]{
@@ -135,4 +141,3 @@
 		}
 	}
 }
-

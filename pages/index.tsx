@@ -66,7 +66,7 @@ const UploadForm = memo(function UploadForm({ config, setIsUploadMenu, toastConf
 	SetInputRef(filesInputRef)
 
 	return (
-		<form action="/api/upload" method="post" name="upload" encType="multipart/form-data">
+		<form method="post" name="upload" encType="multipart/form-data">
 			<label tabIndex={0}
 				onDragOver={event => event.preventDefault()}
 				onDragEnter={event => event.preventDefault()}
@@ -181,7 +181,8 @@ export default function IndexPage({ config, userAccess }: IndexProps){
 
 			if(!vercelCookie){
 				SetCookie("vercel-warn", "ok", { sameSite: "Strict", maxAge: 31536000 })
-				toast.warn("Esse site está sendo hosteado no Vercel. Isso significa que ele tem algumas limitações.")
+				toast.warn("Esse site está sendo hosteado no Vercel. Isso significa que ele tem algumas limitações.", { autoClose: 10e3 })
+				toast.warn("Esse é o ambiente público da plataforma Flash. Nenhum dado pode ser alterado por aqui, por motivos de segurança.", { autoClose: 25e3 })
 			}
 		}
 

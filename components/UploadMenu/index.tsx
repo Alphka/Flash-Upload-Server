@@ -1,15 +1,12 @@
 import type { AccessTypes, DocumentTypeInfo } from "../../typings/database"
 import type { FileInfo, FileObject } from "../../typings"
-import type { APIUploadResponse } from "../../typings/api"
+import type { ToastOptions } from "react-toastify"
 import { useState, useEffect, useCallback, type CSSProperties } from "react"
-import { toast, type ToastOptions } from "react-toastify"
 import { useRouter } from "next/router"
-import HandleRequestError from "../../helpers/HandleRequestError"
 import ValidateFilename from "../../helpers/ValidateFilename"
 import LocalInputDate from "../../helpers/LocalInputDate"
 import FileContainer from "./FileContainer"
 import GetExtension from "../../helpers/GetExtension"
-import axios from "axios"
 import style from "../../styles/modules/homepage.module.scss"
 
 interface UploadMenuProps {
@@ -109,9 +106,8 @@ export default function UploadMenu({ userAccess, types, inputFiles, toastConfig,
 							info,
 							types,
 							setFile,
-							deleteFile,
-							key: info.name
-						}} />
+							deleteFile
+						}} key={id} />
 					})}
 				</section>
 
@@ -154,66 +150,22 @@ export default function UploadMenu({ userAccess, types, inputFiles, toastConfig,
 						setSubmitBusy(true)
 						setIsProgressBar(true)
 
-						try{
-							const response = await axios.post<APIUploadResponse>("/api/upload", formData, {
-								headers: {
-									"Accept": "application/json",
-									"Content-Type": "multipart/form-data"
-								},
-								withCredentials: true,
-								onUploadProgress: progressEvent => {
-									const progress = progressEvent.progress
-										? progressEvent.progress * 100
-										: (progressEvent.loaded * 100 / progressEvent.total!)
+						for(let i = 0, { size: filesLength } = files; i < filesLength; i++){
+							let divisor = 4
 
-									setUploadPercentage(Math.trunc(progress))
+							do{
+								if(divisor === 1){
+									setUploadPercentage(100)
+									await new Promise(resolve => setTimeout(resolve, 150))
+								}else{
+									setUploadPercentage(Math.round((i + 1) / filesLength * 100 / divisor))
+									await new Promise(resolve => setTimeout(resolve, 500))
 								}
-							})
-
-							// Type assertion
-							if(!response.data.success) throw "Upload failed"
-
-							const { errors, message, uploaded } = response.data
-
-							// Handle each error
-							for(const { id, message } of errors){
-								if(!id && id !== 0){
-									if(message) toast.error(`Erro: ${message}`, toastConfig)
-									else console.error("Unknown API Error")
-									continue
-								}
-
-								const file = files.get(id)
-								const container = file?.references.container
-
-								if(file && container) file.setErrorMessage(message)
-							}
-
-							let shouldClose = false
-
-							// Remove uploaded files
-							for(const id of uploaded){
-								const file = files.get(id)
-
-								if(!file) continue
-								if(file.getErrorMessage() !== null) file.setErrorMessage(null)
-
-								shouldClose = deleteFile(id, true)
-							}
-
-							if(shouldClose && !errors.length){
-								router.push("/documents")
-								toast.success(message)
-								return
-							}
-
-							if(message) toast[uploaded.length ? "success" : "error"](message, toastConfig)
-						}catch(error){
-							HandleRequestError(error)
-						}finally{
-							setSubmitBusy(false)
-							setIsProgressBar(false)
+							}while((divisor /= 2) >= 1)
 						}
+
+						setSubmitBusy(false)
+						setIsProgressBar(false)
 					}} />
 
 					{isProgressBar && (
