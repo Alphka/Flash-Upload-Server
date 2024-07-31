@@ -1,9 +1,9 @@
 import mongoose from "mongoose"
 
-const { MONGO_URL } = process.env
+const { MONGODB_URI } = process.env
 
-if(!MONGO_URL){
-	throw new Error("Please define the MONGO_URL environment variable inside .env.local")
+if(!MONGODB_URI){
+	throw new Error("Please define the MONGODB_URI environment variable inside .env.local")
 }
 
 let cached = global.mongoose
@@ -18,7 +18,10 @@ export default async function ConnectDatabase(){
 
 	if(!cached.promise){
 		mongoose.set("strictQuery", false)
-		cached.promise = mongoose.connect(MONGO_URL!)
+
+		cached.promise = mongoose.connect(MONGODB_URI!, {
+			dbName: "production"
+		})
 	}
 
 	try{

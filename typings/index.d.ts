@@ -16,7 +16,7 @@ declare global {
 		interface ProcessEnv {
 			NODE_ENV?: "development" | "production"
 			PORT?: string
-			MONGO_URL?: string
+			MONGODB_URI?: string
 		}
 	}
 
