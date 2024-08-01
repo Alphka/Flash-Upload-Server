@@ -1,13 +1,10 @@
 import type { InputHTMLAttributes, MouseEvent, SyntheticEvent } from "react"
 import type { Config, AccessTypes } from "../typings/database"
 import type { GetServerSideProps } from "next"
-import type { APIResponse } from "../typings/api"
 import type { IUser } from "../models/typings"
 import { memo, forwardRef, useRef, useState, useCallback, useEffect } from "react"
+import { toast, type ToastOptions } from "react-toastify"
 import { GetCachedConfig } from "../helpers/Config"
-import { IUpdateUser } from "./api/user"
-import { toast, ToastOptions } from "react-toastify"
-import HandleRequestError from "../helpers/HandleRequestError"
 import useForwardedRef from "../helpers/useForwardedRef"
 import ConnectDatabase from "../lib/ConnectDatabase"
 import Unauthorize from "../helpers/Unauthorize"
@@ -16,6 +13,15 @@ import UserToken from "../models/UserToken"
 import UserDb from "../models/User"
 import style from "../styles/modules/settings.module.scss"
 import Head from "next/head"
+
+interface IUpdateUser {
+	username: string
+	data: {
+		username?: string
+		password?: string
+		access?: AccessTypes
+	}
+}
 
 const title = "Configurações"
 const description = "Página de configuração do site."
