@@ -1,0 +1,15 @@
+{
+	"recommendations": [
+		"aaron-bond.better-comments",
+		"bradlc.vscode-tailwindcss",
+		"christian-kohler.npm-intellisense",
+		"dbaeumer.vscode-eslint",
+		"editorconfig.editorconfig",
+		"meganrogge.template-string-converter",
+		"ms-vscode.vscode-typescript-next",
+		"naumovs.color-highlight",
+		"usernamehw.errorlens",
+		"visualstudioexptteam.intellicode-api-usage-examples",
+		"visualstudioexptteam.vscodeintellicode"
+	]
+}

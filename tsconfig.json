@@ -2,35 +2,46 @@
 	"compilerOptions": {
 		"module": "ESNext",
 		"target": "ES2021",
-		"moduleResolution": "Node",
-		"lib": [
-			"ESNext",
-			"DOM",
-			"DOM.Iterable",
-		],
-		"typeRoots": [
-			"typings",
-			"node_modules/@types"
-		],
 		"allowJs": true,
+		"checkJs": true,
 		"strict": true,
-		"incremental": true,
-		"skipLibCheck": true,
-		"forceConsistentCasingInFileNames": true,
+		"jsx": "preserve",
+		"moduleResolution": "Node",
+		"isolatedModules": true,
 		"esModuleInterop": true,
 		"allowSyntheticDefaultImports": true,
+		"forceConsistentCasingInFileNames": true,
+		"allowArbitraryExtensions": true,
 		"resolveJsonModule": true,
-		"isolatedModules": true,
-		"jsx": "preserve",
+		"skipLibCheck": true,
+		"incremental": true,
+		"types": ["node"],
+		"lib": [
+			"DOM",
+			"DOM.Iterable",
+			"ESNext"
+		],
+		"plugins": [
+			{ "name": "next" }
+		],
+		"typeRoots": [
+			"node_modules/@types",
+			"src/typings"
+		],
 		"noEmit": true
 	},
 	"include": [
-		"next-env.d.ts",
 		"**/*.ts",
-		"**/*.tsx"
+		"**/*.tsx",
+		"**/*.js",
+		"**/*.jsx",
+		"**/*.mjs",
+		"next-env.d.ts",
+		".next/types/**/*.ts",
+    	".next/dev/types/**/*.ts"
 	],
 	"exclude": [
 		"node_modules",
-		"database"
-	]
+		".next"
+	],
 }
