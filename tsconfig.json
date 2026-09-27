@@ -44,4 +44,7 @@
 		"node_modules",
 		".next"
 	],
+	"typeAcquisition": {
+		"enable": true
+	}
 }

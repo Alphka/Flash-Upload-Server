@@ -2,7 +2,7 @@
 
 > **Language / Idioma:** **English** | [Português (Brasil)](README.pt-BR.md)
 >
-> *If you do not speak English and would prefer to read this documentation in Portuguese, please [click here](README.pt-BR.md).*
+> *Se você prefere ler esta documentação em português, [clique aqui](README.pt-BR.md).*
 
 <div align="center">
 	<a href="https://github.com/Alphka/Flash-Upload-Server">
@@ -29,6 +29,8 @@
 ## Table of Contents
 - [Flash Upload Server](#flash-upload-server)
   - [Table of Contents](#table-of-contents)
+  - [Live Demo \& Credentials](#live-demo--credentials)
+    - [Demo Login Credentials](#demo-login-credentials)
   - [About the Project](#about-the-project)
     - [Industrial Context \& Problem](#industrial-context--problem)
     - [The Solution (Flash EDMS)](#the-solution-flash-edms)
@@ -59,10 +61,30 @@
   - [Academic Context \& Credits](#academic-context--credits)
   - [License](#license)
 
+---
+
+## Live Demo & Credentials
+
+A public demonstration environment is hosted live on Vercel for testing and evaluation purposes.
+
+> **Live Demo URL**: [https://flash-upload-server-git-public-alphkas-projects.vercel.app/](https://flash-upload-server-git-public-alphkas-projects.vercel.app/)
+
+### Demo Login Credentials
+
+| Access Profile | Username | Password | Purpose & Access Level |
+| :--- | :---: | :---: | :--- |
+| **Administrative Access** | `admin` | `123` | Full administrative view to inspect private documents, user management, and settings menus. |
+| **Public Access** | `teste` | `123` | Standard floor operator profile for document browsing and file submission interface. |
+
+> [!IMPORTANT]
+> **Read-Only Mode Notice**: In this live public environment, data modifications (creating, editing, or deleting documents and users) are disabled for security and integrity reasons. The instance is designed exclusively to showcase the platform's interface, workflows, and features.
+
+---
+
 ## About the Project
 
 ### Industrial Context & Problem
-This project was born out of an industrial challenge submitted through the **SAGA SENAI de Inovação** platform for a **Steel Products Manufacturing Company**. 
+This project was born out of an industrial challenge submitted through the **SAGA SENAI de Inovação** platform for a **Steel Products Manufacturing Company**.
 
 In the factory under study, operators on the production line lacked digital access points to consult standard operating procedures and register inspection sheets. Consequently, the operational flow suffered from severe inefficiencies:
 1. **Double Handling & Motion Waste**: Operators recorded measurements and checks on paper sheets and routinely had to walk from the production floor to the administrative office to have them scanned.
@@ -70,7 +92,7 @@ In the factory under study, operators on the production line lacked digital acce
 3. **Operational Waste (Lean Manufacturing)**: Excessive paper, printer toner consumption, loss of productive operator hours, and cluttered physical archives.
 
 ### The Solution (Flash EDMS)
-**Flash** is a lightweight, responsive **Electronic Document Management System (EDMS)** built to bridge the floor-to-office gap. 
+**Flash** is a lightweight, responsive **Electronic Document Management System (EDMS)** built to bridge the floor-to-office gap.
 
 By deploying tablet devices directly on the production lines alongside administrative desktop stations, Flash provides an instantaneous channel to:
 - Digitize physical records via mobile cameras/scanners directly at the workstation.
@@ -90,21 +112,21 @@ Flash follows a full-stack architecture built on **Next.js** (Pages Router with 
 ```mermaid
 flowchart TD
     subgraph Clients["Clients / Access Devices"]
-        Op["📱 Floor Operator<br/>(Tablet / Mobile Device)"]
-        Adm["🖥️ Admin Staff<br/>(Desktop Workstation)"]
+        Op["Floor Operator<br/>(Tablet / Mobile Device)"]
+        Adm["Admin Staff<br/>(Desktop Workstation)"]
     end
 
     subgraph Platform["Flash EDMS Platform (Next.js 14)"]
-        Auth["🔒 Auth & Session Management<br/>(HTTP-Only Cookies & Bearer Tokens)"]
-        UI["🎨 Frontend Interface<br/>(React 18 + SCSS Modules + SWR)"]
-        API["⚙️ Next.js API Routes<br/>(/api/files, /api/login, /api/notifications, /api/search)"]
-        Crypto["🛡️ Cryptographic Engine<br/>(SHA-256 Payload Hash & Mime Validator)"]
+        Auth["Auth & Session Management<br/>(HTTP-Only Cookies & Bearer Tokens)"]
+        UI["Frontend Interface<br/>(React 18 + SCSS Modules + SWR)"]
+        API["Next.js API Routes<br/>(/api/files, /api/login, /api/notifications, /api/search)"]
+        Crypto["Cryptographic Engine<br/>(SHA-256 Payload Hash & Mime Validator)"]
     end
 
     subgraph Database["Data Layer (MongoDB Atlas)"]
-        ColFiles[("📁 Files Collection<br/>Payload Buffer, SHA-256, Expiry, Access")]
-        ColUsers[("👤 Users Collection<br/>Credentials & Access Roles")]
-        ColTokens[("🔑 UserTokens Collection<br/>Session Invalidation & Timers")]
+        ColFiles[("Files Collection<br/>Payload Buffer, SHA-256, Expiry, Access")]
+        ColUsers[("Users Collection<br/>Credentials & Access Roles")]
+        ColTokens[("UserTokens Collection<br/>Session Invalidation & Timers")]
     end
 
     Op -->|Public Floor Credential| Auth
@@ -134,7 +156,7 @@ This guarantees storage efficiency, referential integrity, and verifiable conten
 ### Proactive Expiration Engine
 Quality documentation (calibration reports, POPs, work safety protocols) must remain strictly up to date. The system periodically computes the time remaining until each file's expiration date ($T_{\text{remaining}} = \text{expiresAt} - \text{today}$):
 
-$$\Delta t \le 3 \text{ days} \implies \text{Trigger Notification}$$
+$$\Delta t \le 3 \text{ days} \Rightarrow \text{Trigger Notification}$$
 
 When $\Delta t \le 3$, the `/api/notifications` service automatically alerts users across the navigation bar, preventing operators from referencing expired standards.
 
@@ -162,13 +184,13 @@ The implementation was structured around minimal capital expenditure (CapEx) and
 
 | Category | Component | Value (BRL) | Description |
 | :--- | :--- | :---: | :--- |
-| **Costs (CapEx)** | Software Engineering & Setup | R$ 300,00 | Deployment, database setup, and configuration. |
-| **Costs (CapEx)** | Floor Hardware (Tablet Multilaser M7) | R$ 349,00 | Dedicated touch device for the factory workstation. |
-| **Subtotal Costs** | | **R$ 649,00** | Initial implementation investment. |
-| **Expenses (OpEx)** | Industrial Broadband Access | R$ 99,90 | Plant floor network connectivity. |
-| **Expenses (OpEx)** | Cloud Hosting & Infrastructure | R$ 13,99 | Server and database hosting tier. |
-| **Subtotal Expenses**| | **R$ 113,89** | Monthly infrastructure expense. |
-| **Total Cost ($C_{\text{total}}$)** | | **R$ 762,89** | Base project investment cost. |
+| **Costs (CapEx)** | Software Engineering & Setup | 300,00 | Deployment, database setup, and configuration. |
+| **Costs (CapEx)** | Floor Hardware (Tablet Multilaser M7) | 349,00 | Dedicated touch device for the factory workstation. |
+| **Subtotal Costs** | | **649,00** | Initial implementation investment. |
+| **Expenses (OpEx)** | Industrial Broadband Access | 99,90 | Plant floor network connectivity. |
+| **Expenses (OpEx)** | Cloud Hosting & Infrastructure | 13,99 | Server and database hosting tier. |
+| **Subtotal Expenses**| | **113,89** | Monthly infrastructure expense. |
+| **Total Cost** | | **762,89** | Base project investment cost. |
 
 ### Mathematical Pricing Model
 Following Brazilian industry profitability benchmarks (which advise between $7\%$ and $12\%$ net margin for industrial software/hardware packages), a target margin of $M = 12\%$ was applied:
@@ -187,20 +209,20 @@ This initial investment offers a rapid payback period by cutting printing/paper 
 ## Tech Stack
 
 ### Frontend
-- **[Next.js 14](https://nextjs.org/)** – Hybrid Server-Side Rendering (SSR) and Client-Side Navigation for instant page transitions.
-- **[React 18](https://react.dev/)** – Component-driven modular UI architecture.
-- **[TypeScript](https://www.typescriptlang.org/)** – Static type safety across client, models, and API boundaries.
-- **[Sass (SCSS Modules)](https://sass-lang.com/)** – Scoped component styling and design tokens.
-- **[SWR](https://swr.vercel.app/)** – Client-side data fetching, caching, and revalidation.
-- **[React-Toastify](https://fkhadra.github.io/react-toastify/)** – Feedback notifications for user interactions.
+- **[Next.js 14](https://nextjs.org/)**: hybrid Server-Side Rendering (SSR) and Client-Side Navigation for instant page transitions.
+- **[React 18](https://react.dev/)**: component-driven modular UI architecture.
+- **[TypeScript](https://www.typescriptlang.org/)**: static type safety across client, models, and API boundaries.
+- **[Sass (SCSS Modules)](https://sass-lang.com/)**: scoped component styling and design tokens.
+- **[SWR](https://swr.vercel.app/)**: client-side data fetching, caching, and revalidation.
+- **[React-Toastify](https://fkhadra.github.io/react-toastify/)**: feedback notifications for user interactions.
 
 ### Backend & Storage
-- **[Next.js API Routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes)** – Serverless endpoint architecture.
-- **[MongoDB Atlas](https://www.mongodb.com/atlas)** – Cloud NoSQL document database.
-- **[Mongoose 8](https://mongoosejs.com/)** – Schema definition, data validation, and model lifecycle management.
-- **[Busboy](https://github.com/mscdex/busboy)** – High-performance streaming multipart form data parser.
-- **[Sharp](https://sharp.pixelplumbing.com/)** – Fast image processing and optimization.
-- **[Crypto (Node.js native)](https://nodejs.org/api/crypto.html)** – Cryptographic SHA-256 hash calculation.
+- **[Next.js API Routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes)**: serverless endpoint architecture.
+- **[MongoDB Atlas](https://www.mongodb.com/atlas)**: cloud NoSQL document database.
+- **[Mongoose 8](https://mongoosejs.com/)**: schema definition, data validation, and model lifecycle management.
+- **[Busboy](https://github.com/mscdex/busboy)**: high-performance streaming multipart form data parser.
+- **[Sharp](https://sharp.pixelplumbing.com/)**: fast image processing and optimization.
+- **[Crypto (Node.js native)](https://nodejs.org/api/crypto.html)**: cryptographic SHA-256 hash calculation.
 
 ## Screenshots & Feature Walkthrough
 

@@ -2,7 +2,7 @@
 
 > **Language / Idioma:** [English](README.md) | **Português (Brasil)**
 >
-> *Caso você prefira ler esta documentação em inglês, por favor [clique aqui](README.md).*
+> *If you prefer to read this documentation in English, [click here](README.md).*
 
 <div align="center">
 	<a href="https://github.com/Alphka/Flash-Upload-Server">
@@ -29,6 +29,8 @@
 ## Sumário
 - [Flash Upload Server](#flash-upload-server)
   - [Sumário](#sumário)
+  - [Demonstração Ao Vivo \& Credenciais](#demonstração-ao-vivo--credenciais)
+    - [Credenciais de Acesso para Teste](#credenciais-de-acesso-para-teste)
   - [Sobre o Projeto](#sobre-o-projeto)
     - [Contexto Industrial \& O Problema](#contexto-industrial--o-problema)
     - [A Solução (Flash GED)](#a-solução-flash-ged)
@@ -59,6 +61,26 @@
   - [Contexto Acadêmico \& Créditos](#contexto-acadêmico--créditos)
   - [Licença](#licença)
 
+---
+
+## Demonstração Ao Vivo & Credenciais
+
+Um ambiente de demonstração pública em modo somente leitura está implantado na Vercel para testes e avaliação.
+
+> **URL de Acesso**: [https://flash-upload-server-git-public-alphkas-projects.vercel.app/](https://flash-upload-server-git-public-alphkas-projects.vercel.app/)
+
+### Credenciais de Acesso para Teste
+
+| Nível de Acesso | Usuário | Senha | Permissões e Finalidade |
+| :--- | :---: | :---: | :--- |
+| **Acesso Administrativo** | `admin` | `123` | Visão administrativa total para inspeção de documentos privados, gerenciamento de usuários e telas de configuração. |
+| **Acesso Público** | `teste` | `123` | Perfil do operador de chão de fábrica para consulta de documentos e interface de envio. |
+
+> [!IMPORTANT]
+> **Aviso de Modo Somente Leitura**: Neste ambiente público de teste, alterações de dados (criação, edição ou remoção de documentos e usuários) foram desabilitadas por motivos de segurança e integridade da demonstração. A instância destina-se exclusivamente à demonstração das telas, fluxos e funcionalidades do sistema.
+
+---
+
 ## Sobre o Projeto
 
 ### Contexto Industrial & O Problema
@@ -70,7 +92,7 @@ No ambiente fabril diagnosticado, os operadores na linha de produção não disp
 3. **Desperdícios Lean (Qualidade)**: Consumo desnecessário de papel, tinta de impressão, perda de tempo produtivo com trânsito interno e ocupação de espaço físico com arquivos mortos.
 
 ### A Solução (Flash GED)
-O **Flash** é um sistema leve e ágil de **Gestão Eletrônica de Documentos (GED)** projetado para unificar a fábrica e a administração. 
+O **Flash** é um sistema leve e ágil de **Gestão Eletrônica de Documentos (GED)** projetado para unificar a fábrica e a administração.
 
 Com a adoção de tablets no chão de fábrica e computadores na área de qualidade/administrativa, a solução permite:
 - Digitalizar fichas físicas na própria bancada de trabalho através da câmera do tablet/scanner móvel.
@@ -90,21 +112,21 @@ O Flash adota uma arquitetura full-stack moderna construída em **Next.js** (Pag
 ```mermaid
 flowchart TD
     subgraph Clientes["Dispositivos e Canais de Acesso"]
-        Op["📱 Operador de Fábrica<br/>(Tablet no Chão de Fábrica)"]
-        Adm["🖥️ Gestor da Qualidade / Admin<br/>(Estação Desktop Administrativa)"]
+        Op["Operador de Fábrica<br/>(Tablet no Chão de Fábrica)"]
+        Adm["Gestor da Qualidade / Admin<br/>(Estação Desktop Administrativa)"]
     end
 
     subgraph Plataforma["Plataforma Flash GED (Next.js 14)"]
-        Auth["🔒 Autenticação & Sessão<br/>(Cookies HTTP-Only & Tokens de Acesso)"]
-        UI["🎨 Interface Frontend<br/>(React 18 + Módulos SCSS + SWR)"]
-        API["⚙️ Rotas de API Next.js<br/>(/api/files, /api/login, /api/notifications, /api/search)"]
-        Crypto["🛡️ Motor de Integridade<br/>(Hash SHA-256 de Carga & Validação de Mime)"]
+        Auth["Autenticação & Sessão<br/>(Cookies HTTP-Only & Tokens de Acesso)"]
+        UI["Interface Frontend<br/>(React 18 + Módulos SCSS + SWR)"]
+        API["Rotas de API Next.js<br/>(/api/files, /api/login, /api/notifications, /api/search)"]
+        Crypto["Motor de Integridade<br/>(Hash SHA-256 de Carga & Validação de Mime)"]
     end
 
     subgraph Banco["Camada de Dados (MongoDB Atlas)"]
-        ColFiles[("📁 Coleção de Arquivos (Files)<br/>Buffer do Conteúdo, SHA-256, Expiração, Acesso")]
-        ColUsers[("👤 Coleção de Usuários (Users)<br/>Credenciais & Perfis de Permissão")]
-        ColTokens[("🔑 Coleção de Sessões (UserTokens)<br/>Tokens Ativos & Expiração de Sessão")]
+        ColFiles[("Coleção de Arquivos (Files)<br/>Buffer do Conteúdo, SHA-256, Expiração, Acesso")]
+        ColUsers[("Coleção de Usuários (Users)<br/>Credenciais & Perfis de Permissão")]
+        ColTokens[("Coleção de Sessões (UserTokens)<br/>Tokens Ativos & Expiração de Sessão")]
     end
 
     Op -->|Login Público de Fábrica| Auth
@@ -134,7 +156,7 @@ Isso garante integridade referencial, preservação de espaço em nuvem e audita
 ### Motor Pró-ativo de Expiração de Documentos
 Procedimentos operacionais, calibrações de instrumentos e laudos técnicos possuem prazo de validade estrito. O sistema calcula a janela restante até o vencimento ($T_{\text{restante}} = \text{expiresAt} - \text{hoje}$):
 
-$$\Delta t \le 3 \text{ dias} \implies \text{Disparar Notificação}$$
+$$\Delta t \le 3 \text{ dias} \Rightarrow \text{Disparar Notificação}$$
 
 Quando um documento está a 3 dias ou menos do vencimento (ou já vencido), o endpoint `/api/notifications` dispara alertas destacados no sino de notificações da barra de navegação, impedindo que procedimentos obsoletos sejam executados na linha de montagem.
 
@@ -160,15 +182,15 @@ Sistemas GED corporativos proprietários disponíveis no mercado costumam exigir
 ### Levantamento de Custos e Despesas
 O estudo orçamentário foi estruturado da seguinte forma:
 
-| Categoria | Item | Valor (R$) | Justificativa Técnica |
+| Categoria | Item | Valor (BRL) | Justificativa Técnica |
 | :--- | :--- | :---: | :--- |
-| **Custos (CapEx)** | Mão de obra de desenvolvimento | R$ 300,00 | Criação, configuração e implantação da plataforma. |
-| **Custos (CapEx)** | Tablet industrial (Multilaser M7) | R$ 349,00 | Dispositivo móvel para o posto de trabalho dos operadores. |
-| **Subtotal Custos**| | **R$ 649,00** | Investimento inicial em infraestrutura física/código. |
-| **Despesas (OpEx)**| Link de Internet fabril | R$ 99,90 | Conectividade de rede da planta fabril. |
-| **Despesas (OpEx)**| Serviço de Hospedagem (Host/Nuvem) | R$ 13,99 | Hospedagem web e banco de dados na nuvem. |
-| **Subtotal Despesas** | | **R$ 113,89** | Custo operacional mensal recorrente. |
-| **Custo Total ($C_{\text{total}}$)** | | **R$ 762,89** | Base total de custos para a comercialização. |
+| **Custos (CapEx)** | Mão de obra de desenvolvimento | 300,00 | Criação, configuração e implantação da plataforma. |
+| **Custos (CapEx)** | Tablet industrial (Multilaser M7) | 349,00 | Dispositivo móvel para o posto de trabalho dos operadores. |
+| **Subtotal Custos**| | **649,00** | Investimento inicial em infraestrutura física/código. |
+| **Despesas (OpEx)**| Link de Internet fabril | 99,90 | Conectividade de rede da planta fabril. |
+| **Despesas (OpEx)**| Serviço de Hospedagem (Host/Nuvem) | 13,99 | Hospedagem web e banco de dados na nuvem. |
+| **Subtotal Despesas** | | **113,89** | Custo operacional mensal recorrente. |
+| **Custo Total** | | **762,89** | Base total de custos para a comercialização. |
 
 ### Equacionamento da Margem de Lucro e Precificação
 Adotando as diretrizes de mercado para soluções fornecidas à indústria (faixa recomendada de $7\%$ a $12\%$ de margem líquida), utilizou-se o teto de $M = 12\%$:
@@ -187,20 +209,20 @@ O investimento se paga rapidamente ao eliminar impressões constantes, perdas de
 ## Stack Tecnológica
 
 ### Frontend
-- **[Next.js 14](https://nextjs.org/)** – Renderização do lado do servidor (SSR) e navegação Single-Page instantânea sem recarregamento.
-- **[React 18](https://react.dev/)** – Arquitetura de componentes reutilizáveis e reativos.
-- **[TypeScript](https://www.typescriptlang.org/)** – Tipagem estática rigorosa de ponta a ponta (dados, APIs e componentes).
-- **[Sass (Módulos SCSS)](https://sass-lang.com/)** – Estilização modular com escopo encapsulado por componente.
-- **[SWR](https://swr.vercel.app/)** – Gerenciamento de cache, revalidação e requisições no cliente.
-- **[React-Toastify](https://fkhadra.github.io/react-toastify/)** – Feedback visual assíncrono para operações de formulário e alertas.
+- **[Next.js 14](https://nextjs.org/)**: renderização do lado do servidor (SSR) e navegação Single-Page instantânea sem recarregamento.
+- **[React 18](https://react.dev/)**: arquitetura de componentes reutilizáveis e reativos.
+- **[TypeScript](https://www.typescriptlang.org/)**: tipagem estática rigorosa de ponta a ponta (dados, APIs e componentes).
+- **[Sass (Módulos SCSS)](https://sass-lang.com/)**: estilização modular com escopo encapsulado por componente.
+- **[SWR](https://swr.vercel.app/)**: gerenciamento de cache, revalidação e requisições no cliente.
+- **[React-Toastify](https://fkhadra.github.io/react-toastify/)**: feedback visual assíncrono para operações de formulário e alertas.
 
 ### Backend & Armazenamento
-- **[Rotas de API do Next.js](https://nextjs.org/docs/pages/building-your-application/routing/api-routes)** – Camada serverless de endpoints RESTful.
-- **[MongoDB Atlas](https://www.mongodb.com/atlas)** – Banco de dados NoSQL em nuvem com alta disponibilidade e criptografia em trânsito/repouso.
-- **[Mongoose 8](https://mongoosejs.com/)** – Modelagem orientada a esquemas e validação de documentos.
-- **[Busboy](https://github.com/mscdex/busboy)** – Parser de streaming de alto desempenho para formulários multipart e uploads de múltiplos arquivos.
-- **[Sharp](https://sharp.pixelplumbing.com/)** – Otimização e manipulação rápida de imagens e documentos gráficos.
-- **[Crypto (Nativo do Node.js)](https://nodejs.org/api/crypto.html)** – Geração de hashes criptográficos SHA-256 para integridade e deduplicação.
+- **[Rotas de API do Next.js](https://nextjs.org/docs/pages/building-your-application/routing/api-routes)**: camada serverless de endpoints RESTful.
+- **[MongoDB Atlas](https://www.mongodb.com/atlas)**: banco de dados NoSQL em nuvem com alta disponibilidade e criptografia em trânsito/repouso.
+- **[Mongoose 8](https://mongoosejs.com/)**: modelagem orientada a esquemas e validação de documentos.
+- **[Busboy](https://github.com/mscdex/busboy)**: parser de streaming de alto desempenho para formulários multipart e uploads de múltiplos arquivos.
+- **[Sharp](https://sharp.pixelplumbing.com/)**: otimização e manipulação rápida de imagens e documentos gráficos.
+- **[Crypto (Nativo do Node.js)](https://nodejs.org/api/crypto.html)**: geração de hashes criptográficos SHA-256 para integridade e deduplicação.
 
 ## Capturas de Tela & Demonstração
 
