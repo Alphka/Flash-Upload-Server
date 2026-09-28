@@ -196,13 +196,13 @@ O estudo orçamentário foi estruturado da seguinte forma:
 Adotando as diretrizes de mercado para soluções fornecidas à indústria (faixa recomendada de $7\%$ a $12\%$ de margem líquida), utilizou-se o teto de $M = 12\%$:
 
 1. **Custo Total da Solução**:
-   $$C_{\text{total}} = \text{Subtotal Custos} + \text{Subtotal Despesas} = 649{,}00 + 113{,}89 = \text{R\$ } 762{,}89$$
+   $$C_{\text{total}} = \text{Subtotal Custos} + \text{Subtotal Despesas} = 649{,}00 + 113{,}89 = 762{,}89 \text{ (BRL)}$$
 
 2. **Margem de Lucro da Indústria ($12\%$ sobre os custos)**:
-   $$\text{Lucro} = C_{\text{total}} \times M = 762{,}89 \times 0{,}12 = \text{R\$ } 91{,}94$$
+   $$\text{Lucro} = C_{\text{total}} \times M = 762{,}89 \times 0{,}12 = 91{,}94 \text{ (BRL)}$$
 
 3. **Preço Final de Venda da Solução**:
-   $$P_{\text{venda}} = C_{\text{total}} + \text{Lucro} = 762{,}89 + 91{,}94 = \mathbf{\text{R\$ } 854{,}33}$$
+   $$P_{\text{venda}} = C_{\text{total}} + \text{Lucro} = 762{,}89 + 91{,}94 = \mathbf{854{,}33} \text{ (BRL)}$$
 
 O investimento se paga rapidamente ao eliminar impressões constantes, perdas de tempo com deslocamento físico e riscos de não-conformidade em auditorias da Qualidade.
 

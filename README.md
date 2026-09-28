@@ -196,13 +196,13 @@ The implementation was structured around minimal capital expenditure (CapEx) and
 Following Brazilian industry profitability benchmarks (which advise between $7\%$ and $12\%$ net margin for industrial software/hardware packages), a target margin of $M = 12\%$ was applied:
 
 1. **Total Implementation Cost**:
-   $$C_{\text{total}} = \text{Costs} + \text{Expenses} = 649{,}00 + 113{,}89 = \text{R\$ } 762{,}89$$
+   $$C_{\text{total}} = \text{Costs} + \text{Expenses} = 649{,}00 + 113{,}89 = 762{,}89 \text{ (BRL)}$$
 
 2. **Net Profit Margin ($12\%$)**:
-   $$\text{Profit} = C_{\text{total}} \times M = 762{,}89 \times 0{,}12 = \text{R\$ } 91{,}94$$
+   $$\text{Profit} = C_{\text{total}} \times M = 762{,}89 \times 0{,}12 = 91{,}94 \text{ (BRL)}$$
 
 3. **Final Commercial Package Price**:
-   $$P_{\text{sale}} = C_{\text{total}} + \text{Profit} = 762{,}89 + 91{,}94 = \mathbf{\text{R\$ } 854{,}33}$$
+   $$P_{\text{sale}} = C_{\text{total}} + \text{Profit} = 762{,}89 + 91{,}94 = \mathbf{854{,}33} \text{ (BRL)}$$
 
 This initial investment offers a rapid payback period by cutting printing/paper expenses and eliminating hundreds of hours wasted on transit between factory floor and administrative offices.
 
