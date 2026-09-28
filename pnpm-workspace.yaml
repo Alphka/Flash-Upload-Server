@@ -1,0 +1,6 @@
+allowBuilds:
+  '@parcel/watcher': true
+  sharp: true
+managePackageManagerVersions: true
+minimumReleaseAge: 0
+verifyDepsBeforeRun: false

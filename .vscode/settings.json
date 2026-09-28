@@ -1,0 +1,101 @@
+{
+	"css.format.spaceAroundSelectorSeparator": true,
+
+	"cssVariables.lookupFiles": [
+		"**/*.css",
+		"**/*.scss",
+		"**/*.sass",
+		"**/*.less",
+	],
+	"cssVariables.languages": [
+		"scss",
+		"postcss",
+		"less",
+		"css",
+		"html",
+		"source.css.styled"
+	],
+
+	"scss.lint.unknownAtRules": "ignore",
+	"scss.format.spaceAroundSelectorSeparator": true,
+	"scss.lint.unknownVendorSpecificProperties": "warning",
+	"scss.lint.zeroUnits": "warning",
+
+	"js/ts.format.indentSwitchCase": true,
+	"js/ts.format.insertSpaceAfterCommaDelimiter": true,
+	"js/ts.format.insertSpaceAfterConstructor": false,
+	"js/ts.format.insertSpaceAfterFunctionKeywordForAnonymousFunctions": false,
+	"js/ts.format.insertSpaceAfterKeywordsInControlFlowStatements": false,
+	"js/ts.format.insertSpaceAfterOpeningAndBeforeClosingEmptyBraces": false,
+	"js/ts.format.insertSpaceAfterOpeningAndBeforeClosingJsxExpressionBraces": false,
+	"js/ts.format.insertSpaceAfterOpeningAndBeforeClosingNonemptyBraces": true,
+	"js/ts.format.insertSpaceAfterOpeningAndBeforeClosingNonemptyBrackets": false,
+	"js/ts.format.insertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis": false,
+	"js/ts.format.insertSpaceAfterOpeningAndBeforeClosingTemplateStringBraces": false,
+	"js/ts.format.insertSpaceAfterSemicolonInForStatements": true,
+	"js/ts.format.insertSpaceAfterTypeAssertion": true,
+	"js/ts.format.insertSpaceBeforeAndAfterBinaryOperators": true,
+	"js/ts.format.insertSpaceBeforeFunctionParenthesis": false,
+	"js/ts.format.placeOpenBraceOnNewLineForControlBlocks": false,
+	"js/ts.format.placeOpenBraceOnNewLineForFunctions": false,
+	"js/ts.format.semicolons": "remove",
+	"js/ts.preferences.importModuleSpecifier": "shortest",
+	"js/ts.preferences.importModuleSpecifierEnding": "minimal",
+	"js/ts.preferences.preferTypeOnlyAutoImports": true,
+	"js/ts.preferences.quoteStyle": "double",
+	"js/ts.reportStyleChecksAsWarnings": true,
+	"js/ts.tsdk.path": "node_modules/typescript/lib",
+	"js/ts.tsdk.promptToUseWorkspaceVersion": false,
+
+	"editor.insertSpaces": false,
+	"editor.tabSize": 4,
+
+	"emmet.includeLanguages": {
+		"postcss": "css",
+		"svg": "html"
+	},
+
+	"files.associations": {
+		".vercelignore": "ignore",
+		"*.manifest": "json",
+		"*.lock": "json",
+		"*.pcss": "source.css.styled"
+	},
+	"files.eol": "\n",
+	"files.insertFinalNewline": true,
+	"files.trimTrailingWhitespace": true,
+	"files.trimFinalNewlines": true,
+	"files.trimTrailingWhitespaceInRegexAndStrings": true,
+
+	"[markdown]": {
+		"diffEditor.ignoreTrimWhitespace": false,
+		"editor.insertSpaces": true,
+		"editor.tabSize": 2,
+		"editor.wordWrap": "on",
+		"editor.unicodeHighlight.ambiguousCharacters": false,
+		"editor.unicodeHighlight.invisibleCharacters": false,
+		"editor.quickSuggestions": {
+			"comments": "on",
+			"strings": "on",
+			"other": "on"
+		},
+		"files.insertFinalNewline": false,
+		"files.trimTrailingWhitespace": false
+	},
+	"[svg]": {
+		"files.insertFinalNewline": false
+	},
+	"[yaml]": {
+		"diffEditor.ignoreTrimWhitespace": false,
+		"editor.insertSpaces": true,
+		"editor.tabSize": 2,
+		"editor.autoIndent": "advanced",
+		"files.trimTrailingWhitespace": false
+	},
+
+	"json.format.keepLines": true,
+
+	"npm-intellisense.importES6": true,
+	"npm-intellisense.importQuotes": "\"",
+	"npm-intellisense.importLinebreak": "\n"
+}

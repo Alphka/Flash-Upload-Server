@@ -1,4 +1,5 @@
 import mongoose from "mongoose"
+import dns from "dns"
 
 const { MONGODB_URI } = process.env
 
@@ -17,6 +18,8 @@ export default async function ConnectDatabase(){
 	if(cached.connection) return cached.connection
 
 	if(!cached.promise){
+		dns.setServers(["8.8.8.8", "8.8.4.4"])
+
 		mongoose.set("strictQuery", false)
 
 		cached.promise = mongoose.connect(MONGODB_URI!, {

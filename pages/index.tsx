@@ -3,16 +3,16 @@ import type { GetServerSideProps } from "next"
 import type { FileInfo } from "../typings"
 import { memo, useEffect, useRef, type RefObject } from "react"
 import { useCallback, useState } from "react"
-import { GetCookie, SetCookie } from "../helpers/Cookie"
+import { toast, ToastOptions } from "react-toastify"
 import { GetCachedConfig } from "../helpers/Config"
 import { useRouter } from "next/router"
 import { Alata } from "next/font/google"
-import { toast, ToastOptions } from "react-toastify"
 import ConnectDatabase from "../lib/ConnectDatabase"
 import Unauthorize from "../helpers/Unauthorize"
 import Navigation from "../components/Navigation"
 import UploadMenu from "../components/UploadMenu"
 import UserToken from "../models/UserToken"
+import Cookies from "js-cookie"
 import Image from "next/image"
 import style from "../styles/modules/homepage.module.scss"
 import Head from "next/head"
@@ -177,10 +177,14 @@ export default function IndexPage({ config, userAccess }: IndexProps){
 
 	useEffect(() => {
 		if(config.isVercel){
-			const vercelCookie = GetCookie("vercel-warn")
+			const vercelCookie = Cookies.get("vercel-warn")
 
 			if(!vercelCookie){
-				SetCookie("vercel-warn", "ok", { sameSite: "Strict", maxAge: 31536000 })
+				Cookies.set("vercel-warn", "ok", {
+					expires: 365,
+					sameSite: "Strict"
+				})
+
 				toast.warn("Esse site está sendo hosteado no Vercel. Isso significa que ele tem algumas limitações.", { autoClose: 10e3 })
 				toast.warn("Esse é o ambiente público da plataforma Flash. Nenhum dado pode ser alterado por aqui, por motivos de segurança.", { autoClose: 25e3 })
 			}

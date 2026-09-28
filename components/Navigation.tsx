@@ -15,8 +15,13 @@ interface GlobalProps {
 }
 
 interface NavigationProps extends GlobalProps {}
+
 interface MobileProps extends GlobalProps {}
-interface SearchFormProps extends GlobalProps { icon?: true, shouldFocus?: true }
+
+interface SearchFormProps extends GlobalProps {
+	withIcon?: boolean
+	shouldFocus?: boolean
+}
 
 const locales = {
 	siteLogo: "Logotipo do site",
@@ -28,7 +33,11 @@ const locales = {
 	search: "Pesquisar"
 }
 
-const SearchForm = memo<SearchFormProps>(function SearchForm({ icon, search, shouldFocus }){
+const SearchForm = memo<SearchFormProps>(function SearchForm({
+	shouldFocus,
+	withIcon,
+	search
+}){
 	const [autoFocus, setAutoFocus] = useState<boolean | undefined>(undefined)
 	const inputRef = useRef<HTMLInputElement>(null)
 	const router = useRouter()
@@ -61,7 +70,8 @@ const SearchForm = memo<SearchFormProps>(function SearchForm({ icon, search, sho
 
 	return (
 		<div id="search">
-			<input type="search"
+			<input
+				type="search"
 				placeholder="Faça uma pesquisa..."
 				className="no-outline"
 				defaultValue={search}
@@ -70,7 +80,8 @@ const SearchForm = memo<SearchFormProps>(function SearchForm({ icon, search, sho
 				autoFocus={autoFocus}
 				ref={inputRef}
 			/>
-			{icon && <span className="icon material-symbols-outlined" onClick={handleSubmit}>search</span>}
+
+			{withIcon && <span className="icon material-symbols-outlined" onClick={handleSubmit}>search</span>}
 		</div>
 	)
 })
@@ -368,12 +379,11 @@ const Navigation = memo<NavigationProps>(function Navigation({ userAccess, searc
 			<Logo />
 
 			<div className="icons">
-				<SearchForm {...{
-					userAccess,
-					search,
-					icon: true,
-					shouldFocus: true
-				}} />
+				<SearchForm
+					{...{ search, userAccess }}
+					shouldFocus
+					withIcon
+				/>
 
 				<Notifications />
 
